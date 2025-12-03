@@ -39,7 +39,7 @@ public:
     ~SmartQuestionImporter();
     
     // 开始导入流程（增强版）
-    void startImport(const QString &sourcePath, const QString &targetPath);
+    void startImport(const QString &sourcePath, const QString &targetPath, const QString &bankName);
     
     // 开始导入流程（使用通用解析器）
     void startImportWithUniversalParser(const QString &sourcePath, const QString &targetPath, const QString &bankName);
@@ -97,6 +97,12 @@ private:
     int m_currentChunkIndex;
     bool m_cancelled;
     bool m_useUniversalParser;
+    
+    // 新增：保存解析规则和基础题库
+    bool saveParseRulesAndQuestionBank();
+    
+    // 新增：生成出题模式规律
+    bool generateExamPattern();
     
     // 配置参数
     static const int MAX_CHUNK_SIZE = 8000;  // 每个块最大字符数

@@ -173,7 +173,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # Windows 特定设置
 if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        WIN32_EXECUTABLE OFF  # 保留控制台窗口用于调试
+        WIN32_EXECUTABLE ON  # 隐藏控制台窗口（正式发布版本）
     )
     
     # 确保 Windows 下正确处理 UTF-8

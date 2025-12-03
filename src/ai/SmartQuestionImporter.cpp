@@ -40,9 +40,10 @@ SmartQuestionImporter::~SmartQuestionImporter()
     delete m_analyzer;
 }
 
-void SmartQuestionImporter::startImport(const QString &sourcePath, const QString &targetPath)
+void SmartQuestionImporter::startImport(const QString &sourcePath, const QString &targetPath, const QString &bankName)
 {
     m_targetPath = targetPath;
+    m_bankName = bankName;
     m_cancelled = false;
     m_chunks.clear();
     m_questions.clear();
@@ -50,18 +51,27 @@ void SmartQuestionImporter::startImport(const QString &sourcePath, const QString
     
     emit logMessage("🚀 开始智能导入流程...\n");
     
-    // 第一步：拷贝文件夹
-    emit logMessage("📁 第一步：拷贝题库文件...");
-    if (!copyQuestionBank(sourcePath, targetPath)) {
-        emit importCompleted(false, "文件拷贝失败");
+    // 第一步：拷贝文件夹到原始题库（只读备份）
+    emit logMessage("📁 第一步：备份原始题库文件...");
+    QString originalBankPath = QString("data/原始题库/%1").arg(m_bankName);
+    if (!copyQuestionBank(sourcePath, originalBankPath)) {
+        emit importCompleted(false, "原始题库备份失败");
         return;
     }
+    emit logMessage(QString("✅ 原始题库已备份到: %1").arg(originalBankPath));
     
-    emit logMessage("✅ 文件拷贝完成\n");
+    // 设置只读属性
+    QDir originalDir(originalBankPath);
+    QFileInfoList files = originalDir.entryInfoList(QDir::Files);
+    for (const QFileInfo &fileInfo : files) {
+        QFile::setPermissions(fileInfo.absoluteFilePath(), 
+                             QFile::ReadOwner | QFile::ReadUser | QFile::ReadGroup | QFile::ReadOther);
+    }
+    emit logMessage("🔒 原始题库已设置为只读\n");
     
-    // 第二步：扫描并分析文件
+    // 第二步：扫描并分析文件（从原始题库读取）
     emit logMessage("📂 第二步：扫描和分析文件...");
-    scanAndAnalyzeFiles(targetPath);
+    scanAndAnalyzeFiles(originalBankPath);
     
     if (m_chunks.isEmpty()) {
         emit importCompleted(false, "未找到任何题目文件");
@@ -292,7 +302,21 @@ void SmartQuestionImporter::processNextChunk()
     
     if (m_currentChunkIndex >= m_chunks.size()) {
         // 所有块处理完成
-        emit logMessage(QString("\n✅ 导入完成！共导入 %1 道题目").arg(m_questions.size()));
+        emit logMessage(QString("\n✅ AI解析完成！共导入 %1 道题目").arg(m_questions.size()));
+        
+        // 第四步：保存解析规则和基础题库
+        emit logMessage("\n📝 第四步：保存解析规则和基础题库...");
+        if (saveParseRulesAndQuestionBank()) {
+            emit logMessage("✅ 解析规则和基础题库保存完成");
+        } else {
+            emit logMessage("⚠️ 保存过程中出现部分问题");
+        }
+        
+        // 第五步：生成出题模式规律
+        emit logMessage("\n📊 第五步：生成出题模式规律...");
+        if (generateExamPattern()) {
+            emit logMessage("✅ 出题模式规律生成完成");
+        }
         
         m_progress.currentStatus = "导入完成";
         emit progressUpdated(m_progress);
@@ -552,6 +576,219 @@ void SmartQuestionImporter::onStreamProgress(const QString &context, int current
 }
 
 
+bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
+{
+    if (m_questions.isEmpty()) {
+        emit logMessage("  ⚠️ 没有题目需要保存");
+        return false;
+    }
+    
+    // 1. 保存解析规则到 config/ccf_parse_rule.json
+    QString configDir = "data/config";
+    QDir dir;
+    if (!dir.mkpath(configDir)) {
+        emit logMessage("  ❌ 无法创建config目录");
+        return false;
+    }
+    
+    QString ruleFilePath = configDir + "/ccf_parse_rule.json";
+    QJsonObject parseRule;
+    parseRule["bankName"] = m_bankName;
+    parseRule["totalQuestions"] = m_questions.size();
+    parseRule["createdTime"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+    
+    // 分析题目格式特征
+    QJsonArray modulePatterns;
+    QJsonObject pattern;
+    pattern["题干标识"] = QJsonArray{"【题目描述】", "问题：", "题目："};
+    pattern["输入标识"] = QJsonArray{"【输入】", "输入格式：", "Input:"};
+    pattern["输出标识"] = QJsonArray{"【输出】", "输出格式：", "Output:"};
+    pattern["测试数据分隔"] = QJsonArray{"空行", "测试用例", "样例"};
+    pattern["代码限制"] = QJsonArray{"【时间限制】", "【内存限制】", "支持语言："};
+    modulePatterns.append(pattern);
+    
+    parseRule["modulePatterns"] = modulePatterns;
+    parseRule["parseMode"] = "AI智能解析";
+    
+    QFile ruleFile(ruleFilePath);
+    if (ruleFile.open(QIODevice::WriteOnly)) {
+        QJsonDocument doc(parseRule);
+        ruleFile.write(doc.toJson(QJsonDocument::Indented));
+        ruleFile.close();
+        emit logMessage(QString("  ✓ 解析规则已保存: %1").arg(ruleFilePath));
+    } else {
+        emit logMessage("  ⚠️ 无法保存解析规则");
+    }
+    
+    // 2. 保存基础题库到 data/基础题库/{bankName}/
+    QString baseQuestionBankDir = QString("data/基础题库/%1").arg(m_bankName);
+    if (!dir.mkpath(baseQuestionBankDir)) {
+        emit logMessage("  ❌ 无法创建基础题库目录");
+        return false;
+    }
+    
+    emit logMessage(QString("  📁 基础题库目录: %1").arg(baseQuestionBankDir));
+    
+    // 按文件分组保存题目
+    QMap<QString, QVector<Question>> questionsByFile;
+    for (const Question &q : m_questions) {
+        QString sourceFile = q.id().section('_', 0, 0);  // 从ID中提取文件名
+        if (sourceFile.isEmpty()) {
+            sourceFile = "未分类";
+        }
+        questionsByFile[sourceFile].append(q);
+    }
+    
+    int savedCount = 0;
+    for (auto it = questionsByFile.begin(); it != questionsByFile.end(); ++it) {
+        QString examFolder = baseQuestionBankDir + "/" + it.key();
+        if (!dir.mkpath(examFolder)) {
+            continue;
+        }
+        
+        const QVector<Question> &questions = it.value();
+        for (int i = 0; i < questions.size(); ++i) {
+            const Question &q = questions[i];
+            QString questionFile = QString("%1/第%2题.md").arg(examFolder).arg(i + 1);
+            
+            QFile file(questionFile);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file);
+                out.setEncoding(QStringConverter::Utf8);
+                
+                // 写入题目内容
+                out << "# " << q.title() << "\n\n";
+                out << "## 题目描述\n\n";
+                out << q.description() << "\n\n";
+                
+                // 写入测试数据
+                out << "## 测试数据\n\n";
+                const QVector<TestCase> &testCases = q.testCases();
+                for (int j = 0; j < testCases.size(); ++j) {
+                    const TestCase &tc = testCases[j];
+                    out << QString("### 测试用例 %1").arg(j + 1);
+                    if (!tc.description.isEmpty()) {
+                        out << " - " << tc.description;
+                    }
+                    if (j < 3) {
+                        out << " (原始数据)";
+                    } else {
+                        out << " (AI补充)";
+                    }
+                    out << "\n\n";
+                    out << "**输入：**\n```\n" << tc.input << "\n```\n\n";
+                    out << "**输出：**\n```\n" << tc.expectedOutput << "\n```\n\n";
+                }
+                
+                // 写入标签和难度
+                out << "## 题目信息\n\n";
+                out << "- **难度**: " << (q.difficulty() == Difficulty::Easy ? "简单" : 
+                                        q.difficulty() == Difficulty::Medium ? "中等" : "困难") << "\n";
+                if (!q.tags().isEmpty()) {
+                    out << "- **标签**: " << q.tags().join(", ") << "\n";
+                }
+                
+                file.close();
+                savedCount++;
+            }
+        }
+        
+        emit logMessage(QString("  ✓ %1: 保存 %2 道题目").arg(it.key()).arg(questions.size()));
+    }
+    
+    emit logMessage(QString("  ✅ 共保存 %1 道题目到基础题库").arg(savedCount));
+    return savedCount > 0;
+}
+
+bool SmartQuestionImporter::generateExamPattern()
+{
+    if (m_questions.isEmpty()) {
+        return false;
+    }
+    
+    QString baseQuestionBankDir = QString("data/基础题库/%1").arg(m_bankName);
+    QString patternFile = baseQuestionBankDir + "/出题模式规律.md";
+    
+    QFile file(patternFile);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        emit logMessage("  ❌ 无法创建出题模式规律文件");
+        return false;
+    }
+    
+    QTextStream out(&file);
+    out.setEncoding(QStringConverter::Utf8);
+    
+    // 统计信息
+    int easyCount = 0, mediumCount = 0, hardCount = 0;
+    QMap<QString, int> tagCount;
+    int totalTestCases = 0;
+    
+    for (const Question &q : m_questions) {
+        switch (q.difficulty()) {
+            case Difficulty::Easy: easyCount++; break;
+            case Difficulty::Medium: mediumCount++; break;
+            case Difficulty::Hard: hardCount++; break;
+        }
+        
+        for (const QString &tag : q.tags()) {
+            tagCount[tag]++;
+        }
+        
+        totalTestCases += q.testCases().size();
+    }
+    
+    // 写入分析报告
+    out << "# " << m_bankName << " - 出题模式规律\n\n";
+    out << "> 自动生成时间: " << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << "\n\n";
+    
+    out << "## 📊 题库概况\n\n";
+    out << "- **题目总数**: " << m_questions.size() << " 道\n";
+    out << "- **平均测试用例**: " << QString::number(totalTestCases * 1.0 / m_questions.size(), 'f', 1) << " 组/题\n\n";
+    
+    out << "## 📈 难度分布\n\n";
+    out << "| 难度 | 数量 | 占比 |\n";
+    out << "|------|------|------|\n";
+    out << QString("| 简单 | %1 | %2% |\n").arg(easyCount).arg(easyCount * 100 / m_questions.size());
+    out << QString("| 中等 | %1 | %2% |\n").arg(mediumCount).arg(mediumCount * 100 / m_questions.size());
+    out << QString("| 困难 | %1 | %2% |\n").arg(hardCount).arg(hardCount * 100 / m_questions.size());
+    out << "\n";
+    
+    out << "## 🏷️ 知识点分布\n\n";
+    out << "| 知识点 | 题目数 |\n";
+    out << "|--------|--------|\n";
+    for (auto it = tagCount.begin(); it != tagCount.end(); ++it) {
+        out << QString("| %1 | %2 |\n").arg(it.key()).arg(it.value());
+    }
+    out << "\n";
+    
+    out << "## 📋 出题规则\n\n";
+    out << "### 套题数量\n";
+    out << "- 每套题目数量: " << m_questions.size() << " 道\n\n";
+    
+    out << "### 难度配比建议\n";
+    out << "- 简单题: " << QString::number(easyCount * 100.0 / m_questions.size(), 'f', 0) << "%\n";
+    out << "- 中等题: " << QString::number(mediumCount * 100.0 / m_questions.size(), 'f', 0) << "%\n";
+    out << "- 困难题: " << QString::number(hardCount * 100.0 / m_questions.size(), 'f', 0) << "%\n\n";
+    
+    out << "### 测试数据规则\n";
+    out << "- 每题至少 3 组原始测试数据\n";
+    out << "- AI自动补充 2-3 组边界/异常测试数据\n";
+    out << "- 测试数据覆盖：基本功能、边界条件、特殊情况\n\n";
+    
+    out << "## 🎯 题号专属规则\n\n";
+    out << "根据题目顺序和难度，建议的题号分配：\n\n";
+    for (int i = 0; i < qMin(5, m_questions.size()); ++i) {
+        const Question &q = m_questions[i];
+        QString diffStr = (q.difficulty() == Difficulty::Easy ? "简单" : 
+                          q.difficulty() == Difficulty::Medium ? "中等" : "困难");
+        out << QString("- 第 %1 题: %2 (%3)\n").arg(i + 1).arg(q.title()).arg(diffStr);
+    }
+    
+    file.close();
+    emit logMessage(QString("  ✓ 出题模式规律已保存: %1").arg(patternFile));
+    return true;
+}
+
 // 使用通用解析器的导入流程
 void SmartQuestionImporter::startImportWithUniversalParser(const QString &sourcePath, const QString &targetPath, const QString &bankName)
 {
@@ -671,8 +908,22 @@ void SmartQuestionImporter::startImportWithUniversalParser(const QString &source
         }
     }
     
-    // 第四步：生成题库分析报告
-    emit logMessage("📊 第四步：生成题库分析报告...");
+    // 第四步：保存解析规则和基础题库
+    emit logMessage("📝 第四步：保存解析规则和基础题库...");
+    if (saveParseRulesAndQuestionBank()) {
+        emit logMessage("✅ 解析规则和基础题库保存完成");
+    } else {
+        emit logMessage("⚠️ 保存过程中出现部分问题");
+    }
+    
+    // 第五步：生成出题模式规律
+    emit logMessage("📊 第五步：生成出题模式规律...");
+    if (generateExamPattern()) {
+        emit logMessage("✅ 出题模式规律生成完成");
+    }
+    
+    // 第六步：生成题库分析报告
+    emit logMessage("📊 第六步：生成题库分析报告...");
     
     BankAnalysis analysis = m_analyzer->analyzeQuestions(m_questions, m_bankName);
     

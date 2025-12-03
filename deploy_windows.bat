@@ -52,8 +52,12 @@ copy "%MINGW_BIN%\libgcc_s_seh-1.dll" "%DEPLOY_DIR%\" >nul 2>&1
 copy "%MINGW_BIN%\libstdc++-6.dll" "%DEPLOY_DIR%\" >nul 2>&1
 copy "%MINGW_BIN%\libwinpthread-1.dll" "%DEPLOY_DIR%\" >nul 2>&1
 
-REM 复制 QScintilla 库
-copy "%QT_PATH%\bin\qscintilla2_qt6.dll" "%DEPLOY_DIR%\" >nul 2>&1
+REM 复制 QScintilla 库（从 lib 目录）
+copy "%QT_PATH%\lib\qscintilla2_qt6.dll" "%DEPLOY_DIR%\" >nul 2>&1
+if not exist "%DEPLOY_DIR%\qscintilla2_qt6.dll" (
+    echo 警告: 未找到 qscintilla2_qt6.dll
+    echo 请检查 QScintilla 是否正确安装
+)
 
 echo [6/6] 复制数据文件...
 REM 创建数据目录结构
