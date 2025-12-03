@@ -104,6 +104,9 @@ private:
     // 新增：生成出题模式规律
     bool generateExamPattern();
     
+    // 新增：保存运行时题库JSON
+    bool saveRuntimeQuestionBank();
+    
     // 配置参数
     static const int MAX_CHUNK_SIZE = 8000;  // 每个块最大字符数
     static const int MIN_TEST_CASES = 3;     // 最少测试用例数

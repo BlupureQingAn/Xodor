@@ -673,63 +673,82 @@ void MainWindow::onImportQuestionBank()
     // 使用AI智能导入
     SmartImportDialog *smartDialog = new SmartImportDialog(path, categoryName, m_ollamaClient, this);
     if (smartDialog->exec() == QDialog::Accepted && smartDialog->isSuccess()) {
-        QVector<Question> questions = smartDialog->getImportedQuestions();
+        // SmartQuestionImporter已经保存了所有数据：
+        // 1. data/原始题库/{categoryName}/ - 只读备份
+        // 2. data/基础题库/{categoryName}/ - 标准化题库
+        // 3. data/config/ccf_parse_rule.json - 解析规则
+        // 4. data/question_banks/{categoryName}/questions.json - 运行时题库
         
-        if (!questions.isEmpty()) {
-            // 清空现有题库
-            m_questionBank->clear();
+        // 从保存的JSON加载题库
+        QString bankPath = QString("data/question_banks/%1").arg(categoryName);
+        QString jsonPath = bankPath + "/questions.json";
+        
+        QFile jsonFile(jsonPath);
+        if (jsonFile.open(QIODevice::ReadOnly)) {
+            QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
+            jsonFile.close();
             
-            // 添加AI解析的题目
-            for (const Question &q : questions) {
-                m_questionBank->addQuestion(q);
-            }
-            
-            // 保存题库到JSON文件
-            QString bankPath = QString("data/question_banks/%1").arg(categoryName);
-            QDir bankDir(bankPath);
-            if (!bankDir.exists()) {
-                bankDir.mkpath(".");
-            }
-            
-            // 保存为questions.json
-            QString jsonPath = bankPath + "/questions.json";
-            QJsonArray questionsArray;
-            for (const Question &q : questions) {
-                questionsArray.append(q.toJson());
-            }
-            
-            QFile jsonFile(jsonPath);
-            if (jsonFile.open(QIODevice::WriteOnly)) {
-                jsonFile.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
-                jsonFile.close();
-                qDebug() << "题库已保存到:" << jsonPath;
-            }
-            
-            // 更新UI
-            m_questionListWidget->setQuestions(m_questionBank->allQuestions());
-            
-            if (m_questionBank->count() > 0) {
-                m_currentQuestionIndex = 0;
-                loadCurrentQuestion();
+            if (doc.isArray()) {
+                // 清空现有题库
+                m_questionBank->clear();
                 
-                // 保存会话状态（记住当前题库路径）
-                SessionManager::instance().saveSession(bankPath, 0);
+                // 加载题目
+                QJsonArray questionsArray = doc.array();
+                for (const QJsonValue &val : questionsArray) {
+                    m_questionBank->addQuestion(Question(val.toObject()));
+                }
                 
-                statusBar()->showMessage(
-                    QString("✅ 【%1】题库导入成功！共 %2 道题目")
-                    .arg(categoryName).arg(m_questionBank->count()), 5000);
+                // 更新UI
+                m_questionListWidget->setQuestions(m_questionBank->allQuestions());
                 
-                QMessageBox::information(this, "导入成功",
-                    QString("【%1】题库导入成功！\n\n"
-                            "• 已生成基础题库（含 AI 扩充测试数据）\n"
-                            "• 总题数：%2 道\n"
-                            "• AI已智能识别题目格式并生成完整测试数据\n"
-                            "• 题库已保存到：%3\n\n"
-                            "现在可以直接刷题或生成模拟题！")
-                    .arg(categoryName)
-                    .arg(m_questionBank->count())
-                    .arg(jsonPath));
+                if (m_questionBank->count() > 0) {
+                    m_currentQuestionIndex = 0;
+                    loadCurrentQuestion();
+                    
+                    // 保存会话状态（记住当前题库路径）
+                    SessionManager::instance().saveSession(bankPath, 0);
+                    
+                    // 统计测试数据
+                    int totalTestCases = 0;
+                    int aiGeneratedCases = 0;
+                    for (const Question &q : m_questionBank->allQuestions()) {
+                        totalTestCases += q.testCases().size();
+                        for (const TestCase &tc : q.testCases()) {
+                            if (tc.isAIGenerated) {
+                                aiGeneratedCases++;
+                            }
+                        }
+                    }
+                    
+                    statusBar()->showMessage(
+                        QString("✅ 【%1】题库导入成功！共 %2 道题目，%3 组测试数据（AI生成 %4 组）")
+                        .arg(categoryName)
+                        .arg(m_questionBank->count())
+                        .arg(totalTestCases)
+                        .arg(aiGeneratedCases), 8000);
+                    
+                    QMessageBox::information(this, "导入成功",
+                        QString("【%1】题库导入成功！\n\n"
+                                "📊 题库统计：\n"
+                                "• 总题数：%2 道\n"
+                                "• 测试数据：%3 组（原始 %4 组 + AI生成 %5 组）\n\n"
+                                "📁 已生成文件：\n"
+                                "• 原始题库（只读）：data/原始题库/%1/\n"
+                                "• 基础题库：data/基础题库/%1/\n"
+                                "• 解析规则：data/config/ccf_parse_rule.json\n"
+                                "• 运行时题库：%6\n\n"
+                                "✅ 现在可以直接刷题或生成模拟题！")
+                        .arg(categoryName)
+                        .arg(m_questionBank->count())
+                        .arg(totalTestCases)
+                        .arg(totalTestCases - aiGeneratedCases)
+                        .arg(aiGeneratedCases)
+                        .arg(jsonPath));
+                }
             }
+        } else {
+            QMessageBox::warning(this, "加载失败", 
+                QString("无法加载题库文件：%1").arg(jsonPath));
         }
     }
     smartDialog->deleteLater();

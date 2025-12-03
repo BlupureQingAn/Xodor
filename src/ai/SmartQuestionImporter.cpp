@@ -11,6 +11,8 @@
 #include <QJsonArray>
 #include <QDebug>
 #include <QTimer>
+#include <QDateTime>
+#include <numeric>
 
 SmartQuestionImporter::SmartQuestionImporter(OllamaClient *aiClient, QObject *parent)
     : QObject(parent)
@@ -498,18 +500,31 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
         // 解析测试用例
         QJsonArray testCasesArray = qObj["testCases"].toArray();
         QVector<TestCase> testCases;
+        int originalCount = 0;
         for (const QJsonValue &tcVal : testCasesArray) {
             QJsonObject tcObj = tcVal.toObject();
             TestCase tc;
             tc.input = tcObj["input"].toString();
             tc.expectedOutput = tcObj["output"].toString();
             tc.description = tcObj["description"].toString();
+            
+            // 前3个标记为原始数据，后面的标记为AI生成
+            if (originalCount < 3) {
+                tc.isAIGenerated = false;
+                originalCount++;
+            } else {
+                tc.isAIGenerated = true;
+            }
+            
             testCases.append(tc);
         }
         
         // 如果测试用例不足，生成更多
         if (testCases.size() < MIN_TEST_CASES) {
             QVector<TestCase> generated = generateTestCases(q);
+            for (TestCase &tc : generated) {
+                tc.isAIGenerated = true;
+            }
             testCases.append(generated);
         }
         
@@ -698,6 +713,43 @@ bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
     
     emit logMessage(QString("  ✅ 共保存 %1 道题目到基础题库").arg(savedCount));
     return savedCount > 0;
+}
+
+bool SmartQuestionImporter::saveRuntimeQuestionBank()
+{
+    if (m_questions.isEmpty()) {
+        emit logMessage("  ⚠️ 没有题目需要保存");
+        return false;
+    }
+    
+    // 保存到 data/question_banks/{bankName}/questions.json
+    QString runtimeBankDir = QString("data/question_banks/%1").arg(m_bankName);
+    QDir dir;
+    if (!dir.mkpath(runtimeBankDir)) {
+        emit logMessage("  ❌ 无法创建运行时题库目录");
+        return false;
+    }
+    
+    QString jsonPath = runtimeBankDir + "/questions.json";
+    QJsonArray questionsArray;
+    for (const Question &q : m_questions) {
+        questionsArray.append(q.toJson());
+    }
+    
+    QFile jsonFile(jsonPath);
+    if (jsonFile.open(QIODevice::WriteOnly)) {
+        jsonFile.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
+        jsonFile.close();
+        emit logMessage(QString("  ✓ 运行时题库已保存: %1").arg(jsonPath));
+        emit logMessage(QString("  📊 包含 %1 道题目，共 %2 组测试数据")
+            .arg(m_questions.size())
+            .arg(std::accumulate(m_questions.begin(), m_questions.end(), 0,
+                [](int sum, const Question &q) { return sum + q.testCases().size(); })));
+        return true;
+    } else {
+        emit logMessage("  ❌ 无法保存运行时题库");
+        return false;
+    }
 }
 
 bool SmartQuestionImporter::generateExamPattern()
@@ -934,6 +986,12 @@ void SmartQuestionImporter::startImportWithUniversalParser(const QString &source
             .arg(analysis.difficultyDistribution["中等"])
             .arg(analysis.difficultyDistribution["困难"]));
         emit logMessage(QString("  📊 平均测试用例: %.1f 组").arg(analysis.avgTestCases));
+    }
+    
+    // 第七步：保存运行时题库JSON
+    emit logMessage("\n💾 第七步：保存运行时题库...");
+    if (saveRuntimeQuestionBank()) {
+        emit logMessage("✅ 运行时题库保存完成");
     }
     
     emit logMessage("\n🎉 导入完成！");
