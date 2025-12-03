@@ -462,8 +462,22 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
     QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
     
     if (doc.isNull() || !doc.isObject()) {
-        emit logMessage("  ⚠️ JSON解析失败，跳过此块");
-        return;
+        emit logMessage("  ⚠️ JSON解析失败，尝试AI修复...");
+        
+        // 尝试让AI修复JSON
+        QString fixedJson = fixJsonWithAI(jsonStr);
+        if (!fixedJson.isEmpty()) {
+            doc = QJsonDocument::fromJson(fixedJson.toUtf8());
+            if (!doc.isNull() && doc.isObject()) {
+                emit logMessage("  ✓ AI成功修复JSON");
+            } else {
+                emit logMessage("  ✗ AI修复失败，跳过此块");
+                return;
+            }
+        } else {
+            emit logMessage("  ✗ 无法修复JSON，跳过此块");
+            return;
+        }
     }
     
     QJsonObject root = doc.object();
@@ -550,6 +564,37 @@ QVector<TestCase> SmartQuestionImporter::generateTestCases(const Question &quest
     // 当前返回空，让AI负责生成
     
     return cases;
+}
+
+QString SmartQuestionImporter::fixJsonWithAI(const QString &brokenJson)
+{
+    if (!m_aiClient) {
+        return QString();
+    }
+    
+    QString prompt = R"(
+你是JSON修复专家。下面的JSON格式有错误，请修复它。
+
+要求：
+1. 只返回修复后的纯JSON，不要任何其他文字
+2. 保持原有数据内容不变
+3. 修复语法错误（缺少逗号、括号不匹配等）
+4. 确保返回的是有效的JSON
+
+错误的JSON：
+---
+)" + brokenJson + R"(
+---
+
+请返回修复后的JSON：
+)";
+    
+    emit logMessage("  🔧 发送JSON修复请求...");
+    
+    // 同步等待AI响应（简化处理）
+    // 实际应该异步处理，这里为了简化先用同步
+    
+    return QString();  // 暂时返回空，需要实现同步AI调用
 }
 
 void SmartQuestionImporter::onAIError(const QString &error)

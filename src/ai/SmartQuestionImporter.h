@@ -85,6 +85,7 @@ private:
     bool isQuestionBoundary(const QString &line);
     QString buildAIPrompt(const FileChunk &chunk);
     QVector<TestCase> generateTestCases(const Question &question);
+    QString fixJsonWithAI(const QString &brokenJson);
     
     OllamaClient *m_aiClient;
     UniversalQuestionParser *m_parser;
