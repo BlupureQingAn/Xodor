@@ -600,19 +600,41 @@ void MainWindow::loadLastSession()
     int questionIndex;
     
     if (SessionManager::instance().loadSession(questionBankPath, questionIndex)) {
-        // 检查题库文件是否存在
-        if (QFile::exists(questionBankPath)) {
-            m_questionBank->loadFromDirectory(questionBankPath);
-            
-            if (m_questionBank->count() > 0) {
-                m_currentQuestionIndex = qBound(0, questionIndex, m_questionBank->count() - 1);
-                loadCurrentQuestion();
+        // 检查题库JSON文件是否存在
+        QString jsonPath = questionBankPath + "/questions.json";
+        
+        if (QFile::exists(jsonPath)) {
+            // 从JSON加载题库
+            QFile jsonFile(jsonPath);
+            if (jsonFile.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
+                jsonFile.close();
                 
-                statusBar()->showMessage(
-                    QString("已恢复上次会话：%1 道题目，当前第 %2 题")
-                    .arg(m_questionBank->count())
-                    .arg(m_currentQuestionIndex + 1), 5000);
+                if (doc.isArray()) {
+                    m_questionBank->clear();
+                    
+                    QJsonArray questionsArray = doc.array();
+                    for (const QJsonValue &val : questionsArray) {
+                        m_questionBank->addQuestion(Question(val.toObject()));
+                    }
+                    
+                    if (m_questionBank->count() > 0) {
+                        m_currentQuestionIndex = qBound(0, questionIndex, m_questionBank->count() - 1);
+                        m_currentBankPath = questionBankPath;  // 记住当前题库路径
+                        m_questionListWidget->setQuestions(m_questionBank->allQuestions());
+                        loadCurrentQuestion();
+                        
+                        statusBar()->showMessage(
+                            QString("✅ 已恢复上次会话：%1 道题目，当前第 %2 题")
+                            .arg(m_questionBank->count())
+                            .arg(m_currentQuestionIndex + 1), 5000);
+                    }
+                }
             }
+        } else {
+            // 题库文件不存在，清除会话
+            SessionManager::instance().clearSession();
+            statusBar()->showMessage("上次的题库已被删除，请重新导入题库", 5000);
         }
     }
 }
@@ -628,9 +650,9 @@ void MainWindow::restoreWindowState()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    // 保存会话
-    if (m_questionBank->count() > 0) {
-        SessionManager::instance().saveSession("data/questions", m_currentQuestionIndex);
+    // 保存会话（使用当前题库路径）
+    if (m_questionBank->count() > 0 && !m_currentBankPath.isEmpty()) {
+        SessionManager::instance().saveSession(m_currentBankPath, m_currentQuestionIndex);
     }
     
     // 保存窗口状态
@@ -703,6 +725,7 @@ void MainWindow::onImportQuestionBank()
                 
                 if (m_questionBank->count() > 0) {
                     m_currentQuestionIndex = 0;
+                    m_currentBankPath = bankPath;  // 记住当前题库路径
                     loadCurrentQuestion();
                     
                     // 保存会话状态（记住当前题库路径）

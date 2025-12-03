@@ -103,6 +103,7 @@ private:
     // 状态
     int m_currentQuestionIndex;
     QString m_lastImportPath;
+    QString m_currentBankPath;  // 当前题库路径
 };
 
 #endif // MAINWINDOW_H
