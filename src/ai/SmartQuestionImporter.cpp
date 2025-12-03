@@ -635,7 +635,7 @@ bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
         emit logMessage("  ⚠️ 无法保存解析规则");
     }
     
-    // 2. 保存基础题库到 data/基础题库/{bankName}/
+    // 2. 保存基础题库到 data/基础题库/{bankName}/questions.json (JSON格式)
     QString baseQuestionBankDir = QString("data/基础题库/%1").arg(m_bankName);
     if (!dir.mkpath(baseQuestionBankDir)) {
         emit logMessage("  ❌ 无法创建基础题库目录");
@@ -644,6 +644,25 @@ bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
     
     emit logMessage(QString("  📁 基础题库目录: %1").arg(baseQuestionBankDir));
     
+    // 保存为JSON格式（这是主要的题库格式）
+    QString questionsJsonPath = baseQuestionBankDir + "/questions.json";
+    QJsonArray questionsArray;
+    for (const Question &q : m_questions) {
+        questionsArray.append(q.toJson());
+    }
+    
+    QFile jsonFile(questionsJsonPath);
+    if (jsonFile.open(QIODevice::WriteOnly)) {
+        jsonFile.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
+        jsonFile.close();
+        emit logMessage(QString("  ✓ 基础题库JSON已保存: %1").arg(questionsJsonPath));
+        emit logMessage(QString("  📊 包含 %1 道题目").arg(m_questions.size()));
+    } else {
+        emit logMessage("  ❌ 无法保存基础题库JSON");
+        return false;
+    }
+    
+    // 3. 同时保存Markdown格式（用于查看和备份）
     // 按文件分组保存题目
     QMap<QString, QVector<Question>> questionsByFile;
     for (const Question &q : m_questions) {
@@ -717,39 +736,10 @@ bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
 
 bool SmartQuestionImporter::saveRuntimeQuestionBank()
 {
-    if (m_questions.isEmpty()) {
-        emit logMessage("  ⚠️ 没有题目需要保存");
-        return false;
-    }
-    
-    // 保存到 data/question_banks/{bankName}/questions.json
-    QString runtimeBankDir = QString("data/question_banks/%1").arg(m_bankName);
-    QDir dir;
-    if (!dir.mkpath(runtimeBankDir)) {
-        emit logMessage("  ❌ 无法创建运行时题库目录");
-        return false;
-    }
-    
-    QString jsonPath = runtimeBankDir + "/questions.json";
-    QJsonArray questionsArray;
-    for (const Question &q : m_questions) {
-        questionsArray.append(q.toJson());
-    }
-    
-    QFile jsonFile(jsonPath);
-    if (jsonFile.open(QIODevice::WriteOnly)) {
-        jsonFile.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
-        jsonFile.close();
-        emit logMessage(QString("  ✓ 运行时题库已保存: %1").arg(jsonPath));
-        emit logMessage(QString("  📊 包含 %1 道题目，共 %2 组测试数据")
-            .arg(m_questions.size())
-            .arg(std::accumulate(m_questions.begin(), m_questions.end(), 0,
-                [](int sum, const Question &q) { return sum + q.testCases().size(); })));
-        return true;
-    } else {
-        emit logMessage("  ❌ 无法保存运行时题库");
-        return false;
-    }
+    // 运行时题库就是基础题库，不需要重复保存
+    // 直接使用 data/基础题库/{bankName}/questions.json
+    emit logMessage("  ℹ️ 运行时直接使用基础题库JSON");
+    return true;
 }
 
 bool SmartQuestionImporter::generateExamPattern()

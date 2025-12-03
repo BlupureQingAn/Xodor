@@ -665,13 +665,52 @@ void MainWindow::onImportQuestionBank()
 {
     // 只支持AI智能导入
     
-    // 选择题库文件夹
-    QString path = QFileDialog::getExistingDirectory(
-        this,
-        "选择题库文件夹",
-        QDir::homePath(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-    );
+    // 询问选择文件还是文件夹
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("选择导入方式");
+    msgBox.setText("请选择要导入的题库类型：");
+    msgBox.setIcon(QMessageBox::Question);
+    
+    QPushButton *folderBtn = msgBox.addButton("📁 选择文件夹", QMessageBox::ActionRole);
+    QPushButton *filesBtn = msgBox.addButton("📄 选择文件", QMessageBox::ActionRole);
+    QPushButton *cancelBtn = msgBox.addButton("取消", QMessageBox::RejectRole);
+    
+    msgBox.exec();
+    
+    QString path;
+    
+    if (msgBox.clickedButton() == folderBtn) {
+        // 选择文件夹
+        path = QFileDialog::getExistingDirectory(
+            this,
+            "选择题库文件夹",
+            QDir::homePath(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+        );
+    } else if (msgBox.clickedButton() == filesBtn) {
+        // 选择文件
+        QStringList files = QFileDialog::getOpenFileNames(
+            this,
+            "选择题库文件",
+            QDir::homePath(),
+            "题库文件 (*.md *.markdown *.txt);;所有文件 (*.*)"
+        );
+        
+        if (!files.isEmpty()) {
+            // 创建临时文件夹，将选中的文件复制进去
+            QString tempDir = QDir::tempPath() + "/CodePracticeSystem_Import_" + 
+                             QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+            QDir().mkpath(tempDir);
+            
+            for (const QString &file : files) {
+                QFile::copy(file, tempDir + "/" + QFileInfo(file).fileName());
+            }
+            
+            path = tempDir;
+        }
+    } else {
+        return;
+    }
     
     if (path.isEmpty()) {
         return;
@@ -697,12 +736,12 @@ void MainWindow::onImportQuestionBank()
     if (smartDialog->exec() == QDialog::Accepted && smartDialog->isSuccess()) {
         // SmartQuestionImporter已经保存了所有数据：
         // 1. data/原始题库/{categoryName}/ - 只读备份
-        // 2. data/基础题库/{categoryName}/ - 标准化题库
-        // 3. data/config/ccf_parse_rule.json - 解析规则
-        // 4. data/question_banks/{categoryName}/questions.json - 运行时题库
+        // 2. data/基础题库/{categoryName}/questions.json - AI解析后的JSON题库（主要使用）
+        // 3. data/基础题库/{categoryName}/*.md - Markdown格式（查看备份）
+        // 4. data/config/ccf_parse_rule.json - 解析规则
         
-        // 从保存的JSON加载题库
-        QString bankPath = QString("data/question_banks/%1").arg(categoryName);
+        // 从基础题库加载JSON
+        QString bankPath = QString("data/基础题库/%1").arg(categoryName);
         QString jsonPath = bankPath + "/questions.json";
         
         QFile jsonFile(jsonPath);
@@ -757,9 +796,9 @@ void MainWindow::onImportQuestionBank()
                                 "• 测试数据：%3 组（原始 %4 组 + AI生成 %5 组）\n\n"
                                 "📁 已生成文件：\n"
                                 "• 原始题库（只读）：data/原始题库/%1/\n"
-                                "• 基础题库：data/基础题库/%1/\n"
-                                "• 解析规则：data/config/ccf_parse_rule.json\n"
-                                "• 运行时题库：%6\n\n"
+                                "• 基础题库（JSON）：%6\n"
+                                "• 基础题库（Markdown）：data/基础题库/%1/*.md\n"
+                                "• 解析规则：data/config/ccf_parse_rule.json\n\n"
                                 "✅ 现在可以直接刷题或生成模拟题！")
                         .arg(categoryName)
                         .arg(m_questionBank->count())
