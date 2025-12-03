@@ -1,4 +1,5 @@
 #include "QuestionListWidget.h"
+#include "../utils/SessionManager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -356,7 +357,8 @@ void QuestionListWidget::onDeleteBank()
         "确认删除",
         QString("确定要删除题库【%1】吗？\n\n此操作将删除：\n"
                 "• 基础题库文件\n"
-                "• 原始题库备份\n\n"
+                "• 原始题库备份\n"
+                "• 相关会话状态\n\n"
                 "此操作不可恢复！").arg(bankName),
         QMessageBox::Yes | QMessageBox::No
     );
@@ -370,8 +372,19 @@ void QuestionListWidget::onDeleteBank()
             QDir originalDir(originalPath);
             originalDir.removeRecursively();
             
+            // 清除会话状态（如果当前会话使用的是这个题库）
+            QString sessionBankPath;
+            int sessionIndex;
+            if (SessionManager::instance().loadSession(sessionBankPath, sessionIndex)) {
+                // 检查会话中的题库路径是否是被删除的题库
+                if (sessionBankPath == bankPath || 
+                    sessionBankPath.contains(bankName)) {
+                    SessionManager::instance().clearSession();
+                }
+            }
+            
             QMessageBox::information(this, "删除成功", 
-                QString("题库【%1】已删除").arg(bankName));
+                QString("题库【%1】已删除\n会话状态已清除").arg(bankName));
             
             refreshBankList();
         } else {
