@@ -179,28 +179,26 @@ void SmartImportDialog::startImport()
 
 void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
 {
-    // 更新状态
+    // 更新状态（简化，不重复显示）
     m_statusLabel->setText(progress.currentStatus);
     
-    // 更新统计信息 - 更详细的进度显示
+    // 更新统计信息（简洁显示）
     QString stats;
     if (progress.totalChunks > 0) {
-        int percentage = (progress.processedChunks * 100) / progress.totalChunks;
-        stats = QString("📊 进度: %1% | 文件块: %2/%3 | 已解析: %4 道题目")
-            .arg(percentage)
+        stats = QString("文件块: %1/%2 | 已解析: %3 道题目")
             .arg(progress.processedChunks)
             .arg(progress.totalChunks)
             .arg(progress.totalQuestions);
     } else if (progress.totalFiles > 0) {
-        stats = QString("📂 扫描文件: %1/%2")
+        stats = QString("扫描文件: %1/%2")
             .arg(progress.processedFiles)
             .arg(progress.totalFiles);
     } else {
-        stats = "⏳ 准备中...";
+        stats = "准备中...";
     }
     m_statsLabel->setText(stats);
     
-    // 更新进度条 - 分阶段显示
+    // 更新进度条（不显示重复文字）
     int percentage = 0;
     if (progress.totalChunks > 0) {
         // AI解析阶段占80%
@@ -210,7 +208,7 @@ void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
         percentage = (progress.processedFiles * 20) / progress.totalFiles;
     }
     m_progressBar->setValue(percentage);
-    m_progressBar->setFormat(QString("%1% - %2").arg(percentage).arg(progress.currentStatus));
+    m_progressBar->setFormat(QString("%1%").arg(percentage));
 }
 
 void SmartImportDialog::onLogMessage(const QString &message)

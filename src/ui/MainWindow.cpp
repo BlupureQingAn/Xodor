@@ -39,6 +39,7 @@
 #include <QStatusBar>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QRegularExpression>
 #include <QToolBar>
 #include <QDockWidget>
 #include <QInputDialog>
@@ -740,77 +741,81 @@ void MainWindow::onImportQuestionBank()
         // 3. data/基础题库/{categoryName}/*.md - Markdown格式（查看备份）
         // 4. data/config/ccf_parse_rule.json - 解析规则
         
-        // 从基础题库加载JSON
+        // 从基础题库加载JSON（支持单文件结构）
         QString bankPath = QString("data/基础题库/%1").arg(categoryName);
-        QString jsonPath = bankPath + "/questions.json";
         
-        QFile jsonFile(jsonPath);
-        if (jsonFile.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
-            jsonFile.close();
-            
-            if (doc.isArray()) {
-                // 清空现有题库
-                m_questionBank->clear();
-                
-                // 加载题目
-                QJsonArray questionsArray = doc.array();
-                for (const QJsonValue &val : questionsArray) {
-                    m_questionBank->addQuestion(Question(val.toObject()));
-                }
-                
-                // 更新UI
-                m_questionListWidget->setQuestions(m_questionBank->allQuestions());
-                
-                if (m_questionBank->count() > 0) {
-                    m_currentQuestionIndex = 0;
-                    m_currentBankPath = bankPath;  // 记住当前题库路径
-                    loadCurrentQuestion();
+        // 清空现有题库
+        m_questionBank->clear();
+        
+        // 扫描目录中的所有.json文件
+        QDir bankDir(bankPath);
+        QStringList jsonFiles = bankDir.entryList(QStringList() << "*.json", QDir::Files);
+        
+        if (!jsonFiles.isEmpty()) {
+            // 单文件结构：每个题目一个JSON文件
+            for (const QString &jsonFile : jsonFiles) {
+                QString filePath = bankPath + "/" + jsonFile;
+                QFile file(filePath);
+                if (file.open(QIODevice::ReadOnly)) {
+                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                    file.close();
                     
-                    // 保存会话状态（记住当前题库路径）
-                    SessionManager::instance().saveSession(bankPath, 0);
-                    
-                    // 统计测试数据
-                    int totalTestCases = 0;
-                    int aiGeneratedCases = 0;
-                    for (const Question &q : m_questionBank->allQuestions()) {
-                        totalTestCases += q.testCases().size();
-                        for (const TestCase &tc : q.testCases()) {
-                            if (tc.isAIGenerated) {
-                                aiGeneratedCases++;
-                            }
-                        }
+                    if (doc.isObject()) {
+                        m_questionBank->addQuestion(Question(doc.object()));
                     }
-                    
-                    statusBar()->showMessage(
-                        QString("✅ 【%1】题库导入成功！共 %2 道题目，%3 组测试数据（AI生成 %4 组）")
-                        .arg(categoryName)
-                        .arg(m_questionBank->count())
-                        .arg(totalTestCases)
-                        .arg(aiGeneratedCases), 8000);
-                    
-                    QMessageBox::information(this, "导入成功",
-                        QString("【%1】题库导入成功！\n\n"
-                                "📊 题库统计：\n"
-                                "• 总题数：%2 道\n"
-                                "• 测试数据：%3 组（原始 %4 组 + AI生成 %5 组）\n\n"
-                                "📁 已生成文件：\n"
-                                "• 原始题库（只读）：data/原始题库/%1/\n"
-                                "• 基础题库（JSON）：%6\n"
-                                "• 基础题库（Markdown）：data/基础题库/%1/*.md\n"
-                                "• 解析规则：data/config/ccf_parse_rule.json\n\n"
-                                "✅ 现在可以直接刷题或生成模拟题！")
-                        .arg(categoryName)
-                        .arg(m_questionBank->count())
-                        .arg(totalTestCases)
-                        .arg(totalTestCases - aiGeneratedCases)
-                        .arg(aiGeneratedCases)
-                        .arg(jsonPath));
                 }
             }
+        }
+        
+        // 更新UI
+        m_questionListWidget->setQuestions(m_questionBank->allQuestions());
+        
+        if (m_questionBank->count() > 0) {
+            m_currentQuestionIndex = 0;
+            m_currentBankPath = bankPath;  // 记住当前题库路径
+            loadCurrentQuestion();
+            
+            // 保存会话状态（记住当前题库路径）
+            SessionManager::instance().saveSession(bankPath, 0);
+            
+            // 统计测试数据
+            int totalTestCases = 0;
+            int aiGeneratedCases = 0;
+            for (const Question &q : m_questionBank->allQuestions()) {
+                totalTestCases += q.testCases().size();
+                for (const TestCase &tc : q.testCases()) {
+                    if (tc.isAIGenerated) {
+                        aiGeneratedCases++;
+                    }
+                }
+            }
+            
+            statusBar()->showMessage(
+                QString("✅ 【%1】题库导入成功！共 %2 道题目，%3 组测试数据（AI生成 %4 组）")
+                .arg(categoryName)
+                .arg(m_questionBank->count())
+                .arg(totalTestCases)
+                .arg(aiGeneratedCases), 8000);
+            
+            QMessageBox::information(this, "导入成功",
+                QString("【%1】题库导入成功！\n\n"
+                        "📊 题库统计：\n"
+                        "• 总题数：%2 道\n"
+                        "• 测试数据：%3 组（原始 %4 组 + AI生成 %5 组）\n\n"
+                        "📁 已生成文件：\n"
+                        "• 原始题库（只读）：data/原始题库/%1/\n"
+                        "• 基础题库（JSON）：%6\n"
+                        "• 解析规则：data/config/ccf_parse_rule.json\n\n"
+                        "✅ 现在可以直接刷题或生成模拟题！")
+                .arg(categoryName)
+                .arg(m_questionBank->count())
+                .arg(totalTestCases)
+                .arg(totalTestCases - aiGeneratedCases)
+                .arg(aiGeneratedCases)
+                .arg(bankPath));
         } else {
             QMessageBox::warning(this, "加载失败", 
-                QString("无法加载题库文件：%1").arg(jsonPath));
+                QString("未找到题库文件，请检查目录：%1").arg(bankPath));
         }
     }
     smartDialog->deleteLater();
@@ -1336,26 +1341,41 @@ void MainWindow::loadSavedCode(const QString &questionId)
 
 void MainWindow::saveQuestionBank()
 {
-    // 保存到基础题库的questions.json
+    // 保存到基础题库（单文件结构）
     if (m_currentBankPath.isEmpty()) {
         return;
     }
     
-    QString jsonPath = m_currentBankPath + "/questions.json";
+    // 确保目录存在
+    QDir dir;
+    if (!dir.mkpath(m_currentBankPath)) {
+        qWarning() << "无法创建题库目录:" << m_currentBankPath;
+        return;
+    }
     
-    QJsonArray questionsArray;
+    // 保存每道题目为单独的JSON文件
+    int savedCount = 0;
     for (const auto &q : m_questionBank->allQuestions()) {
-        questionsArray.append(q.toJson());
+        // 清理题目标题，用作文件名
+        QString safeTitle = q.title();
+        safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
+        safeTitle = safeTitle.trimmed();
+        if (safeTitle.isEmpty()) {
+            safeTitle = QString("题目%1").arg(savedCount + 1);
+        }
+        
+        QString questionFilePath = QString("%1/%2.json").arg(m_currentBankPath).arg(safeTitle);
+        
+        QFile file(questionFilePath);
+        if (file.open(QIODevice::WriteOnly)) {
+            QJsonDocument doc(q.toJson());
+            file.write(doc.toJson(QJsonDocument::Indented));
+            file.close();
+            savedCount++;
+        }
     }
     
-    QFile file(jsonPath);
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
-        file.close();
-        qDebug() << "题库已保存到基础题库:" << jsonPath;
-    } else {
-        qWarning() << "无法保存题库到:" << jsonPath;
-    }
+    qDebug() << "题库已保存到基础题库:" << m_currentBankPath << "共" << savedCount << "道题目";
 }
 
 QString MainWindow::generateDefaultCode(const Question &question)
@@ -2067,9 +2087,23 @@ void MainWindow::onDeleteQuestions(const QVector<int> &indices)
     QVector<int> sortedIndices = indices;
     std::sort(sortedIndices.begin(), sortedIndices.end(), std::greater<int>());
     
-    // 删除题目
+    // 删除题目（同时删除对应的JSON文件）
     for (int index : sortedIndices) {
         if (index >= 0 && index < m_questionBank->count()) {
+            // 获取题目信息，用于删除文件
+            Question q = m_questionBank->allQuestions()[index];
+            
+            // 删除对应的JSON文件
+            if (!m_currentBankPath.isEmpty()) {
+                QString safeTitle = q.title();
+                safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
+                safeTitle = safeTitle.trimmed();
+                QString questionFilePath = QString("%1/%2.json").arg(m_currentBankPath).arg(safeTitle);
+                
+                QFile::remove(questionFilePath);
+            }
+            
+            // 从题库中删除
             m_questionBank->removeQuestion(index);
         }
     }
@@ -2087,8 +2121,7 @@ void MainWindow::onDeleteQuestions(const QVector<int> &indices)
     }
     // 如果没有题目了，loadCurrentQuestion会处理
     
-    // 保存题库
-    saveQuestionBank();
+    // 注意：不需要再调用saveQuestionBank()，因为已经直接删除了文件
     
     statusBar()->showMessage(QString("✓ 已删除 %1 道题目").arg(indices.size()), 3000);
 }

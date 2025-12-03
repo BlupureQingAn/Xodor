@@ -727,102 +727,48 @@ bool SmartQuestionImporter::saveParseRulesAndQuestionBank()
         emit logMessage("  ⚠️ 无法保存解析规则");
     }
     
-    // 2. 保存基础题库到 data/基础题库/{bankName}/questions.json (JSON格式)
+    // 2. 保存基础题库 - 使用单文件结构: data/基础题库/{bankName}/{题目名}.json
     QString baseQuestionBankDir = QString("data/基础题库/%1").arg(m_bankName);
     if (!dir.mkpath(baseQuestionBankDir)) {
         emit logMessage("  ❌ 无法创建基础题库目录");
         return false;
     }
     
-    emit logMessage(QString("  📁 基础题库目录: %1").arg(baseQuestionBankDir));
+    emit logMessage(QString("\n[3/3] 💾 保存题目到基础题库..."));
+    emit logMessage(QString("  📁 目录: %1").arg(baseQuestionBankDir));
     
-    // 保存为JSON格式（这是主要的题库格式）
-    QString questionsJsonPath = baseQuestionBankDir + "/questions.json";
-    QJsonArray questionsArray;
-    for (const Question &q : m_questions) {
-        questionsArray.append(q.toJson());
-    }
-    
-    QFile jsonFile(questionsJsonPath);
-    if (jsonFile.open(QIODevice::WriteOnly)) {
-        jsonFile.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
-        jsonFile.close();
-        emit logMessage(QString("  ✓ 基础题库JSON已保存: %1").arg(questionsJsonPath));
-        emit logMessage(QString("  📊 包含 %1 道题目").arg(m_questions.size()));
-    } else {
-        emit logMessage("  ❌ 无法保存基础题库JSON");
-        return false;
-    }
-    
-    // 3. 同时保存Markdown格式（用于查看和备份）
-    // 按文件分组保存题目
-    QMap<QString, QVector<Question>> questionsByFile;
-    for (const Question &q : m_questions) {
-        QString sourceFile = q.id().section('_', 0, 0);  // 从ID中提取文件名
-        if (sourceFile.isEmpty()) {
-            sourceFile = "未分类";
-        }
-        questionsByFile[sourceFile].append(q);
-    }
-    
+    // 保存每道题目为单独的JSON文件
     int savedCount = 0;
-    for (auto it = questionsByFile.begin(); it != questionsByFile.end(); ++it) {
-        QString examFolder = baseQuestionBankDir + "/" + it.key();
-        if (!dir.mkpath(examFolder)) {
-            continue;
+    for (const Question &q : m_questions) {
+        // 清理题目标题，用作文件名
+        QString safeTitle = q.title();
+        safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");  // 移除非法字符
+        safeTitle = safeTitle.trimmed();
+        if (safeTitle.isEmpty()) {
+            safeTitle = QString("题目%1").arg(savedCount + 1);
         }
         
-        const QVector<Question> &questions = it.value();
-        for (int i = 0; i < questions.size(); ++i) {
-            const Question &q = questions[i];
-            QString questionFile = QString("%1/第%2题.md").arg(examFolder).arg(i + 1);
+        QString questionFilePath = QString("%1/%2.json").arg(baseQuestionBankDir).arg(safeTitle);
+        
+        QFile jsonFile(questionFilePath);
+        if (jsonFile.open(QIODevice::WriteOnly)) {
+            QJsonDocument doc(q.toJson());
+            jsonFile.write(doc.toJson(QJsonDocument::Indented));
+            jsonFile.close();
+            savedCount++;
             
-            QFile file(questionFile);
-            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QTextStream out(&file);
-                out.setEncoding(QStringConverter::Utf8);
-                
-                // 写入题目内容
-                out << "# " << q.title() << "\n\n";
-                out << "## 题目描述\n\n";
-                out << q.description() << "\n\n";
-                
-                // 写入测试数据
-                out << "## 测试数据\n\n";
-                const QVector<TestCase> &testCases = q.testCases();
-                for (int j = 0; j < testCases.size(); ++j) {
-                    const TestCase &tc = testCases[j];
-                    out << QString("### 测试用例 %1").arg(j + 1);
-                    if (!tc.description.isEmpty()) {
-                        out << " - " << tc.description;
-                    }
-                    if (j < 3) {
-                        out << " (原始数据)";
-                    } else {
-                        out << " (AI补充)";
-                    }
-                    out << "\n\n";
-                    out << "**输入：**\n```\n" << tc.input << "\n```\n\n";
-                    out << "**输出：**\n```\n" << tc.expectedOutput << "\n```\n\n";
-                }
-                
-                // 写入标签和难度
-                out << "## 题目信息\n\n";
-                out << "- **难度**: " << (q.difficulty() == Difficulty::Easy ? "简单" : 
-                                        q.difficulty() == Difficulty::Medium ? "中等" : "困难") << "\n";
-                if (!q.tags().isEmpty()) {
-                    out << "- **标签**: " << q.tags().join(", ") << "\n";
-                }
-                
-                file.close();
-                savedCount++;
-            }
+            // 显示保存信息
+            QString diffEmoji = (q.difficulty() == Difficulty::Easy) ? "🟢" : 
+                               (q.difficulty() == Difficulty::Hard) ? "🔴" : "🟡";
+            emit logMessage(QString("  %1 %2.json").arg(diffEmoji).arg(safeTitle));
+        } else {
+            emit logMessage(QString("  ❌ 无法保存: %1").arg(safeTitle));
         }
-        
-        emit logMessage(QString("  ✓ %1: 保存 %2 道题目").arg(it.key()).arg(questions.size()));
     }
     
-    emit logMessage(QString("  ✅ 共保存 %1 道题目到基础题库").arg(savedCount));
+    emit logMessage(QString("\n  ✅ 成功保存 %1 道题目").arg(savedCount));
+    emit logMessage(QString("  📂 位置: %1").arg(baseQuestionBankDir));
+    
     return savedCount > 0;
 }
 
