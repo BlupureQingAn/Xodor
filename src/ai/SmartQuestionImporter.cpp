@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDateTime>
+#include <QEventLoop>
 #include <numeric>
 
 SmartQuestionImporter::SmartQuestionImporter(OllamaClient *aiClient, QObject *parent)
@@ -591,10 +592,56 @@ QString SmartQuestionImporter::fixJsonWithAI(const QString &brokenJson)
     
     emit logMessage("  🔧 发送JSON修复请求...");
     
-    // 同步等待AI响应（简化处理）
-    // 实际应该异步处理，这里为了简化先用同步
+    // 使用事件循环实现同步等待
+    QString fixedJson;
+    bool completed = false;
     
-    return QString();  // 暂时返回空，需要实现同步AI调用
+    // 临时连接信号
+    QMetaObject::Connection conn = connect(m_aiClient, &OllamaClient::codeAnalysisReady,
+        [&fixedJson, &completed](const QString &response) {
+            // 提取JSON
+            QString json = response;
+            int jsonStart = response.indexOf("```json");
+            if (jsonStart >= 0) {
+                jsonStart = response.indexOf('\n', jsonStart) + 1;
+                int jsonEnd = response.indexOf("```", jsonStart);
+                if (jsonEnd > jsonStart) {
+                    json = response.mid(jsonStart, jsonEnd - jsonStart).trimmed();
+                }
+            } else {
+                jsonStart = response.indexOf('{');
+                if (jsonStart >= 0) {
+                    json = response.mid(jsonStart);
+                }
+            }
+            fixedJson = json;
+            completed = true;
+        });
+    
+    // 发送请求
+    m_aiClient->sendCustomPrompt(prompt, "json_fix");
+    
+    // 等待响应（最多10秒）
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    connect(m_aiClient, &OllamaClient::codeAnalysisReady, &loop, &QEventLoop::quit);
+    connect(m_aiClient, &OllamaClient::error, &loop, &QEventLoop::quit);
+    
+    timer.start(10000);
+    loop.exec();
+    
+    // 断开临时连接
+    disconnect(conn);
+    
+    if (completed && !fixedJson.isEmpty()) {
+        emit logMessage("  ✓ JSON修复完成");
+        return fixedJson;
+    } else {
+        emit logMessage("  ✗ JSON修复超时或失败");
+        return QString();
+    }
 }
 
 void SmartQuestionImporter::onAIError(const QString &error)
