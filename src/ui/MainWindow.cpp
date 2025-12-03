@@ -1336,20 +1336,25 @@ void MainWindow::loadSavedCode(const QString &questionId)
 
 void MainWindow::saveQuestionBank()
 {
-    QDir dir("data/questions");
-    if (!dir.exists()) {
-        dir.mkpath(".");
+    // 保存到基础题库的questions.json
+    if (m_currentBankPath.isEmpty()) {
+        return;
     }
+    
+    QString jsonPath = m_currentBankPath + "/questions.json";
     
     QJsonArray questionsArray;
     for (const auto &q : m_questionBank->allQuestions()) {
         questionsArray.append(q.toJson());
     }
     
-    QFile file("data/questions/bank.json");
+    QFile file(jsonPath);
     if (file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(questionsArray).toJson());
+        file.write(QJsonDocument(questionsArray).toJson(QJsonDocument::Indented));
         file.close();
+        qDebug() << "题库已保存到基础题库:" << jsonPath;
+    } else {
+        qWarning() << "无法保存题库到:" << jsonPath;
     }
 }
 
