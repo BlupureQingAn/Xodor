@@ -573,6 +573,10 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
         }
         
         QString questionFilePath = QString("%1/%2.json").arg(subDir).arg(safeTitle);
+        
+        // 检查文件是否已存在
+        bool isOverwrite = QFile::exists(questionFilePath);
+        
         QFile jsonFile(questionFilePath);
         if (jsonFile.open(QIODevice::WriteOnly)) {
             QJsonDocument doc(q.toJson());
@@ -586,11 +590,13 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
             // 显示保存信息
             QString diffEmoji = (q.difficulty() == Difficulty::Easy) ? "🟢" : 
                                (q.difficulty() == Difficulty::Hard) ? "🔴" : "🟡";
-            emit logMessage(QString("    %1 %2 [%3] - %4个测试用例 ✓已保存")
+            QString saveStatus = isOverwrite ? "✓已覆盖" : "✓已保存";
+            emit logMessage(QString("    %1 %2 [%3] - %4个测试用例 %5")
                 .arg(diffEmoji)
                 .arg(q.title())
                 .arg(diffStr)
-                .arg(testCases.size()));
+                .arg(testCases.size())
+                .arg(saveStatus));
         } else {
             emit logMessage(QString("    ❌ 保存失败: %1").arg(q.title()));
         }

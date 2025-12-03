@@ -721,8 +721,11 @@ void MainWindow::onImportQuestionBank()
     bool ok;
     QString categoryName = QInputDialog::getText(
         this, 
-        "题库分类",
-        "请输入题库分类名称（如：ccf、leetcode）:",
+        "题库名称",
+        "请输入题库名称（如：CCF考试、LeetCode）:\n\n"
+        "💡 提示：\n"
+        "• 输入新名称：创建新题库\n"
+        "• 输入已有名称：导入到现有题库（同名题目会被覆盖）",
         QLineEdit::Normal,
         QFileInfo(path).fileName(), 
         &ok
@@ -730,6 +733,29 @@ void MainWindow::onImportQuestionBank()
     
     if (!ok || categoryName.isEmpty()) {
         return;
+    }
+    
+    // 检查题库是否已存在
+    QString bankPath = QString("data/基础题库/%1").arg(categoryName);
+    bool bankExists = QDir(bankPath).exists();
+    
+    if (bankExists) {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "题库已存在",
+            QString("题库【%1】已存在！\n\n"
+                    "导入操作将：\n"
+                    "• 保留现有题目\n"
+                    "• 添加新题目\n"
+                    "• 覆盖同名题目\n\n"
+                    "是否继续？").arg(categoryName),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::Yes
+        );
+        
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
     }
     
     // 使用AI智能导入
