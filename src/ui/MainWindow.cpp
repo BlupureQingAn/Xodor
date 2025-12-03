@@ -741,18 +741,31 @@ void MainWindow::onImportQuestionBank()
         // 3. data/基础题库/{categoryName}/*.md - Markdown格式（查看备份）
         // 4. data/config/ccf_parse_rule.json - 解析规则
         
-        // 从基础题库加载JSON（支持单文件结构）
+        // 从基础题库加载JSON（支持分层结构）
         QString bankPath = QString("data/基础题库/%1").arg(categoryName);
         
         // 清空现有题库
         m_questionBank->clear();
         
-        // 扫描目录中的所有.json文件
+        // 递归扫描所有子目录中的.json文件
         QDir bankDir(bankPath);
-        QStringList jsonFiles = bankDir.entryList(QStringList() << "*.json", QDir::Files);
+        QStringList jsonFiles;
+        
+        // 先扫描根目录
+        jsonFiles.append(bankDir.entryList(QStringList() << "*.json", QDir::Files));
+        
+        // 再扫描所有子目录
+        QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString &subDir : subDirs) {
+            QDir subDirectory(bankPath + "/" + subDir);
+            QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
+            for (const QString &file : subFiles) {
+                jsonFiles.append(subDir + "/" + file);
+            }
+        }
         
         if (!jsonFiles.isEmpty()) {
-            // 单文件结构：每个题目一个JSON文件
+            // 加载所有题目
             for (const QString &jsonFile : jsonFiles) {
                 QString filePath = bankPath + "/" + jsonFile;
                 QFile file(filePath);
@@ -1341,37 +1354,55 @@ void MainWindow::loadSavedCode(const QString &questionId)
 
 void MainWindow::saveQuestionBank()
 {
-    // 保存到基础题库（单文件结构）
+    // 保存到基础题库（分层结构）
     if (m_currentBankPath.isEmpty()) {
         return;
     }
     
-    // 确保目录存在
-    QDir dir;
-    if (!dir.mkpath(m_currentBankPath)) {
-        qWarning() << "无法创建题库目录:" << m_currentBankPath;
-        return;
+    // 按源文件分组保存题目
+    QMap<QString, QVector<Question>> questionsByFile;
+    for (const auto &q : m_questionBank->allQuestions()) {
+        // 从ID中提取源文件名（格式：{sourceFile}_{hash}）
+        QString sourceFile = q.id().section('_', 0, 0);
+        if (sourceFile.isEmpty()) {
+            sourceFile = "未分类";
+        }
+        questionsByFile[sourceFile].append(q);
     }
     
-    // 保存每道题目为单独的JSON文件
+    QDir dir;
     int savedCount = 0;
-    for (const auto &q : m_questionBank->allQuestions()) {
-        // 清理题目标题，用作文件名
-        QString safeTitle = q.title();
-        safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
-        safeTitle = safeTitle.trimmed();
-        if (safeTitle.isEmpty()) {
-            safeTitle = QString("题目%1").arg(savedCount + 1);
+    
+    for (auto it = questionsByFile.begin(); it != questionsByFile.end(); ++it) {
+        QString sourceFileName = it.key();
+        const QVector<Question> &questions = it.value();
+        
+        // 创建源文件对应的子目录
+        QString subDir = QString("%1/%2").arg(m_currentBankPath).arg(sourceFileName);
+        if (!dir.mkpath(subDir)) {
+            qWarning() << "无法创建子目录:" << subDir;
+            continue;
         }
         
-        QString questionFilePath = QString("%1/%2.json").arg(m_currentBankPath).arg(safeTitle);
-        
-        QFile file(questionFilePath);
-        if (file.open(QIODevice::WriteOnly)) {
-            QJsonDocument doc(q.toJson());
-            file.write(doc.toJson(QJsonDocument::Indented));
-            file.close();
-            savedCount++;
+        // 保存该文件的所有题目
+        for (const Question &q : questions) {
+            // 清理题目标题，用作文件名
+            QString safeTitle = q.title();
+            safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
+            safeTitle = safeTitle.trimmed();
+            if (safeTitle.isEmpty()) {
+                safeTitle = QString("题目%1").arg(savedCount + 1);
+            }
+            
+            QString questionFilePath = QString("%1/%2.json").arg(subDir).arg(safeTitle);
+            
+            QFile file(questionFilePath);
+            if (file.open(QIODevice::WriteOnly)) {
+                QJsonDocument doc(q.toJson());
+                file.write(doc.toJson(QJsonDocument::Indented));
+                file.close();
+                savedCount++;
+            }
         }
     }
     
@@ -2093,12 +2124,21 @@ void MainWindow::onDeleteQuestions(const QVector<int> &indices)
             // 获取题目信息，用于删除文件
             Question q = m_questionBank->allQuestions()[index];
             
-            // 删除对应的JSON文件
+            // 删除对应的JSON文件（支持分层结构）
             if (!m_currentBankPath.isEmpty()) {
+                // 从ID中提取源文件名
+                QString sourceFile = q.id().section('_', 0, 0);
+                if (sourceFile.isEmpty()) {
+                    sourceFile = "未分类";
+                }
+                
                 QString safeTitle = q.title();
                 safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
                 safeTitle = safeTitle.trimmed();
-                QString questionFilePath = QString("%1/%2.json").arg(m_currentBankPath).arg(safeTitle);
+                QString questionFilePath = QString("%1/%2/%3.json")
+                    .arg(m_currentBankPath)
+                    .arg(sourceFile)
+                    .arg(safeTitle);
                 
                 QFile::remove(questionFilePath);
             }
