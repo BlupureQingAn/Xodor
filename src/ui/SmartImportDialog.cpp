@@ -172,9 +172,9 @@ void SmartImportDialog::startImport()
     m_logText->append("🤖 使用AI智能解析模式\n");
     m_logText->append("📋 AI将自动识别格式、解析题目、生成测试数据\n\n");
     
-    // 使用通用解析器（包含完整的保存流程）
+    // 使用AI解析器（完整的AI驱动流程）
     m_statusLabel->setText("🤖 AI智能解析中...");
-    m_importer->startImportWithUniversalParser(m_sourcePath, m_targetPath, m_bankName);
+    m_importer->startImport(m_sourcePath, m_targetPath, m_bankName);
 }
 
 void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
