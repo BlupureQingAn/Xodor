@@ -69,8 +69,8 @@ QString QuestionBankManager::generateBankId() const
 
 QString QuestionBankManager::getInternalStorageRoot() const
 {
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString banksPath = dataPath + "/QuestionBanks";
+    // 使用项目根目录的data文件夹
+    QString banksPath = "data";
     
     QDir dir;
     if (!dir.exists(banksPath)) {
@@ -82,7 +82,8 @@ QString QuestionBankManager::getInternalStorageRoot() const
 
 QString QuestionBankManager::getOriginalBanksRoot() const
 {
-    QString root = getInternalStorageRoot() + "/original_banks";
+    // 原始题库目录
+    QString root = "data/原始题库";
     QDir dir;
     if (!dir.exists(root)) {
         dir.mkpath(root);
@@ -92,7 +93,8 @@ QString QuestionBankManager::getOriginalBanksRoot() const
 
 QString QuestionBankManager::getProcessedBanksRoot() const
 {
-    QString root = getInternalStorageRoot() + "/processed_banks";
+    // 基础题库目录（AI解析后的题库）
+    QString root = "data/基础题库";
     QDir dir;
     if (!dir.exists(root)) {
         dir.mkpath(root);
