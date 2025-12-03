@@ -313,18 +313,18 @@ QString QuestionListWidget::getBankInfo(const QString &bankPath) const
     QFileInfo pathInfo(bankPath);
     QString bankName = pathInfo.fileName();
     
-    // 读取questions.json获取题目数量
-    QString jsonPath = bankPath + "/questions.json";
+    // 统计分层结构中的题目数量
     int questionCount = 0;
+    QDir bankDir(bankPath);
     
-    QFile jsonFile(jsonPath);
-    if (jsonFile.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
-        jsonFile.close();
-        
-        if (doc.isArray()) {
-            questionCount = doc.array().size();
-        }
+    // 扫描根目录的JSON文件
+    questionCount += bankDir.entryList(QStringList() << "*.json", QDir::Files).size();
+    
+    // 扫描所有子目录的JSON文件
+    QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString &subDir : subDirs) {
+        QDir subDirectory(bankPath + "/" + subDir);
+        questionCount += subDirectory.entryList(QStringList() << "*.json", QDir::Files).size();
     }
     
     return QString("📚 %1 (%2 道题目)").arg(bankName).arg(questionCount);
