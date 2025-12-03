@@ -53,16 +53,12 @@ void SmartQuestionImporter::startImport(const QString &sourcePath, const QString
     m_questions.clear();
     m_currentChunkIndex = 0;
     
-    emit logMessage("🚀 开始智能导入流程...\n");
-    
-    // 第一步：拷贝文件夹到原始题库（只读备份）
-    emit logMessage("📁 第一步：备份原始题库文件...");
+    // 备份原始题库（静默处理）
     QString originalBankPath = QString("data/原始题库/%1").arg(m_bankName);
     if (!copyQuestionBank(sourcePath, originalBankPath)) {
         emit importCompleted(false, "原始题库备份失败");
         return;
     }
-    emit logMessage(QString("✅ 原始题库已备份到: %1").arg(originalBankPath));
     
     // 设置只读属性
     QDir originalDir(originalBankPath);
@@ -71,10 +67,8 @@ void SmartQuestionImporter::startImport(const QString &sourcePath, const QString
         QFile::setPermissions(fileInfo.absoluteFilePath(), 
                              QFile::ReadOwner | QFile::ReadUser | QFile::ReadGroup | QFile::ReadOther);
     }
-    emit logMessage("🔒 原始题库已设置为只读\n");
     
-    // 第二步：扫描并分析文件（从原始题库读取）
-    emit logMessage("📂 第二步：扫描和分析文件...");
+    // 扫描并分析文件（从原始题库读取）
     scanAndAnalyzeFiles(originalBankPath);
     
     if (m_chunks.isEmpty()) {
@@ -82,16 +76,14 @@ void SmartQuestionImporter::startImport(const QString &sourcePath, const QString
         return;
     }
     
-    emit logMessage(QString("✅ 文件分析完成，共 %1 个文件块\n").arg(m_chunks.size()));
-    
     // 更新进度
     m_progress.totalChunks = m_chunks.size();
     m_progress.processedChunks = 0;
-    m_progress.currentStatus = "准备开始AI解析";
+    m_progress.currentStatus = "开始AI解析并实时保存";
     emit progressUpdated(m_progress);
     
-    // 第三步：开始处理第一个块
-    emit logMessage("🤖 第三步：AI智能解析题目...");
+    // 开始处理第一个块
+    emit logMessage("\n[2/2] 🤖 AI解析并实时保存...");
     processNextChunk();
 }
 
@@ -148,6 +140,8 @@ bool SmartQuestionImporter::copyQuestionBank(const QString &sourcePath, const QS
 
 void SmartQuestionImporter::scanAndAnalyzeFiles(const QString &path)
 {
+    emit logMessage("\n[1/2] 📂 扫描文件...");
+    
     QDir dir(path);
     QStringList filters;
     filters << "*.md" << "*.markdown" << "*.txt";
@@ -156,6 +150,10 @@ void SmartQuestionImporter::scanAndAnalyzeFiles(const QString &path)
     
     m_progress.totalFiles = files.size();
     m_progress.processedFiles = 0;
+    m_progress.currentStatus = "扫描文件";
+    emit progressUpdated(m_progress);
+    
+    emit logMessage(QString("  找到 %1 个文件\n").arg(files.size()));
     
     for (const QFileInfo &fileInfo : files) {
         QFile file(fileInfo.absoluteFilePath());
@@ -168,7 +166,7 @@ void SmartQuestionImporter::scanAndAnalyzeFiles(const QString &path)
         QString content = in.readAll();
         file.close();
         
-        emit logMessage(QString("  分析: %1 (%2 字符)")
+        emit logMessage(QString("  ✓ %1 (%2 字符)")
             .arg(fileInfo.fileName())
             .arg(content.length()));
         
@@ -180,7 +178,13 @@ void SmartQuestionImporter::scanAndAnalyzeFiles(const QString &path)
         }
         
         m_chunks.append(chunks);
+        m_progress.processedFiles++;
+        emit progressUpdated(m_progress);
     }
+    
+    emit logMessage(QString("\n  共 %1 个文件，%2 个文件块\n")
+        .arg(files.size())
+        .arg(m_chunks.size()));
 }
 
 QVector<FileChunk> SmartQuestionImporter::splitLargeFile(const QString &fileName, const QString &content)
@@ -332,16 +336,16 @@ void SmartQuestionImporter::processNextChunk()
     
     // 更新进度
     m_progress.currentFile = chunk.fileName;
-    m_progress.currentStatus = QString("处理文件块 %1/%2")
+    m_progress.currentStatus = QString("AI解析并保存 %1/%2")
         .arg(m_currentChunkIndex + 1)
         .arg(m_chunks.size());
     m_progress.processedChunks = m_currentChunkIndex;
     emit progressUpdated(m_progress);
     
-    emit logMessage(QString("\n📄 处理: %1 (块 %2/%3)")
-        .arg(chunk.fileName)
-        .arg(chunk.chunkIndex + 1)
-        .arg(chunk.totalChunks));
+    emit logMessage(QString("\n[%1/%2] 📄 %3")
+        .arg(m_currentChunkIndex + 1)
+        .arg(m_chunks.size())
+        .arg(chunk.fileName));
     
     emit chunkProcessed(chunk.fileName, chunk.chunkIndex + 1, chunk.totalChunks);
     
@@ -702,19 +706,16 @@ void SmartQuestionImporter::onStreamProgress(const QString &context, int current
     int estimatedQuestions = currentLength / 2000;
     if (estimatedQuestions < 1) estimatedQuestions = 1;
     
-    // 更新进度信息
-    m_progress.currentStatus = QString("AI正在解析... (已接收 %1 字符)")
+    // 更新进度信息（简化显示）
+    m_progress.currentStatus = QString("AI解析中... (%1 字符)")
         .arg(currentLength);
-    
-    // 计算当前块的进度百分比（0-100）
-    int chunkProgress = qMin(100, (currentLength * 100) / 10000);  // 假设每个响应最多10000字符
     
     emit progressUpdated(m_progress);
     
-    // 每1000字符输出一次日志
+    // 每2000字符输出一次日志
     static int lastLoggedLength = 0;
-    if (currentLength - lastLoggedLength >= 1000) {
-        emit logMessage(QString("  📥 接收中... %1 字符").arg(currentLength));
+    if (currentLength - lastLoggedLength >= 2000) {
+        emit logMessage(QString("  ⏳ AI思考中... %1 字符").arg(currentLength));
         lastLoggedLength = currentLength;
     }
 }

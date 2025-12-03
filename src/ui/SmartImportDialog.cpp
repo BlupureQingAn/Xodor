@@ -164,33 +164,34 @@ void SmartImportDialog::setupUI()
 
 void SmartImportDialog::startImport()
 {
-    m_logText->append(QString("📚 题库名称: %1").arg(m_bankName));
-    m_logText->append(QString("📁 源路径: %1").arg(m_sourcePath));
-    m_logText->append(QString("🎯 目标路径: %1\n").arg(m_targetPath));
+    m_logText->clear();
+    m_logText->append("=== AI智能导入开始 ===\n");
+    m_logText->append(QString("📚 题库: %1").arg(m_bankName));
+    m_logText->append(QString("📁 源路径: %1\n").arg(m_sourcePath));
     
-    // 统一使用AI智能解析
-    m_logText->append("🤖 使用AI智能解析模式\n");
-    m_logText->append("📋 AI将自动识别格式、解析题目、生成测试数据\n\n");
+    m_logText->append("💡 AI将自动识别格式、解析题目、生成测试数据并实时保存\n");
     
     // 使用AI解析器（完整的AI驱动流程）
-    m_statusLabel->setText("🤖 AI智能解析中...");
+    m_statusLabel->setText("准备扫描文件...");
     m_importer->startImport(m_sourcePath, m_targetPath, m_bankName);
 }
 
 void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
 {
-    // 更新状态（简化，不重复显示）
+    // 更新状态
     m_statusLabel->setText(progress.currentStatus);
     
-    // 更新统计信息（简洁显示）
+    // 更新统计信息
     QString stats;
     if (progress.totalChunks > 0) {
-        stats = QString("文件块: %1/%2 | 已解析: %3 道题目")
+        // AI解析阶段
+        stats = QString("文件块: %1/%2 | 已保存: %3 道题目")
             .arg(progress.processedChunks)
             .arg(progress.totalChunks)
             .arg(progress.totalQuestions);
     } else if (progress.totalFiles > 0) {
-        stats = QString("扫描文件: %1/%2")
+        // 文件扫描阶段
+        stats = QString("扫描: %1/%2 个文件")
             .arg(progress.processedFiles)
             .arg(progress.totalFiles);
     } else {
@@ -198,13 +199,13 @@ void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
     }
     m_statsLabel->setText(stats);
     
-    // 更新进度条（不显示重复文字）
+    // 更新进度条
     int percentage = 0;
     if (progress.totalChunks > 0) {
-        // AI解析阶段占80%
-        percentage = 20 + (progress.processedChunks * 60) / progress.totalChunks;
+        // AI解析并保存阶段占80% (20% → 100%)
+        percentage = 20 + (progress.processedChunks * 80) / progress.totalChunks;
     } else if (progress.totalFiles > 0) {
-        // 文件扫描阶段占20%
+        // 文件扫描阶段占20% (0% → 20%)
         percentage = (progress.processedFiles * 20) / progress.totalFiles;
     }
     m_progressBar->setValue(percentage);
