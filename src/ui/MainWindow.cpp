@@ -601,41 +601,63 @@ void MainWindow::loadLastSession()
     int questionIndex;
     
     if (SessionManager::instance().loadSession(questionBankPath, questionIndex)) {
-        // 检查题库JSON文件是否存在
-        QString jsonPath = questionBankPath + "/questions.json";
+        // 检查题库目录是否存在
+        QDir bankDir(questionBankPath);
+        if (!bankDir.exists()) {
+            SessionManager::instance().clearSession();
+            statusBar()->showMessage("上次的题库已被删除，请重新导入题库", 5000);
+            return;
+        }
         
-        if (QFile::exists(jsonPath)) {
-            // 从JSON加载题库
-            QFile jsonFile(jsonPath);
-            if (jsonFile.open(QIODevice::ReadOnly)) {
-                QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
-                jsonFile.close();
-                
-                if (doc.isArray()) {
-                    m_questionBank->clear();
+        // 清空现有题库
+        m_questionBank->clear();
+        
+        // 递归扫描所有子目录中的.json文件（支持分层结构）
+        QStringList jsonFiles;
+        
+        // 先扫描根目录
+        jsonFiles.append(bankDir.entryList(QStringList() << "*.json", QDir::Files));
+        
+        // 再扫描所有子目录
+        QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString &subDir : subDirs) {
+            QDir subDirectory(questionBankPath + "/" + subDir);
+            QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
+            for (const QString &file : subFiles) {
+                jsonFiles.append(subDir + "/" + file);
+            }
+        }
+        
+        // 加载所有题目
+        if (!jsonFiles.isEmpty()) {
+            for (const QString &jsonFile : jsonFiles) {
+                QString filePath = questionBankPath + "/" + jsonFile;
+                QFile file(filePath);
+                if (file.open(QIODevice::ReadOnly)) {
+                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                    file.close();
                     
-                    QJsonArray questionsArray = doc.array();
-                    for (const QJsonValue &val : questionsArray) {
-                        m_questionBank->addQuestion(Question(val.toObject()));
-                    }
-                    
-                    if (m_questionBank->count() > 0) {
-                        m_currentQuestionIndex = qBound(0, questionIndex, m_questionBank->count() - 1);
-                        m_currentBankPath = questionBankPath;  // 记住当前题库路径
-                        m_questionListWidget->setQuestions(m_questionBank->allQuestions());
-                        loadCurrentQuestion();
-                        
-                        statusBar()->showMessage(
-                            QString("✅ 已恢复上次会话：%1 道题目，当前第 %2 题")
-                            .arg(m_questionBank->count())
-                            .arg(m_currentQuestionIndex + 1), 5000);
+                    if (doc.isObject()) {
+                        m_questionBank->addQuestion(Question(doc.object()));
                     }
                 }
             }
+            
+            if (m_questionBank->count() > 0) {
+                m_currentQuestionIndex = qBound(0, questionIndex, m_questionBank->count() - 1);
+                m_currentBankPath = questionBankPath;  // 记住当前题库路径
+                m_questionListWidget->setQuestions(m_questionBank->allQuestions());
+                loadCurrentQuestion();
+                
+                statusBar()->showMessage(
+                    QString("✅ 已恢复上次会话：%1 道题目，当前第 %2 题")
+                    .arg(m_questionBank->count())
+                    .arg(m_currentQuestionIndex + 1), 5000);
+            }
         } else {
-            // 题库文件不存在，清除会话
+            // 题库为空
             SessionManager::instance().clearSession();
-            statusBar()->showMessage("上次的题库已被删除，请重新导入题库", 5000);
+            statusBar()->showMessage("题库为空，请重新导入题库", 5000);
         }
     }
 }
