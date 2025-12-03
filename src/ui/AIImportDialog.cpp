@@ -136,21 +136,25 @@ void AIImportDialog::setupUI()
 
 void AIImportDialog::startImport()
 {
-    m_logText->append("🚀 开始导入流程...\n");
+    m_logText->clear();
+    m_logText->append("=== AI智能导入开始 ===\n\n");
     
     // 第一步：扫描文件
-    m_statusLabel->setText("📂 正在扫描文件...");
+    m_statusLabel->setText("步骤 1/3: 扫描文件");
     m_progressBar->setValue(10);
+    m_logText->append("[1/3] 📂 扫描目录中的文件...\n");
     scanFiles();
     
     // 第二步：发送给AI解析
     if (!m_fileContents.isEmpty()) {
-        m_statusLabel->setText("🤖 正在使用AI解析题目...");
+        m_statusLabel->setText("步骤 2/3: AI解析题目");
         m_progressBar->setValue(30);
+        m_logText->append("\n[2/3] 🤖 发送给AI进行智能解析...\n");
         sendToAI();
     } else {
-        m_logText->append("❌ 错误：未找到任何Markdown文件\n");
-        m_statusLabel->setText("导入失败");
+        m_logText->append("\n❌ 错误：未找到任何Markdown文件\n");
+        m_statusLabel->setText("❌ 导入失败：未找到文件");
+        m_progressBar->setValue(0);
         m_cancelBtn->setEnabled(false);
         m_closeBtn->setEnabled(true);
     }
@@ -158,16 +162,16 @@ void AIImportDialog::startImport()
 
 void AIImportDialog::scanFiles()
 {
-    m_logText->append(QString("📁 扫描目录: %1\n").arg(m_folderPath));
-    
     QDir dir(m_folderPath);
     QStringList filters;
     filters << "*.md" << "*.markdown" << "*.txt";
     
     QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
     
-    m_logText->append(QString("📄 找到 %1 个文件\n").arg(files.size()));
+    m_logText->append(QString("  目录: %1\n").arg(m_folderPath));
+    m_logText->append(QString("  找到 %1 个文件\n\n").arg(files.size()));
     
+    int totalChars = 0;
     for (const QFileInfo &fileInfo : files) {
         QFile file(fileInfo.absoluteFilePath());
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -178,6 +182,7 @@ void AIImportDialog::scanFiles()
             
             m_fileContents.append(content);
             m_fileNames.append(fileInfo.fileName());
+            totalChars += content.length();
             
             m_logText->append(QString("  ✓ %1 (%2 字符)\n")
                 .arg(fileInfo.fileName())
@@ -185,14 +190,17 @@ void AIImportDialog::scanFiles()
         }
     }
     
-    m_logText->append("\n");
+    m_logText->append(QString("\n  总计: %1 个文件, %2 字符\n")
+        .arg(files.size())
+        .arg(totalChars));
 }
 
 void AIImportDialog::sendToAI()
 {
     if (!m_aiClient) {
-        m_logText->append("❌ 错误：AI客户端未初始化\n");
-        m_statusLabel->setText("导入失败");
+        m_logText->append("\n❌ 错误：AI客户端未初始化\n");
+        m_statusLabel->setText("❌ 导入失败：AI未连接");
+        m_progressBar->setValue(0);
         m_cancelBtn->setEnabled(false);
         m_closeBtn->setEnabled(true);
         return;
@@ -200,9 +208,9 @@ void AIImportDialog::sendToAI()
     
     QString prompt = buildAIPrompt();
     
-    m_logText->append("🤖 正在发送给AI分析...\n");
-    m_logText->append(QString("📊 总字符数: %1\n").arg(prompt.length()));
-    m_logText->append("⏳ 请稍候，AI正在思考...\n\n");
+    m_logText->append(QString("  提示词长度: %1 字符\n").arg(prompt.length()));
+    m_logText->append("  正在发送请求...\n");
+    m_logText->append("  ⏳ AI正在分析，请稍候...\n");
     
     // 连接AI响应信号
     connect(m_aiClient, &OllamaClient::codeAnalysisReady, 
@@ -213,7 +221,7 @@ void AIImportDialog::sendToAI()
     // 发送请求
     m_aiClient->analyzeCode("", prompt);
     
-    m_progressBar->setValue(50);
+    m_progressBar->setValue(40);
 }
 
 QString AIImportDialog::buildAIPrompt()
@@ -306,12 +314,13 @@ QString AIImportDialog::buildAIPrompt()
 
 void AIImportDialog::onAIResponse(const QString &response)
 {
-    m_logText->append("✅ AI响应接收完成\n\n");
-    m_logText->append("📝 AI返回内容:\n");
-    m_logText->append(response.left(500) + "...\n\n");
+    m_logText->append("\n  ✓ AI响应接收完成\n");
+    m_logText->append(QString("  响应长度: %1 字符\n").arg(response.length()));
     
-    m_statusLabel->setText("🔍 正在解析AI响应...");
+    m_statusLabel->setText("步骤 3/3: 解析结果");
     m_progressBar->setValue(70);
+    
+    m_logText->append("\n[3/3] 🔍 解析AI返回的题目数据...\n");
     
     parseAIResponse(response);
 }
@@ -321,6 +330,8 @@ void AIImportDialog::parseAIResponse(const QString &response)
     // 提取JSON部分（AI可能返回额外的文字）
     QString jsonStr = response;
     
+    m_logText->append("  正在提取JSON数据...\n");
+    
     // 尝试找到JSON代码块
     int jsonStart = response.indexOf("```json");
     if (jsonStart >= 0) {
@@ -328,21 +339,27 @@ void AIImportDialog::parseAIResponse(const QString &response)
         int jsonEnd = response.indexOf("```", jsonStart);
         if (jsonEnd > jsonStart) {
             jsonStr = response.mid(jsonStart, jsonEnd - jsonStart).trimmed();
+            m_logText->append("  ✓ 找到JSON代码块\n");
         }
     } else {
         // 尝试找到 { 开始的JSON
         jsonStart = response.indexOf('{');
         if (jsonStart >= 0) {
             jsonStr = response.mid(jsonStart);
+            m_logText->append("  ✓ 找到JSON对象\n");
         }
     }
+    
+    m_progressBar->setValue(80);
     
     // 解析JSON
     QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
     
     if (doc.isNull() || !doc.isObject()) {
-        m_logText->append("❌ 错误：无法解析AI返回的JSON\n");
-        m_statusLabel->setText("解析失败");
+        m_logText->append("\n❌ 错误：无法解析AI返回的JSON格式\n");
+        m_logText->append("  可能原因：AI返回格式不正确或不完整\n");
+        m_statusLabel->setText("❌ 解析失败：JSON格式错误");
+        m_progressBar->setValue(0);
         m_cancelBtn->setEnabled(false);
         m_closeBtn->setEnabled(true);
         return;
@@ -351,14 +368,31 @@ void AIImportDialog::parseAIResponse(const QString &response)
     QJsonObject root = doc.object();
     QJsonArray questionsArray = root["questions"].toArray();
     
-    m_logText->append(QString("📚 解析到 %1 道题目\n\n").arg(questionsArray.size()));
+    if (questionsArray.isEmpty()) {
+        m_logText->append("\n❌ 错误：未找到任何题目\n");
+        m_statusLabel->setText("❌ 解析失败：未找到题目");
+        m_progressBar->setValue(0);
+        m_cancelBtn->setEnabled(false);
+        m_closeBtn->setEnabled(true);
+        return;
+    }
     
+    m_logText->append(QString("  ✓ 成功解析 %1 道题目\n\n").arg(questionsArray.size()));
+    m_progressBar->setValue(90);
+    
+    int successCount = 0;
     for (const QJsonValue &val : questionsArray) {
         QJsonObject qObj = val.toObject();
         
+        QString title = qObj["title"].toString();
+        if (title.isEmpty()) {
+            m_logText->append("  ⚠ 跳过：题目标题为空\n");
+            continue;
+        }
+        
         Question q;
-        q.setId(QString("q_%1").arg(qHash(qObj["title"].toString())));
-        q.setTitle(qObj["title"].toString());
+        q.setId(QString("q_%1").arg(qHash(title)));
+        q.setTitle(title);
         q.setDescription(qObj["description"].toString());
         
         // 解析难度
@@ -393,15 +427,22 @@ void AIImportDialog::parseAIResponse(const QString &response)
         q.setType(QuestionType::Code);
         
         m_questions.append(q);
+        successCount++;
         
-        m_logText->append(QString("  ✓ %1 [%2] - %3个测试用例\n")
-            .arg(q.title())
+        QString diffEmoji = (q.difficulty() == Difficulty::Easy) ? "🟢" : 
+                           (q.difficulty() == Difficulty::Hard) ? "🔴" : "🟡";
+        
+        m_logText->append(QString("  %1 %2 [%3] - %4个测试用例\n")
+            .arg(diffEmoji)
+            .arg(title)
             .arg(diffStr)
             .arg(testCases.size()));
     }
     
-    m_logText->append("\n✅ 导入完成！\n");
-    m_statusLabel->setText(QString("✅ 成功导入 %1 道题目").arg(m_questions.size()));
+    m_logText->append(QString("\n=== 导入完成 ===\n"));
+    m_logText->append(QString("成功导入: %1 道题目\n").arg(successCount));
+    
+    m_statusLabel->setText(QString("✅ 成功导入 %1 道题目").arg(successCount));
     m_progressBar->setValue(100);
     
     m_success = true;
@@ -413,8 +454,13 @@ void AIImportDialog::parseAIResponse(const QString &response)
 
 void AIImportDialog::onAIError(const QString &error)
 {
-    m_logText->append(QString("❌ AI错误: %1\n").arg(error));
-    m_statusLabel->setText("AI解析失败");
+    m_logText->append(QString("\n❌ AI错误: %1\n").arg(error));
+    m_logText->append("\n请检查：\n");
+    m_logText->append("  1. Ollama服务是否正在运行\n");
+    m_logText->append("  2. AI模型是否已下载\n");
+    m_logText->append("  3. 网络连接是否正常\n");
+    
+    m_statusLabel->setText("❌ AI解析失败");
     m_progressBar->setValue(0);
     
     m_cancelBtn->setEnabled(false);
