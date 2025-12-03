@@ -1,0 +1,28 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Default Config",
+      "description": "Default build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "F:/Qt/qt/6.10.0/mingw_64",
+        "Qt6_DIR": "F:/Qt/qt/6.10.0/mingw_64/lib/cmake/Qt6",
+        "CMAKE_CXX_COMPILER": "F:/Qt/qt/Tools/mingw1310_64/bin/g++.exe",
+        "CMAKE_C_COMPILER": "F:/Qt/qt/Tools/mingw1310_64/bin/gcc.exe"
+      },
+      "environment": {
+        "PATH": "F:/Qt/qt/6.10.0/mingw_64/bin;F:/Qt/qt/Tools/mingw1310_64/bin;F:/Qt/qt/Tools/Ninja;$penv{PATH}"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    }
+  ]
+}
