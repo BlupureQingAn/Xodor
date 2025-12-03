@@ -1,0 +1,53 @@
+{
+    "description": "在一个 n×m 的网格上，初始有 p 名员工。阴阳龙在位置 (u, v) 以强度 t 现身时，会根据规则改变员工位置：计算8个方向上员工到阴阳龙的距离和阴阳龙到边界的距离，取交集的最小正距离 k。若 k>0，则将距离为 k 的员工以阴阳龙为中心逆时针旋转 t×45°。经过 q 次阴阳龙现身后，计算所有员工位置的校验和：⊕(i * xi + yi)，其中 ⊕ 为按位异或。",
+    "difficulty": "hard",
+    "id": "31_13873667192833354962",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "几何",
+        "数据结构"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "3 3 9 1\n1 1\n1 2\n1 3\n2 1\n2 2\n2 3\n3 1\n3 2\n3 3\n2 2 1",
+            "isAIGenerated": false,
+            "output": "20"
+        },
+        {
+            "description": "基本测试：简单旋转",
+            "input": "5 5 2 1\n1 1\n5 5\n3 3 2",
+            "isAIGenerated": false,
+            "output": "30"
+        },
+        {
+            "description": "边界条件：最小网格，单员工",
+            "input": "1 1 1 1\n1 1\n1 1 1",
+            "isAIGenerated": false,
+            "output": "2"
+        },
+        {
+            "description": "边界条件：最大网格，单员工，最大强度",
+            "input": "1000000000 1000000000 1 1\n500000000 500000000\n1 1 7",
+            "isAIGenerated": true,
+            "output": "1500000000"
+        },
+        {
+            "description": "特殊情况：无阴阳龙现身",
+            "input": "10 10 5 0\n1 1\n2 2\n3 3\n4 4\n5 5",
+            "isAIGenerated": true,
+            "output": "62"
+        },
+        {
+            "description": "特殊情况：多次现身",
+            "input": "5 5 3 2\n1 1\n3 3\n5 5\n2 2 1\n4 4 3",
+            "isAIGenerated": true,
+            "output": "102"
+        }
+    ],
+    "title": "阴阳龙",
+    "type": "code"
+}

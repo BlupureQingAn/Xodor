@@ -1,0 +1,52 @@
+{
+    "description": "西西艾弗岛上共有 n 个仓库，依次编号为 1…n。每个仓库均有一个 m 维向量的位置编码。每个仓库 i 均可能有一个上级仓库 j，满足：仓库 j 位置编码的每一维均大于仓库 i 位置编码的对应元素。如果有多个仓库均满足该要求，则选取其中编号最小的仓库作为仓库 i 的上级仓库；如果没有仓库满足条件，则说明仓库 i 是一个物流中心，没有上级仓库。现给定 n 个仓库的位置编码，试计算每个仓库的上级仓库编号。",
+    "difficulty": "easy",
+    "id": "32_9132234930173549528",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数组",
+        "模拟"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "4 2\n0 0\n-1 -1\n1 2\n0 -1",
+            "isAIGenerated": false,
+            "output": "3\n1\n0\n3"
+        },
+        {
+            "description": "基本测试：一维情况",
+            "input": "3 1\n5\n3\n7",
+            "isAIGenerated": false,
+            "output": "0\n1\n0"
+        },
+        {
+            "description": "边界条件：只有一个仓库",
+            "input": "1 3\n1 2 3",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：所有维度相等，无上级",
+            "input": "2 2\n0 0\n0 0",
+            "isAIGenerated": true,
+            "output": "0\n0"
+        },
+        {
+            "description": "边界条件：输入值达到绝对值上限",
+            "input": "3 2\n-1000000 -1000000\n1000000 1000000\n-999999 -999999",
+            "isAIGenerated": true,
+            "output": "2\n0\n2"
+        },
+        {
+            "description": "特殊情况：链式上级关系",
+            "input": "3 2\n1 1\n2 2\n3 3",
+            "isAIGenerated": true,
+            "output": "2\n3\n0"
+        }
+    ],
+    "title": "仓库规划",
+    "type": "code"
+}

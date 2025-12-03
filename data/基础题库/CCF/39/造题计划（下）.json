@@ -1,0 +1,54 @@
+{
+    "description": "小 C 和小 F 在 n 天里造题和验题。小 C 每天上午造题，花费 a_i；小 F 每天下午验题，花费 b_i。每天每人最多处理一题。题目必须先造后验，且同一天可以造完后立即验。总精力值不能超过 m。求最多能完成多少题目（造+验）。\n\n输入格式：第一行 n, m，第二行 n 个正整数 a_i，第三行 n 个正整数 b_i。\n输出格式：一个整数，最多题目数。\n\n约束：1 ≤ n ≤ 5×10^5, 1 ≤ a_i, b_i ≤ 10^9, 1 ≤ m ≤ 10^18。",
+    "difficulty": "hard",
+    "id": "39_1695249473833284408",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "贪心",
+        "二分查找",
+        "排序",
+        "优化"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入，选择第1天造、第2天验和第4天造、第4天验",
+            "input": "5 12\n3 5 7 2 9\n4 2 8 3 7",
+            "isAIGenerated": false,
+            "output": "2"
+        },
+        {
+            "description": "基本测试：每天花费相同，最多完成2题（总花费1+1+2+2=6）",
+            "input": "3 10\n1 2 3\n1 2 3",
+            "isAIGenerated": false,
+            "output": "2"
+        },
+        {
+            "description": "边界条件：只有一天，但造题花费已超总精力，无法完成任何题",
+            "input": "1 5\n10\n20",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：精力足够，可以完成所有天数的题目（第1天造验，第2天造验）",
+            "input": "2 100\n1 1\n1 1",
+            "isAIGenerated": true,
+            "output": "2"
+        },
+        {
+            "description": "特殊情况：验题花费很高，只能完成一题（选择最小a_i和b_i组合）",
+            "input": "4 15\n5 5 5 5\n10 10 10 10",
+            "isAIGenerated": true,
+            "output": "1"
+        },
+        {
+            "description": "边界条件：极大精力值，计算最大可能题目数（需用long long）",
+            "input": "3 1000000000000000000\n1000000000 1000000000 1000000000\n1000000000 1000000000 1000000000",
+            "isAIGenerated": true,
+            "output": "166666666"
+        }
+    ],
+    "title": "造题计划（下）",
+    "type": "code"
+}

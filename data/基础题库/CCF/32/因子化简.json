@@ -1,0 +1,53 @@
+{
+    "description": "任意的正整数 n 都可以唯一地表示为若干素因子相乘的形式：n = p1^t1 × p2^t2 × … × pm^tm。设定一个阈值 k，如果某个素因子 pi 对应的指数 ti 小于 k，则认为该素因子不重要，可以将 pi^ti 项从 n 中除去；反之则将 pi^ti 项保留。最终剩余项的乘积就是 n 简化后的值，如果没有剩余项则认为简化后的值等于 1。试编写程序处理 q 个查询：每个查询包含两个正整数 n 和 k，要求计算按上述方法将 n 简化后的值。",
+    "difficulty": "medium",
+    "id": "32_9431802463865170235",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数学",
+        "数论",
+        "质因数分解"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "3\n2155895064 3\n2 2\n10000000000 10",
+            "isAIGenerated": false,
+            "output": "2238728\n1\n10000000000"
+        },
+        {
+            "description": "基本测试：12 = 2^2 * 3^1，除去2^2，保留3^1",
+            "input": "1\n12 2",
+            "isAIGenerated": false,
+            "output": "3"
+        },
+        {
+            "description": "边界条件：n=1",
+            "input": "1\n1 5",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "边界条件：k=1，所有因子都保留",
+            "input": "1\n10000000000 1",
+            "isAIGenerated": true,
+            "output": "10000000000"
+        },
+        {
+            "description": "特殊情况：完全幂次，8=2^3，指数等于k被保留；27=3^3，保留",
+            "input": "2\n8 3\n27 3",
+            "isAIGenerated": true,
+            "output": "1\n27"
+        },
+        {
+            "description": "特殊情况：大质数，指数1小于k=2，被除去，结果为1",
+            "input": "1\n999999937 2",
+            "isAIGenerated": true,
+            "output": "1"
+        }
+    ],
+    "title": "因子化简",
+    "type": "code"
+}

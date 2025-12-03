@@ -1,0 +1,48 @@
+{
+    "description": "给定一棵树，每个节点有收费 a_i（可负）。基本费用定义为：从根节点出发，游览一个包含根的连通区域，可能的最大花费（节点收费之和）。处理 m 次操作：1. 评估只开放某子树时的最大花费；2. 修改节点收费；3. 换根；4. 删边加边。每次操作后（除类型1外）需重新计算基本费用。输出初始及每次操作后的结果。",
+    "difficulty": "hard",
+    "id": "37_17643664404553439628",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "树",
+        "动态规划",
+        "数据结构",
+        "树链剖分"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入输出",
+            "input": "5 4\n-5 7 9 -3 1\n1 2\n1 4\n2 3\n4 5\n1 1\n3 2\n2 5 7\n4 5 4 1 5",
+            "isAIGenerated": false,
+            "output": "11\n16\n16\n16\n18"
+        },
+        {
+            "description": "基本测试：简单树，操作1和2",
+            "input": "3 2\n1 2 3\n1 2\n2 3\n1 1\n2 2 -10",
+            "isAIGenerated": false,
+            "output": "6\n6\n6"
+        },
+        {
+            "description": "边界条件：单节点树",
+            "input": "1 1\n100\n1 1",
+            "isAIGenerated": false,
+            "output": "100\n100"
+        },
+        {
+            "description": "特殊情况：所有收费为负，最大花费可能为单个节点（根）",
+            "input": "4 3\n-1 -2 -3 -4\n1 2\n2 3\n3 4\n3 4\n2 1 0\n4 2 3 1 4",
+            "isAIGenerated": true,
+            "output": "-1\n-1\n-1\n-1"
+        },
+        {
+            "description": "特殊情况：操作4改变树结构",
+            "input": "3 2\n5 0 5\n1 2\n1 3\n1 2\n4 1 2 2 3",
+            "isAIGenerated": true,
+            "output": "10\n5\n10"
+        }
+    ],
+    "title": "收费标准评估",
+    "type": "code"
+}

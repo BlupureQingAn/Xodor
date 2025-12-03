@@ -1,0 +1,52 @@
+{
+    "description": "给定二次函数 f(x) = x^2 + bx + c，其中 b 和 c 为整数。对于给定区间 [l, r]（l 和 r 为整数），选取闭区间内所有偶数坐标点：l ≤ x, x+2, x+4, ... ≤ r。分别计算每个坐标点的函数值并求和，再乘以坐标点间距 2，即计算 s = 2 × (f(x) + f(x+2) + f(x+4) + ...)。输出 s。",
+    "difficulty": "easy",
+    "id": "37_3012585583256180223",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数学",
+        "模拟"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1",
+            "input": "1 2 0 5",
+            "isAIGenerated": false,
+            "output": "64"
+        },
+        {
+            "description": "基本测试：样例2",
+            "input": "-20 -20 1 1000",
+            "isAIGenerated": false,
+            "output": "324294000"
+        },
+        {
+            "description": "边界条件：区间长度为0，只有一个点l=r=0，且为偶数",
+            "input": "0 0 0 0",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：区间内没有偶数点",
+            "input": "0 0 1 1",
+            "isAIGenerated": true,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：最大区间，b=c=0，计算所有偶数点平方和乘以2",
+            "input": "0 0 0 1000",
+            "isAIGenerated": true,
+            "output": "334334000"
+        },
+        {
+            "description": "特殊情况：包含负系数和正系数",
+            "input": "-20 20 0 10",
+            "isAIGenerated": true,
+            "output": "1060"
+        }
+    ],
+    "title": "数值积分",
+    "type": "code"
+}

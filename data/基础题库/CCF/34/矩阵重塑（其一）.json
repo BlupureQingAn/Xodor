@@ -1,0 +1,52 @@
+{
+    "description": "给定一个 n 行 m 列的矩阵，将其重塑为 p 行 q 列的矩阵。重塑操作要求元素总数不变，即 n*m = p*q。重塑过程为：先将原矩阵按行优先顺序线性化为一维数组，再按行优先顺序填充新矩阵。输入包含矩阵维度 n, m, p, q 和矩阵元素。输出重塑后的矩阵。",
+    "difficulty": "easy",
+    "id": "34_14199527796968495546",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数组",
+        "模拟"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：2x3重塑为3x2",
+            "input": "2 3 3 2\n1 2 3\n4 5 6",
+            "isAIGenerated": false,
+            "output": "1 2\n3 4\n5 6"
+        },
+        {
+            "description": "基本测试：2x2重塑为1x4",
+            "input": "2 2 1 4\n6 6\n6 6",
+            "isAIGenerated": false,
+            "output": "6 6 6 6"
+        },
+        {
+            "description": "边界条件：最小矩阵（1x1）",
+            "input": "1 1 1 1\n1000",
+            "isAIGenerated": false,
+            "output": "1000"
+        },
+        {
+            "description": "边界条件：最大元素数（10000），重塑为1x10000",
+            "input": "100 100 1 10000\n（此处省略100行，每行100个0）",
+            "isAIGenerated": true,
+            "output": "（此处为1行10000个0）"
+        },
+        {
+            "description": "特殊情况：包含负数元素",
+            "input": "2 2 4 1\n-1 -2\n-3 -4",
+            "isAIGenerated": true,
+            "output": "-1\n-2\n-3\n-4"
+        },
+        {
+            "description": "特殊情况：所有元素为零",
+            "input": "3 2 2 3\n0 0\n0 0\n0 0",
+            "isAIGenerated": true,
+            "output": "0 0 0\n0 0 0"
+        }
+    ],
+    "title": "矩阵重塑（其一）",
+    "type": "code"
+}

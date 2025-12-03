@@ -1,0 +1,53 @@
+{
+    "description": "有 n 个仓库，m 件货物。卖出货物 i 获得 a_i 现金，但调用仓库 j 需支付基本费用 b_j 和计件费用 c_j * k（k 为该仓库卖出货物数）。目标是净收益（总价值减总费用）至少为 v，求最小总费用。",
+    "difficulty": "hard",
+    "id": "34_4054539341558379775",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "动态规划",
+        "背包问题",
+        "贪心"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1",
+            "input": "2 3 15\n2 1\n3 2\n10 0\n20 1\n15 0",
+            "isAIGenerated": false,
+            "output": "4"
+        },
+        {
+            "description": "基本测试：样例2",
+            "input": "5 3 15\n2 1\n1 1\n3 2\n4 2\n1 5\n10 1\n10 1\n10 1",
+            "isAIGenerated": false,
+            "output": "3"
+        },
+        {
+            "description": "边界条件：单仓库单货物，必须选",
+            "input": "1 1 5\n10 5\n6 0",
+            "isAIGenerated": false,
+            "output": "15"
+        },
+        {
+            "description": "边界条件：多仓库，需组合达到目标",
+            "input": "3 5 100\n1 1\n1 1\n1 1\n20 0\n20 1\n20 2\n30 0\n30 0",
+            "isAIGenerated": true,
+            "output": "6"
+        },
+        {
+            "description": "特殊情况：v=0，可不选货物",
+            "input": "2 4 0\n0 1\n0 1\n5 0\n5 0\n5 1\n5 1",
+            "isAIGenerated": true,
+            "output": "0"
+        },
+        {
+            "description": "特殊情况：高价值货物，需支付高费用",
+            "input": "2 3 1000\n20 10\n30 20\n500 0\n400 0\n300 1",
+            "isAIGenerated": true,
+            "output": "70"
+        }
+    ],
+    "title": "货物调度",
+    "type": "code"
+}

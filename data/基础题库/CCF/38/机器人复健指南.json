@@ -1,0 +1,59 @@
+{
+    "description": "场地为 n×n 方格，机器人从 (x,y) 出发，每次移动按国际象棋中马的走法（横向或纵向移动 2 格，另一方向移动 1 格），且目标方格必须在场地内。求在 k 步内（包括 0 步）可以抵达的方格总数。输入第一行 n 和 k，第二行 x 和 y。输出一个整数。",
+    "difficulty": "medium",
+    "id": "38_1570554787237226829",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "广度优先搜索",
+        "图论",
+        "模拟"
+    ],
+    "testCases": [
+        {
+            "description": "样例 1：从 (1,1) 一步可跳到 (2,3) 和 (3,2)，加上起点共 3 个",
+            "input": "4 1\n1 1",
+            "isAIGenerated": false,
+            "output": "3"
+        },
+        {
+            "description": "样例 2",
+            "input": "4 2\n1 1",
+            "isAIGenerated": false,
+            "output": "8"
+        },
+        {
+            "description": "基本测试：场地 1×1，k=1，只能待在起点",
+            "input": "1 1\n1 1",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "基本测试：从中心出发，k=2 可覆盖所有格子",
+            "input": "3 2\n2 2",
+            "isAIGenerated": true,
+            "output": "9"
+        },
+        {
+            "description": "边界条件：k=0，只能抵达起点",
+            "input": "100 0\n50 50",
+            "isAIGenerated": true,
+            "output": "1"
+        },
+        {
+            "description": "边界条件：k 足够大，可覆盖整个场地",
+            "input": "100 100\n1 1",
+            "isAIGenerated": true,
+            "output": "10000"
+        },
+        {
+            "description": "特殊情况：从中心出发，一步可跳 8 个位置，加上起点共 9 个",
+            "input": "5 1\n3 3",
+            "isAIGenerated": true,
+            "output": "9"
+        }
+    ],
+    "title": "机器人复健指南",
+    "type": "code"
+}

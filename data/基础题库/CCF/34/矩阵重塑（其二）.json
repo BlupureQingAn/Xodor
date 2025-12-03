@@ -1,0 +1,53 @@
+{
+    "description": "给定初始矩阵，支持三种操作：1) 重塑为 p x q 矩阵；2) 转置矩阵；3) 查询第 i 行 j 列元素。依次处理 t 个操作，对每个查询输出结果。输入包含初始矩阵维度 n, m 和操作数 t，以及初始矩阵和操作序列。",
+    "difficulty": "medium",
+    "id": "34_14068615868825795297",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数组",
+        "模拟",
+        "数据结构"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：查询、重塑、再查询",
+            "input": "3 2 3\n1 2\n3 4\n5 6\n3 0 1\n1 2 3\n3 1 2",
+            "isAIGenerated": false,
+            "output": "2\n6"
+        },
+        {
+            "description": "基本测试：查询、转置、查询、重塑、查询",
+            "input": "3 2 5\n1 2\n3 4\n5 6\n3 1 0\n2 0 0\n3 1 0\n1 3 2\n3 1 0",
+            "isAIGenerated": false,
+            "output": "3\n2\n5"
+        },
+        {
+            "description": "边界条件：1x1矩阵，查询后转置（无输出）",
+            "input": "1 1 2\n0\n3 0 0\n2 0 0",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：最大维度查询",
+            "input": "100 100 1\n（此处省略100行，每行100个1）\n3 99 99",
+            "isAIGenerated": true,
+            "output": "1"
+        },
+        {
+            "description": "特殊情况：负数元素，转置和重塑操作",
+            "input": "2 2 4\n-1 -2\n-3 -4\n3 0 0\n2 0 0\n3 0 1\n1 4 1\n3 2 0",
+            "isAIGenerated": true,
+            "output": "-1\n-2\n-4"
+        },
+        {
+            "description": "特殊情况：重复元素，重塑为无效形状（但题目保证有效）",
+            "input": "2 3 3\n1 1 1\n1 1 1\n1 2 2\n3 0 0\n3 1 2",
+            "isAIGenerated": true,
+            "output": "1\n1"
+        }
+    ],
+    "title": "矩阵重塑（其二）",
+    "type": "code"
+}

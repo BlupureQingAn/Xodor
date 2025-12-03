@@ -1,0 +1,53 @@
+{
+    "description": "给定两篇文章的单词列表（忽略大小写），计算它们的 Jaccard 相似度所需的两部分：|A ∩ B|（交集大小）和 |A ∪ B|（并集大小）。\n\n输入格式：第一行两个正整数 n 和 m。第二行 n 个单词（第一篇文章）。第三行 m 个单词（第二篇文章）。\n输出格式：第一行输出 |A ∩ B|，第二行输出 |A ∪ B|。",
+    "difficulty": "easy",
+    "id": "33_6344225824534344188",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "字符串",
+        "集合",
+        "哈希表"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1，所有单词忽略大小写后相同",
+            "input": "3 2\nThe tHe thE\nthe THE",
+            "isAIGenerated": false,
+            "output": "1\n1"
+        },
+        {
+            "description": "基本测试：样例2，忽略大小写后交集为2，并集为13",
+            "input": "9 7\nPar les soirs bleus dete jirai dans les sentiers\nPICOTE PAR LES BLES FOULER LHERBE MENUE",
+            "isAIGenerated": false,
+            "output": "2\n13"
+        },
+        {
+            "description": "边界条件：单单词文章，无交集",
+            "input": "1 1\nhello\nworld",
+            "isAIGenerated": false,
+            "output": "0\n2"
+        },
+        {
+            "description": "边界条件：空输入，两篇文章都无单词",
+            "input": "0 0\n\n",
+            "isAIGenerated": true,
+            "output": "0\n0"
+        },
+        {
+            "description": "特殊情况：重复单词，交集为空，并集为{a, b}",
+            "input": "3 3\na a a\nb b b",
+            "isAIGenerated": true,
+            "output": "0\n2"
+        },
+        {
+            "description": "特殊情况：大小写混合，全部视为相同单词",
+            "input": "2 2\nHello hello\nHELLO HeLlO",
+            "isAIGenerated": true,
+            "output": "1\n1"
+        }
+    ],
+    "title": "相似度计算",
+    "type": "code"
+}

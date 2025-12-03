@@ -1,0 +1,53 @@
+{
+    "description": "给定平面上n个节点和m个基站，每个基站覆盖一个正方形区域，区域内节点可以相互通讯，延迟为t_i。求节点1到节点n的最短通讯延迟。若无法通讯，输出'Nan'。",
+    "difficulty": "medium",
+    "id": "35_4937198373865969368",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "图论",
+        "最短路",
+        "几何"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：两个节点不在同一基站覆盖范围内",
+            "input": "2 1\n0 0\n10 10\n5 5 5 1",
+            "isAIGenerated": false,
+            "output": "Nan"
+        },
+        {
+            "description": "基本测试：两个节点在同一基站覆盖范围内",
+            "input": "2 1\n0 0\n1 1\n0 0 2 5",
+            "isAIGenerated": false,
+            "output": "5"
+        },
+        {
+            "description": "样例测试：多节点多基站",
+            "input": "5 5\n0 0\n2 4\n4 0\n5 3\n5 5\n1 2 2 5\n3 5 2 6\n2 0 2 1\n4 2 2 3\n5 4 1 2",
+            "isAIGenerated": false,
+            "output": "6"
+        },
+        {
+            "description": "边界条件：只有一个节点，延迟为0",
+            "input": "1 1\n0 0\n0 0 1 10",
+            "isAIGenerated": true,
+            "output": "0"
+        },
+        {
+            "description": "特殊情况：通过多个基站中转",
+            "input": "3 2\n0 0\n5 5\n10 10\n0 0 6 3\n5 5 6 4",
+            "isAIGenerated": true,
+            "output": "7"
+        },
+        {
+            "description": "特殊情况：基站覆盖范围小，无法连接所有节点",
+            "input": "3 1\n0 0\n1 1\n2 2\n0 0 1 5",
+            "isAIGenerated": true,
+            "output": "Nan"
+        }
+    ],
+    "title": "通讯延迟 (Communication Delay)",
+    "type": "code"
+}

@@ -1,0 +1,53 @@
+{
+    "description": "给定初始字符串s和字符替换函数f（由n个字符对定义，f为单射），处理m个查询，每个查询包含一个正整数k，要求输出对s进行k次变换后的结果F^k(s)。未定义的f(ch)视为f(ch)=ch。",
+    "difficulty": "medium",
+    "id": "35_12942839771827097660",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "字符串",
+        "模拟",
+        "数学"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：简单替换，k=1",
+            "input": "#abc#\n2\n#ab#\n#bc#\n1\n1",
+            "isAIGenerated": false,
+            "output": "#bcc#"
+        },
+        {
+            "description": "基本测试：简单替换，k=2",
+            "input": "#abc#\n2\n#ab#\n#bc#\n1\n2",
+            "isAIGenerated": false,
+            "output": "#ccc#"
+        },
+        {
+            "description": "样例测试：包含空格和大小写字母",
+            "input": "#Hello World#\n6\n#HH#\n#e #\n# r#\n#re#\n#oa#\n#ao#\n3\n1 2 3",
+            "isAIGenerated": false,
+            "output": "#H llarWaeld#\n#HrlloeWo ld#\n#Hella Warld#"
+        },
+        {
+            "description": "边界条件：无替换规则，k极大",
+            "input": "#a#\n0\n1\n1000000000",
+            "isAIGenerated": true,
+            "output": "#a#"
+        },
+        {
+            "description": "特殊情况：循环替换，周期为3",
+            "input": "#abc#\n3\n#ab#\n#bc#\n#ca#\n1\n5",
+            "isAIGenerated": true,
+            "output": "#abc#"
+        },
+        {
+            "description": "边界条件：k=0，应返回原字符串",
+            "input": "#123#\n2\n#12#\n#23#\n1\n0",
+            "isAIGenerated": true,
+            "output": "#123#"
+        }
+    ],
+    "title": "字符串变换 (String Transformation)",
+    "type": "code"
+}

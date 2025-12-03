@@ -1,0 +1,52 @@
+{
+    "description": "对于平面直角坐标系上的坐标 (x, y)，给定一个包含 n 个平移操作的序列 T = (t1, t2, ..., tn)，每个操作 ti 包含两个参数 dxi 和 dyi，表示将坐标 (x, y) 平移至 (x + dxi, y + dyi) 处。现给定 m 个初始坐标，试计算对每个坐标 (xj, yj) 依次进行 T 中 n 个操作后的最终坐标。",
+    "difficulty": "easy",
+    "id": "31_16733555202665192015",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "数学"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "3 2\n10 10\n0 0\n10 -20\n1 -1\n0 0",
+            "isAIGenerated": false,
+            "output": "21 -11\n20 -10"
+        },
+        {
+            "description": "基本测试：单次操作",
+            "input": "1 1\n5 -3\n0 0",
+            "isAIGenerated": false,
+            "output": "5 -3"
+        },
+        {
+            "description": "基本测试：多个坐标",
+            "input": "2 2\n1 2\n3 4\n0 0\n10 10",
+            "isAIGenerated": false,
+            "output": "4 6\n14 16"
+        },
+        {
+            "description": "边界条件：无操作",
+            "input": "0 3\n0 0\n1 1\n-1 -1",
+            "isAIGenerated": true,
+            "output": "0 0\n1 1\n-1 -1"
+        },
+        {
+            "description": "边界条件：最大操作数，简单重复",
+            "input": "100 1\n1 0\n1 0\n... (重复100次)\n0 0",
+            "isAIGenerated": true,
+            "output": "100 0"
+        },
+        {
+            "description": "特殊情况：大数抵消",
+            "input": "1 1\n-100000 100000\n100000 -100000",
+            "isAIGenerated": true,
+            "output": "0 0"
+        }
+    ],
+    "title": "坐标变换（其一）",
+    "type": "code"
+}

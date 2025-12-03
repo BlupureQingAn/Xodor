@@ -1,0 +1,53 @@
+{
+    "description": "实现patch程序，将补丁应用到原文件。补丁由多个块组成，每个块描述原文件和新文件的差异。需要检查补丁合法性，并在应用时处理可能的行号偏移（δ）。若补丁损坏，输出'Patch is damaged.'。",
+    "difficulty": "hard",
+    "id": "35_9881891002921186780",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "字符串",
+        "模拟",
+        "文件处理"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：单块补丁，添加一行",
+            "input": "5\na\nb\nc\nd\ne\n@@ -2,2 +2,3 @@\n b\n+c\n d",
+            "isAIGenerated": false,
+            "output": "a\nb\nc\nd\ne"
+        },
+        {
+            "description": "基本测试：单块补丁，删除一行",
+            "input": "3\nx\ny\nz\n@@ -1,2 +1,1 @@\n-x\n y",
+            "isAIGenerated": false,
+            "output": "y\nz"
+        },
+        {
+            "description": "样例测试：多块补丁",
+            "input": "7\nbbb\na\n1\n2\n3\n4\n5\ndummy\n@@ -1,4 +1,5 @@\n-a\n+b\n 1\n+c\n 2\n 3\n@@ -6,2 +6,2 @@\n-4\n+6\n 5",
+            "isAIGenerated": false,
+            "output": "bbb\nb\n1\nc\n2\n3\n6\n5"
+        },
+        {
+            "description": "边界条件：单块补丁，修改一行",
+            "input": "2\nline1\nline2\n@@ -1,2 +1,2 @@\n line1\n-line2\n+line3",
+            "isAIGenerated": true,
+            "output": "line1\nline3"
+        },
+        {
+            "description": "特殊情况：删除所有行",
+            "input": "1\ntest\n@@ -1,1 +1,0 @@\n-test",
+            "isAIGenerated": true,
+            "output": ""
+        },
+        {
+            "description": "特殊情况：补丁损坏，无法匹配原文件内容",
+            "input": "3\na\nb\nc\n@@ -2,2 +2,2 @@\n x\n y",
+            "isAIGenerated": true,
+            "output": "Patch is damaged."
+        }
+    ],
+    "title": "补丁应用 (Patch Application)",
+    "type": "code"
+}
