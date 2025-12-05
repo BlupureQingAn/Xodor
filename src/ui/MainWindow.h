@@ -7,7 +7,8 @@
 #include "QuestionPanel.h"
 #include "CodeEditor.h"
 #include "AIAssistantPanel.h"
-#include "QuestionListWidget.h"
+#include "AIJudgeProgressDialog.h"
+#include "QuestionBankPanel.h"
 #include "PracticeWidget.h"
 #include "../core/QuestionBank.h"
 #include "../core/CompilerRunner.h"
@@ -37,6 +38,8 @@ private slots:
     void onShowHistory();
     void onShowWrongBook();
     void onShowCodeVersionHistory();
+    void onFixTestCases();  // 修复测试用例
+    void onBatchFixTestCases();  // 批量修复测试用例
     void onToggleAIAssistant();
     void onSwitchToQuestionList();  // 切换到题库列表
     void onSwitchToPracticeMode();  // 切换到刷题模式
@@ -44,11 +47,22 @@ private slots:
     void onAbout();
     void onInsertTemplate(const QString &templateName);
     
+    // 撤销/重做
+    void onUndo();
+    void onRedo();
+    void onShowOperationHistory();
+    
     // 题目操作
     void onRunTests();
+    void onAIJudgeRequested();  // AI判题
+    void onAIJudgeCompleted(bool passed, const QString &comment, const QVector<int> &failedTestCases);
+    void onAIJudgeError(const QString &error);
     void onNextQuestion();
     void onPreviousQuestion();
     void onQuestionSelectedFromList(int index);
+    void onQuestionFileSelected(const QString &filePath, const Question &question);
+    void onBankSelectedFromPanel(const QString &bankPath);
+    void onRefreshCurrentBank();  // 刷新当前题库
     
     // AI操作
     void onRequestAnalysis();
@@ -71,6 +85,7 @@ private:
     void loadConfiguration();
     void loadCurrentQuestion();
     void loadSavedCode(const QString &questionId);
+    QString loadSavedCodeForQuestion(const QString &questionId);
     void saveQuestionBank();
     QString generateDefaultCode(const Question &question);
     void showTestResults(const QVector<TestResult> &results);
@@ -80,14 +95,14 @@ private:
     void importQuestionsFromPath(const QString &path);
     void checkAIConnection();
     void showAIConnectionStatus(const AIConnectionStatus &status);
-    void checkAndSelectModel();
+    void showAIConfigDialog(const AIConnectionStatus &status);
     
     // UI组件
     QSplitter *m_mainSplitter;
     QuestionPanel *m_questionPanel;
     CodeEditor *m_codeEditor;
     AIAssistantPanel *m_aiAssistantPanel;
-    QuestionListWidget *m_questionListWidget;
+    QuestionBankPanel *m_questionBankPanel;
     PracticeWidget *m_practiceWidget;
     QWidget *m_normalModeWidget;
     QStackedWidget *m_stackedWidget;
@@ -99,11 +114,16 @@ private:
     OllamaClient *m_ollamaClient;
     CompilerRunner *m_compilerRunner;
     CodeVersionManager *m_versionManager;
+    class AIJudge *m_aiJudge;
+    
+    // UI组件
+    AIJudgeProgressDialog *m_aiJudgeProgressDialog;
     
     // 状态
     int m_currentQuestionIndex;
     QString m_lastImportPath;
     QString m_currentBankPath;  // 当前题库路径
+    AIConnectionStatus m_lastAIStatus;  // 最后一次AI连接状态
 };
 
 #endif // MAINWINDOW_H

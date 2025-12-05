@@ -1,19 +1,36 @@
 cmake_minimum_required(VERSION 3.16)
 project(CodePracticeSystem VERSION 1.0.0 LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 支持中文字符编译
+# ============================================
+# UTF-8编码配置 - 支持中文字符编译
+# ============================================
+# 确保源文件、编译器输出、运行时都使用UTF-8编码
+
+# 设置CMake使用UTF-8
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexec-charset=UTF-8")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexec-charset=UTF-8")
+
 if(MSVC)
     # MSVC 编译器
-    add_compile_options(/utf-8)
-    add_compile_options(/source-charset:utf-8)
-    add_compile_options(/execution-charset:utf-8)
+    add_compile_options(/utf-8)  # 源文件和执行字符集都使用UTF-8
+    add_compile_options(/Zc:__cplusplus)  # 正确报告C++版本
+    add_compile_definitions(_UNICODE UNICODE)
 elseif(MINGW OR CMAKE_COMPILER_IS_GNUCXX)
     # MinGW/GCC 编译器
-    add_compile_options(-finput-charset=UTF-8)
-    add_compile_options(-fexec-charset=UTF-8)
+    add_compile_options(-finput-charset=UTF-8)  # 源文件编码
+    add_compile_options(-fexec-charset=UTF-8)   # 执行字符集
+    add_compile_options(-fwide-exec-charset=UTF-8)  # 宽字符集
+    
+    # 确保字符串字面量使用UTF-8
+    add_compile_definitions(_UNICODE UNICODE)
+    
+    # 链接器选项 - 支持UTF-8
+    add_link_options(-municode)
 endif()
 
 # Qt 自动化工具
@@ -42,20 +59,24 @@ set(SOURCES
     src/ui/AIAnalysisPanel.cpp
     src/ui/ImportDialog.cpp
     src/ui/HistoryWidget.cpp
-    src/ui/QuestionListWidget.cpp
+    src/ui/QuestionBankPanel.cpp
+    src/ui/QuestionBankTreeWidget.cpp
     src/ui/StyleManager.cpp
     src/ui/ModernTheme.cpp
     src/ui/WrongQuestionWidget.cpp
     src/ui/SettingsDialog.cpp
     src/ui/OriginalQuestionDialog.cpp
     src/ui/PracticeWidget.cpp
+    src/ui/PracticeStatsPanel.cpp
     src/ui/AIImportDialog.cpp
     src/ui/QuestionBankManagerDialog.cpp
     src/ui/SmartImportDialog.cpp
     src/ui/ExamGeneratorDialog.cpp
     src/ui/CodeVersionDialog.cpp
     src/ui/AIAssistantPanel.cpp
+    src/ui/AIJudgeProgressDialog.cpp
     src/ui/ChatBubbleDelegate.cpp
+    src/ui/ChatBubbleWidget.cpp
     src/ui/ChatHistoryDialog.cpp
     src/ui/ErrorListWidget.cpp
     src/ui/MockExamManagerDialog.cpp
@@ -82,7 +103,13 @@ set(SOURCES
     src/ai/AIAssistant.cpp
     src/ai/MockExamGenerator.cpp
     src/ai/TestDataGenerator.cpp
+    src/ai/TestCaseFixer.cpp
+    src/ai/AIJudge.cpp
+    src/ui/TestCaseFixerDialog.cpp
+    src/ui/BatchTestCaseFixerDialog.cpp
+    src/ui/QuestionEditorDialog.cpp
     src/utils/FileManager.cpp
+    src/utils/OperationHistory.cpp
     src/utils/ConfigManager.cpp
     src/utils/CompilerDetector.cpp
     src/utils/SessionManager.cpp
@@ -92,6 +119,7 @@ set(SOURCES
     src/utils/AIConnectionChecker.cpp
     src/utils/AutoSaveManager.cpp
     src/utils/SyntaxChecker.cpp
+    src/utils/FileUtils.cpp
 )
 
 # 头文件
@@ -102,7 +130,8 @@ set(HEADERS
     src/ui/AIAnalysisPanel.h
     src/ui/ImportDialog.h
     src/ui/HistoryWidget.h
-    src/ui/QuestionListWidget.h
+    src/ui/QuestionBankPanel.h
+    src/ui/QuestionBankTreeWidget.h
     src/ui/StyleManager.h
     src/ui/WrongQuestionWidget.h
     src/ui/SettingsDialog.h
@@ -114,9 +143,15 @@ set(HEADERS
     src/ui/ExamGeneratorDialog.h
     src/ui/CodeVersionDialog.h
     src/ui/AIAssistantPanel.h
+    src/ui/AIJudgeProgressDialog.h
     src/ui/ChatBubbleDelegate.h
     src/ui/ChatHistoryDialog.h
     src/ui/ErrorListWidget.h
+    src/ui/TestCaseFixerDialog.h
+    src/ui/BatchTestCaseFixerDialog.h
+    src/ui/QuestionEditorDialog.h
+    src/ai/TestCaseFixer.h
+    src/utils/OperationHistory.h
     src/ui/MockExamManagerDialog.h
     src/ui/ExamReportDialog.h
     src/core/QuestionBank.h
@@ -183,7 +218,19 @@ if(WIN32)
     )
 endif()
 
+# 智能复制数据文件到构建目录（不覆盖用户数据）
+# 使用自定义脚本，只复制模板文件，保护用户数据
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} 
+        -DSOURCE_DIR="${CMAKE_SOURCE_DIR}/data"
+        -DBUILD_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>/data"
+        -P "${CMAKE_SOURCE_DIR}/cmake/copy_data_if_needed.cmake"
+    COMMENT "Syncing data files (preserving user data)..."
+)
+
 # 输出信息
 message(STATUS "Qt6 found: ${Qt6_DIR}")
 message(STATUS "QScintilla library: ${QSCINTILLA_LIBRARY}")
 message(STATUS "QScintilla include: ${QSCINTILLA_INCLUDE_DIR}")
+message(STATUS "Data files will be copied from: ${CMAKE_SOURCE_DIR}/data")
+message(STATUS "Data files will be copied to: build/data")

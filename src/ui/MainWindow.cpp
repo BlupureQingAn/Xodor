@@ -1602,21 +1602,15 @@ void MainWindow::onAIJudgeRequested()
     
     // 显示进度对话框
     if (!m_aiJudgeProgressDialog) {
-        m_aiJudgeProgressDialog = new QProgressDialog(this);
-        m_aiJudgeProgressDialog->setWindowTitle("AI判题中");
-        m_aiJudgeProgressDialog->setLabelText("正在分析代码...");
-        m_aiJudgeProgressDialog->setRange(0, 0);  // 不确定进度
-        m_aiJudgeProgressDialog->setModal(true);
-        m_aiJudgeProgressDialog->setCancelButton(nullptr);  // 不允许取消
-        m_aiJudgeProgressDialog->setMinimumWidth(300);
-        m_aiJudgeProgressDialog->setMinimumHeight(120);
+        m_aiJudgeProgressDialog = new AIJudgeProgressDialog(this);
     }
+    
+    m_aiJudgeProgressDialog->setMessage("正在分析代码逻辑...");
     
     // 手动居中对话框
     QRect parentRect = this->geometry();
-    QSize dialogSize = m_aiJudgeProgressDialog->sizeHint();
-    int x = parentRect.x() + (parentRect.width() - dialogSize.width()) / 2;
-    int y = parentRect.y() + (parentRect.height() - dialogSize.height()) / 2;
+    int x = parentRect.x() + (parentRect.width() - m_aiJudgeProgressDialog->width()) / 2;
+    int y = parentRect.y() + (parentRect.height() - m_aiJudgeProgressDialog->height()) / 2;
     m_aiJudgeProgressDialog->move(x, y);
     
     m_aiJudgeProgressDialog->show();
