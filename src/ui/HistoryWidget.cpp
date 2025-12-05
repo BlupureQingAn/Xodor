@@ -8,6 +8,10 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QDir>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 HistoryWidget::HistoryWidget(QWidget *parent)
     : QWidget(parent)
@@ -165,11 +169,21 @@ void HistoryWidget::loadHistory()
         // 题目ID
         m_historyTable->setItem(row, 0, new QTableWidgetItem(questionId));
         
-        // 题目标题（从进度记录中获取）
+        // 题目标题（从进度记录中获取，如果为空则尝试从文件加载）
         QString title = record.questionTitle;
         if (title.isEmpty()) {
-            title = questionId;  // 如果没有标题，显示ID
-            qDebug() << "[HistoryWidget] WARNING: No title for question" << questionId;
+            // 尝试从题库文件中读取标题
+            title = loadQuestionTitleFromFile(questionId);
+            
+            if (!title.isEmpty()) {
+                // 找到标题后，更新进度记录
+                pm.setQuestionTitle(questionId, title);
+                qDebug() << "[HistoryWidget] Loaded and saved title for question" << questionId << ":" << title;
+            } else {
+                // 如果还是找不到，使用ID
+                title = questionId;
+                qDebug() << "[HistoryWidget] WARNING: No title found for question" << questionId;
+            }
         }
         m_historyTable->setItem(row, 1, new QTableWidgetItem(title));
         
@@ -229,4 +243,70 @@ void HistoryWidget::loadHistory()
     if (m_historyTable->rowCount() == 0) {
         QMessageBox::information(this, "提示", "暂无做题历史记录");
     }
+}
+
+QString HistoryWidget::loadQuestionTitleFromFile(const QString &questionId)
+{
+    // 尝试从当前题库中查找题目文件
+    QuestionBankManager &qbm = QuestionBankManager::instance();
+    QString currentBankId = qbm.getCurrentBankId();
+    
+    if (currentBankId.isEmpty()) {
+        return QString();
+    }
+    
+    // 获取题库路径
+    QString bankPath = qbm.getBankStoragePath(currentBankId);
+    if (bankPath.isEmpty()) {
+        return QString();
+    }
+    
+    // 尝试查找题目文件（可能在根目录或子目录中）
+    QDir bankDir(bankPath);
+    if (!bankDir.exists()) {
+        return QString();
+    }
+    
+    // 递归搜索所有.json文件
+    QStringList jsonFiles;
+    
+    // 先搜索根目录
+    QStringList rootFiles = bankDir.entryList(QStringList() << "*.json", QDir::Files);
+    for (const QString &file : rootFiles) {
+        jsonFiles.append(bankPath + "/" + file);
+    }
+    
+    // 再搜索子目录
+    QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString &subDir : subDirs) {
+        QDir subDirectory(bankPath + "/" + subDir);
+        QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
+        for (const QString &file : subFiles) {
+            jsonFiles.append(bankPath + "/" + subDir + "/" + file);
+        }
+    }
+    
+    // 在所有文件中查找匹配的题目ID
+    for (const QString &filePath : jsonFiles) {
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadOnly)) {
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            file.close();
+            
+            if (doc.isObject()) {
+                QJsonObject obj = doc.object();
+                QString fileQuestionId = obj["id"].toString();
+                
+                if (fileQuestionId == questionId) {
+                    // 找到匹配的题目，返回标题
+                    QString title = obj["title"].toString();
+                    if (!title.isEmpty()) {
+                        return title;
+                    }
+                }
+            }
+        }
+    }
+    
+    return QString();
 }

@@ -16,6 +16,7 @@ private slots:
     
 private:
     void setupUI();
+    QString loadQuestionTitleFromFile(const QString &questionId);
     
     QTableWidget *m_historyTable;
     QLabel *m_totalLabel;
