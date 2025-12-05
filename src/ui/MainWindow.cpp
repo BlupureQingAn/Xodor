@@ -1815,7 +1815,10 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
     // 2. 加载题目到面板
     m_questionPanel->setQuestion(question);
     
-    // 3. 设置新题目ID到代码编辑器
+    // 3. 保存题目标题到进度管理器（用于历史记录显示）
+    ProgressManager::instance().setQuestionTitle(question.id(), question.title());
+    
+    // 4. 设置新题目ID到代码编辑器
     if (m_codeEditor) {
         qDebug() << "[MainWindow] Setting question ID to editor:" << question.id();
         m_codeEditor->setQuestionId(question.id());

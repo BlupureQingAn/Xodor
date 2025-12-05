@@ -15,6 +15,7 @@ enum class QuestionStatus {
 // 单个题目的进度记录
 struct QuestionProgressRecord {
     QString questionId;
+    QString questionTitle;      // 题目标题（用于显示）
     QuestionStatus status;
     int attemptCount;           // 尝试次数
     int correctCount;           // 正确次数
@@ -22,10 +23,16 @@ struct QuestionProgressRecord {
     QDateTime firstAttemptTime; // 首次尝试时间
     QString lastCode;           // 最后提交的代码
     
+    // AI判定相关
+    bool aiJudgePassed;         // AI判定是否通过
+    QDateTime aiJudgeTime;      // AI判定时间
+    QString aiJudgeComment;     // AI判定评语
+    
     QuestionProgressRecord()
         : status(QuestionStatus::NotStarted)
         , attemptCount(0)
         , correctCount(0)
+        , aiJudgePassed(false)
     {}
     
     QJsonObject toJson() const;
