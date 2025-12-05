@@ -156,12 +156,10 @@ void HistoryWidget::loadHistory()
         // 题目ID
         m_historyTable->setItem(row, 0, new QTableWidgetItem(questionId));
         
-        // 题目标题（从题库管理器获取）
-        QString title = "未知题目";
-        Question question = qbm.findQuestionById(questionId);
-        if (!question.id().isEmpty()) {
-            title = question.title();
-        }
+        // 题目标题（从进度记录中获取，如果有的话）
+        QString title = questionId;  // 默认显示ID
+        // 注意：这里无法直接获取题目标题，因为需要加载题库
+        // 可以考虑在ProgressManager中保存题目标题
         m_historyTable->setItem(row, 1, new QTableWidgetItem(title));
         
         // 状态
