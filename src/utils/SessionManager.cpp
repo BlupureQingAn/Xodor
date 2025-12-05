@@ -44,6 +44,13 @@ QJsonObject SessionState::toJson() const
     json["expandedBankPaths"] = expandedArray;
     json["selectedQuestionPath"] = selectedQuestionPath;
     
+    // 难度筛选状态
+    QJsonArray difficultyArray;
+    for (int difficulty : activeDifficultyFilters) {
+        difficultyArray.append(difficulty);
+    }
+    json["activeDifficultyFilters"] = difficultyArray;
+    
     // 窗口状态
     json["windowGeometry"] = QString(windowGeometry.toBase64());
     json["windowState"] = QString(windowState.toBase64());
@@ -91,6 +98,14 @@ SessionState SessionState::fromJson(const QJsonObject &json)
         }
     }
     state.selectedQuestionPath = json["selectedQuestionPath"].toString();
+    
+    // 难度筛选状态
+    if (json.contains("activeDifficultyFilters")) {
+        QJsonArray difficultyArray = json["activeDifficultyFilters"].toArray();
+        for (const QJsonValue &value : difficultyArray) {
+            state.activeDifficultyFilters.append(value.toInt());
+        }
+    }
     
     // 窗口状态
     if (json.contains("windowGeometry")) {
@@ -450,4 +465,27 @@ bool SessionManager::loadPanelState(QStringList &expandedPaths, QString &selecte
     expandedPaths = state.expandedBankPaths;
     selectedQuestionPath = state.selectedQuestionPath;
     return !expandedPaths.isEmpty() || !selectedQuestionPath.isEmpty();
+}
+
+void SessionManager::saveDifficultyFilters(const QList<int> &filters)
+{
+    SessionState state = loadSessionState();
+    state.activeDifficultyFilters = filters;
+    state.lastSaved = QDateTime::currentDateTime();
+    saveSessionState(state);
+    
+    qDebug() << "[SessionManager] Saved difficulty filters:" << filters;
+}
+
+QList<int> SessionManager::loadDifficultyFilters()
+{
+    SessionState state = loadSessionState();
+    
+    // 如果没有保存的筛选，默认返回所有难度
+    if (state.activeDifficultyFilters.isEmpty()) {
+        return QList<int>() << 0 << 1 << 2;  // Easy, Medium, Hard
+    }
+    
+    qDebug() << "[SessionManager] Loaded difficulty filters:" << state.activeDifficultyFilters;
+    return state.activeDifficultyFilters;
 }

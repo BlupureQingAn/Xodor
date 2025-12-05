@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include <QCheckBox>
+#include <QSet>
 #include "../core/Question.h"
 
 class QuestionBankTreeWidget;
@@ -28,6 +30,10 @@ public:
     void restoreExpandedPaths(const QStringList &paths);
     QString getSelectedQuestionPath() const;
     
+    // 获取和恢复难度筛选状态
+    QSet<Difficulty> getActiveDifficultyFilters() const;
+    void restoreDifficultyFilters(const QSet<Difficulty> &filters);
+    
 public slots:
     void updateQuestionStatus(const QString &questionId);
 
@@ -42,13 +48,21 @@ private slots:
     void onSearchTextChanged(const QString &text);
     void onQuestionSelected(const QString &filePath, const Question &question);
     void onBankSelected(const QString &bankPath);
+    void onDifficultyFilterChanged();
     
 private:
     void setupUI();
+    void applyFilters();
     
     // UI组件
     QLineEdit *m_searchEdit;
     QuestionBankTreeWidget *m_treeWidget;
+    QCheckBox *m_easyCheckBox;
+    QCheckBox *m_mediumCheckBox;
+    QCheckBox *m_hardCheckBox;
+    
+    // 筛选状态
+    QSet<Difficulty> m_activeDifficultyFilters;
 };
 
 #endif // QUESTIONBANKPANEL_H

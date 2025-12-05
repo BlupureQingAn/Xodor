@@ -565,11 +565,19 @@ void MainWindow::setupConnections()
             }
         }
         
-        // 8. 保存题库面板状态
+        // 8. 保存题库面板状态（包括难度筛选）
         if (m_questionBankPanel) {
             QStringList expandedPaths = m_questionBankPanel->getExpandedPaths();
             QString selectedPath = m_questionBankPanel->getSelectedQuestionPath();
             SessionManager::instance().savePanelState(expandedPaths, selectedPath);
+            
+            // 保存难度筛选状态
+            QSet<Difficulty> filters = m_questionBankPanel->getActiveDifficultyFilters();
+            QList<int> filterList;
+            for (Difficulty d : filters) {
+                filterList.append(static_cast<int>(d));
+            }
+            SessionManager::instance().saveDifficultyFilters(filterList);
         }
         
         statusBar()->showMessage(QString("已选择题目: %1").arg(question.title()), 3000);
@@ -745,6 +753,15 @@ void MainWindow::loadLastSession()
                     }
                     qDebug() << "[MainWindow] Restored panel state - Expanded:" << expandedPaths.size() << "Selected:" << selectedQuestionPath;
                 }
+                
+                // 恢复难度筛选状态
+                QList<int> filterList = SessionManager::instance().loadDifficultyFilters();
+                QSet<Difficulty> filters;
+                for (int f : filterList) {
+                    filters.insert(static_cast<Difficulty>(f));
+                }
+                m_questionBankPanel->restoreDifficultyFilters(filters);
+                qDebug() << "[MainWindow] Restored difficulty filters:" << filters.size();
                 
                 // 优先使用题目ID查找题目
                 bool foundById = false;

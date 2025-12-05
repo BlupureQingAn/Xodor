@@ -159,6 +159,12 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
         
         // 加载题目以获取ID和状态
         Question question = loadQuestionFromFile(filePath);
+        
+        // 应用难度筛选
+        if (!shouldShowQuestion(question)) {
+            continue;  // 跳过不符合筛选条件的题目
+        }
+        
         QString statusIcon = getQuestionStatusIcon(question.id());
         
         // 创建题目节点
@@ -773,4 +779,26 @@ void QuestionBankTreeWidget::onDeleteBank()
         refreshTree();
         QMessageBox::information(this, "成功", "题库已删除\n\n按 Ctrl+Z 可撤销此操作");
     }
+}
+
+
+void QuestionBankTreeWidget::setDifficultyFilter(const QSet<Difficulty> &difficulties)
+{
+    m_difficultyFilter = difficulties;
+    
+    qDebug() << "[QuestionBankTreeWidget] Difficulty filter set. Active filters:" << m_difficultyFilter.size();
+    
+    // 重新加载树以应用筛选
+    refreshTree();
+}
+
+bool QuestionBankTreeWidget::shouldShowQuestion(const Question &question) const
+{
+    // 如果没有设置筛选（空集合），显示所有题目
+    if (m_difficultyFilter.isEmpty()) {
+        return true;
+    }
+    
+    // 检查题目难度是否在筛选列表中
+    return m_difficultyFilter.contains(question.difficulty());
 }

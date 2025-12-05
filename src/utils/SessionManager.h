@@ -15,6 +15,7 @@ struct SessionState {
     // 题库面板状态
     QStringList expandedBankPaths;  // 展开的题库路径列表
     QString selectedQuestionPath;   // 选中的题目文件路径
+    QList<int> activeDifficultyFilters;  // 激活的难度筛选（0=Easy, 1=Medium, 2=Hard）
     
     // 窗口状态
     QByteArray windowGeometry;
@@ -60,6 +61,8 @@ public:
     // 题库面板状态管理
     void savePanelState(const QStringList &expandedPaths, const QString &selectedQuestionPath);
     bool loadPanelState(QStringList &expandedPaths, QString &selectedQuestionPath);
+    void saveDifficultyFilters(const QList<int> &filters);
+    QList<int> loadDifficultyFilters();
     
     // 完整会话状态管理
     void saveSessionState(const SessionState &state);

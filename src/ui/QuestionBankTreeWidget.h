@@ -42,6 +42,9 @@ public:
     void restoreExpandedPaths(const QStringList &paths);
     QString getSelectedQuestionPath() const;
     
+    // 设置难度筛选
+    void setDifficultyFilter(const QSet<Difficulty> &difficulties);
+    
 signals:
     // 题目被选中
     void questionSelected(const QString &filePath, const Question &question);
@@ -65,6 +68,7 @@ private:
     void loadRootNode();
     void loadBankNode(QTreeWidgetItem *parentItem, const QString &bankPath);
     void loadQuestionFiles(QTreeWidgetItem *bankItem, const QString &bankPath);
+    void applyDifficultyFilter();
     
     // 辅助函数
     TreeNodeType getNodeType(QTreeWidgetItem *item) const;
@@ -72,9 +76,13 @@ private:
     int countQuestionsInBank(const QString &bankPath) const;
     Question loadQuestionFromFile(const QString &filePath) const;
     QString getQuestionStatusIcon(const QString &questionId) const;
+    bool shouldShowQuestion(const Question &question) const;
     
     // 根节点
     QTreeWidgetItem *m_rootItem;
+    
+    // 筛选状态
+    QSet<Difficulty> m_difficultyFilter;
 };
 
 #endif // QUESTIONBANKTREEWIDGET_H
