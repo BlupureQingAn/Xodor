@@ -1,6 +1,7 @@
 #include "HistoryWidget.h"
 #include "../core/ProgressManager.h"
 #include "../core/QuestionBankManager.h"
+#include "../core/Question.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
