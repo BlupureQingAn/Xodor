@@ -11,7 +11,7 @@ public:
     static QString getCodeEditorStyle();
     static QString getQuestionPanelStyle();
     static QString getAIPanelStyle();
-    static QString getQuestionListStyle();
+    static QString getQuestionBankPanelStyle();
     static QString getToolBarStyle();
     static QString getMenuBarStyle();
     static QString getButtonStyle();

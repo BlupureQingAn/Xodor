@@ -3,10 +3,27 @@
 #include <QApplication>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
+#include <QRegularExpression>
+#include <QLinearGradient>
+#include <QPen>
+#include <QFontMetrics>
+#include <QtMath>
 
 ChatBubbleDelegate::ChatBubbleDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
+    , m_fontScale(1.0)
 {
+}
+
+void ChatBubbleDelegate::setFontScale(qreal scale)
+{
+    if (scale < 0.5) scale = 0.5;  // 最小50%
+    if (scale > 2.0) scale = 2.0;  // 最大200%
+    
+    if (qAbs(m_fontScale - scale) > 0.01) {
+        m_fontScale = scale;
+        emit sizeChanged();
+    }
 }
 
 void ChatBubbleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -63,16 +80,143 @@ void ChatBubbleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         painter->drawText(headerRect, Qt::AlignLeft | Qt::AlignVCenter, header);
     }
     
-    // 绘制内容
-    painter->setPen(Qt::white);
+    // 绘制内容（使用QTextDocument支持HTML格式）
     QFont contentFont = painter->font();
-    contentFont.setPointSize(11);
-    painter->setFont(contentFont);
+    contentFont.setPointSize(qRound(11 * m_fontScale));
     
     QRectF contentRect = bubbleRect.adjusted(16, 38, -16, -12);
-    painter->drawText(contentRect, Qt::AlignLeft | Qt::TextWordWrap, content);
+    
+    QTextDocument doc;
+    doc.setDefaultFont(contentFont);
+    doc.setTextWidth(contentRect.width());
+    doc.setDocumentMargin(0);  // 减少文档边距
+    
+    // 如果是AI消息，格式化Markdown
+    if (!isUser && role == "assistant") {
+        QString formattedContent = formatMarkdown(content);
+        doc.setHtml(formattedContent);
+    } else {
+        doc.setPlainText(content);
+    }
+    
+    painter->translate(contentRect.topLeft());
+    QRectF clip(0, 0, contentRect.width(), contentRect.height());
+    doc.drawContents(painter, clip);
     
     painter->restore();
+}
+
+QString ChatBubbleDelegate::formatMarkdown(const QString &content) const
+{
+    QString result = content;
+    
+    // 先转义HTML特殊字符（但保留换行符）
+    result.replace("&", "&amp;");
+    result.replace("<", "&lt;");
+    result.replace(">", "&gt;");
+    
+    // 处理代码块 ```language\ncode\n``` （必须在其他处理之前）
+    QRegularExpression codeBlockRegex("```([^\\n]*)\\n([\\s\\S]*?)```");
+    QRegularExpressionMatchIterator it = codeBlockRegex.globalMatch(result);
+    
+    QVector<QPair<int, int>> codeBlockPositions;
+    QStringList codeBlockReplacements;
+    
+    while (it.hasNext()) {
+        QRegularExpressionMatch match = it.next();
+        QString language = match.captured(1).trimmed();
+        QString code = match.captured(2);
+        
+        // 简单的C++语法高亮
+        QString highlightedCode = code;
+        if (language.isEmpty() || language == "cpp" || language == "c++") {
+            // 关键字高亮（紫色）
+            QStringList keywords = {"int", "char", "float", "double", "void", "bool", "string",
+                                   "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+                                   "return", "const", "static", "class", "struct", "namespace", "using",
+                                   "include", "define", "typedef", "template", "typename", "public", "private", "protected"};
+            for (const QString &kw : keywords) {
+                highlightedCode.replace(QRegularExpression(QString("\\b%1\\b").arg(kw)),
+                                       QString("<span style='color: #c586c0; font-weight: bold;'>%1</span>").arg(kw));
+            }
+            
+            // 字符串高亮（橙色）
+            highlightedCode.replace(QRegularExpression("\"([^\"]*)\""),
+                                   "<span style='color: #ce9178;'>\"\\1\"</span>");
+            
+            // 数字高亮（浅绿色）
+            highlightedCode.replace(QRegularExpression("\\b(\\d+)\\b"),
+                                   "<span style='color: #b5cea8;'>\\1</span>");
+            
+            // 注释高亮（绿色）
+            highlightedCode.replace(QRegularExpression("//(.*)$", QRegularExpression::MultilineOption),
+                                   "<span style='color: #6a9955;'>//\\1</span>");
+            
+            // 预处理器高亮（青色）
+            highlightedCode.replace(QRegularExpression("^(#.*)$", QRegularExpression::MultilineOption),
+                                   "<span style='color: #4ec9b0;'>\\1</span>");
+        }
+        
+        // 代码块样式：圆角、纯色灰背景
+        int fontSize = qRound(11 * m_fontScale);
+        QString codeHtml = QString(
+            "<div style='background: #2d2d2d; padding: 12px; border-radius: 8px; "
+            "margin: 8px 0; border: 1px solid #3d3d3d;'>"
+            "<div style='color: #858585; font-size: %1pt; margin-bottom: 6px; font-weight: bold;'>%2</div>"
+            "<pre style='margin: 0; padding: 0; "
+            "font-family: \"Consolas\", \"Courier New\", monospace; "
+            "font-size: %3pt; line-height: 1.3; "
+            "white-space: pre-wrap; word-wrap: break-word; color: #d4d4d4;'>%4</pre>"
+            "</div>"
+        ).arg(fontSize - 2).arg(language.isEmpty() ? "代码" : language).arg(fontSize).arg(highlightedCode);
+        
+        codeBlockPositions.append(qMakePair(match.capturedStart(), match.capturedEnd()));
+        codeBlockReplacements.append(codeHtml);
+    }
+    
+    // 从后往前替换，避免位置偏移
+    for (int i = codeBlockPositions.size() - 1; i >= 0; --i) {
+        result.replace(codeBlockPositions[i].first, 
+                      codeBlockPositions[i].second - codeBlockPositions[i].first, 
+                      codeBlockReplacements[i]);
+    }
+    
+    // 处理行内代码 `code`
+    result.replace(QRegularExpression("`([^`]+)`"), 
+                  "<code style='background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 3px; "
+                  "font-family: \"Consolas\", \"Courier New\", monospace; font-size: 10.5pt; color: #ffd700;'>\\1</code>");
+    
+    // 处理加粗 **text**
+    result.replace(QRegularExpression("\\*\\*([^\\*]+)\\*\\*"), 
+                  "<b style='color: #ffd700; font-weight: bold;'>\\1</b>");
+    
+    // 处理斜体 *text*
+    result.replace(QRegularExpression("\\*([^\\*]+)\\*"), 
+                  "<i style='color: #e8e8e8;'>\\1</i>");
+    
+    // 处理标题 ### text
+    result.replace(QRegularExpression("^### (.+)$", QRegularExpression::MultilineOption), 
+                  "<div style='color: #ffd700; margin: 6px 0 3px 0; font-size: 11.5pt; font-weight: bold;'>\\1</div>");
+    result.replace(QRegularExpression("^## (.+)$", QRegularExpression::MultilineOption), 
+                  "<div style='color: #ffd700; margin: 8px 0 4px 0; font-size: 12pt; font-weight: bold;'>\\1</div>");
+    
+    // 处理有序列表 1. text
+    result.replace(QRegularExpression("^(\\d+)\\. (.+)$", QRegularExpression::MultilineOption), 
+                  "<div style='margin: 1px 0; padding-left: 12px;'><span style='color: #ffd700; font-weight: bold;'>\\1.</span> \\2</div>");
+    
+    // 处理无序列表 - text
+    result.replace(QRegularExpression("^- (.+)$", QRegularExpression::MultilineOption), 
+                  "<div style='margin: 1px 0; padding-left: 12px;'><span style='color: #ffd700; font-weight: bold;'>•</span> \\1</div>");
+    
+    // 处理换行（在最后处理）
+    result.replace("\n", "<br>");
+    
+    // 设置基础样式，统一字体和行高（行高降到1.1，更紧凑）
+    int fontSize = qRound(11 * m_fontScale);
+    int codeSize = qRound(11 * m_fontScale);
+    return QString("<div style='color: #f0f0f0; line-height: 1.1; "
+                  "font-family: \"Microsoft YaHei\", \"Segoe UI\", Arial, sans-serif; "
+                  "font-size: %1pt; margin: 0; padding: 0;'>%2</div>").arg(fontSize).arg(result);
 }
 
 QSize ChatBubbleDelegate::sizeHint(const QStyleOptionViewItem &option,
@@ -90,14 +234,28 @@ QSize ChatBubbleDelegate::sizeHint(const QStyleOptionViewItem &option,
 QSize ChatBubbleDelegate::calculateSize(const QString &text, const QString &role, int maxWidth) const
 {
     QFont font;
-    font.setPointSize(11);
-    QFontMetrics fm(font);
+    font.setPointSize(qRound(11 * m_fontScale));
     
-    QRect boundingRect = fm.boundingRect(QRect(0, 0, maxWidth - 32, 10000),
-                                         Qt::TextWordWrap | Qt::AlignLeft,
-                                         text);
-    
-    return QSize(boundingRect.width(), boundingRect.height());
+    // 如果是AI消息，使用QTextDocument计算HTML内容的大小
+    if (role == "assistant") {
+        QTextDocument doc;
+        doc.setDefaultFont(font);
+        doc.setTextWidth(maxWidth - 32);
+        doc.setDocumentMargin(0);
+        
+        QString formattedContent = formatMarkdown(text);
+        doc.setHtml(formattedContent);
+        
+        QSize size = doc.size().toSize();
+        return QSize(maxWidth - 32, size.height());
+    } else {
+        // 用户消息使用简单的文本计算
+        QFontMetrics fm(font);
+        QRect boundingRect = fm.boundingRect(QRect(0, 0, maxWidth - 32, 10000),
+                                             Qt::TextWordWrap | Qt::AlignLeft,
+                                             text);
+        return QSize(boundingRect.width(), boundingRect.height());
+    }
 }
 
 void ChatBubbleDelegate::drawBubble(QPainter *painter, const QRectF &rect,

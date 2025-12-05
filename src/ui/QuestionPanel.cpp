@@ -14,15 +14,17 @@ void QuestionPanel::setupUI()
     mainLayout->setContentsMargins(8, 8, 8, 8);
     mainLayout->setSpacing(8);
     
-    m_questionBrowser = new QTextBrowser(this);
+    m_questionBrowser = new ZoomableTextBrowser(this);
     m_questionBrowser->setOpenExternalLinks(false);
     
     QHBoxLayout *btnLayout = new QHBoxLayout();
     btnLayout->setSpacing(8);
     
-    m_prevBtn = new QPushButton("⬅ 上一题", this);
+    m_prevBtn = new QPushButton("◀ 上一题", this);
     m_runTestsBtn = new QPushButton("▶ 运行测试", this);
-    m_nextBtn = new QPushButton("下一题 ➡", this);
+    m_aiJudgeBtn = new QPushButton("🤖 AI判题", this);
+    m_aiJudgeBtn->setToolTip(QString::fromUtf8("让AI分析代码逻辑，判断是否符合题目要求"));
+    m_nextBtn = new QPushButton("下一题 ▶", this);
     
     // 应用按钮样式
     QString buttonStyle = R"(
@@ -45,16 +47,19 @@ void QuestionPanel::setupUI()
     
     m_prevBtn->setStyleSheet(buttonStyle);
     m_runTestsBtn->setStyleSheet(buttonStyle);
+    m_aiJudgeBtn->setStyleSheet(buttonStyle);
     m_nextBtn->setStyleSheet(buttonStyle);
     
     btnLayout->addWidget(m_prevBtn);
     btnLayout->addWidget(m_runTestsBtn);
+    btnLayout->addWidget(m_aiJudgeBtn);
     btnLayout->addWidget(m_nextBtn);
     
     mainLayout->addWidget(m_questionBrowser);
     mainLayout->addLayout(btnLayout);
     
     connect(m_runTestsBtn, &QPushButton::clicked, this, &QuestionPanel::runTests);
+    connect(m_aiJudgeBtn, &QPushButton::clicked, this, &QuestionPanel::aiJudgeRequested);
     connect(m_nextBtn, &QPushButton::clicked, this, &QuestionPanel::nextQuestion);
     connect(m_prevBtn, &QPushButton::clicked, this, &QuestionPanel::previousQuestion);
 }
@@ -148,17 +153,41 @@ void QuestionPanel::setQuestion(const Question &question)
                 }
                 .io-block {
                     background-color: #1e1e1e;
-                    padding: 10px;
+                    padding: 12px;
                     border-radius: 4px;
-                    margin: 6px 0;
+                    margin: 8px 0;
                     font-family: 'Consolas', 'Monaco', monospace;
-                    font-size: 9.5pt;
+                    font-size: 10pt;
+                    line-height: 1.6;
                     user-select: text;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    border: 1px solid #3a3a3a;
+                    color: #e8e8e8;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    overflow-x: auto;
+                }
+                .io-block::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+                .io-block::-webkit-scrollbar-track {
+                    background: #2a2a2a;
+                    border-radius: 4px;
+                }
+                .io-block::-webkit-scrollbar-thumb {
+                    background: #555;
+                    border-radius: 4px;
+                }
+                .io-block::-webkit-scrollbar-thumb:hover {
+                    background: #666;
                 }
                 .io-label {
                     color: #b0b0b0;
                     font-weight: bold;
-                    margin-bottom: 4px;
+                    margin-bottom: 6px;
+                    font-size: 10pt;
                 }
             </style>
         </head>
@@ -213,9 +242,12 @@ void QuestionPanel::setQuestion(const Question &question)
             html += QString("<div class='test-case'>");
             html += QString("<div class='test-case-title'>示例 %1</div>").arg(caseNum++);
             html += "<div class='io-label'>输入：</div>";
-            html += QString("<div class='io-block'>%1</div>").arg(tc.input.toHtmlEscaped());
+            // 保留换行符，使用<br>替换\n
+            QString inputHtml = tc.input.toHtmlEscaped().replace("\n", "<br>");
+            html += QString("<div class='io-block'>%1</div>").arg(inputHtml);
             html += "<div class='io-label'>输出：</div>";
-            html += QString("<div class='io-block'>%1</div>").arg(tc.expectedOutput.toHtmlEscaped());
+            QString outputHtml = tc.expectedOutput.toHtmlEscaped().replace("\n", "<br>");
+            html += QString("<div class='io-block'>%1</div>").arg(outputHtml);
             html += "</div>";
         }
     }

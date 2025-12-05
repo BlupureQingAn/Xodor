@@ -10,6 +10,11 @@ struct SessionState {
     // 题库信息
     QString questionBankPath;
     int currentQuestionIndex;
+    QString currentQuestionId;  // 当前题目ID
+    
+    // 题库面板状态
+    QStringList expandedBankPaths;  // 展开的题库路径列表
+    QString selectedQuestionPath;   // 选中的题目文件路径
     
     // 窗口状态
     QByteArray windowGeometry;
@@ -48,8 +53,13 @@ public:
     static SessionManager& instance();
     
     // 基本会话管理
-    void saveSession(const QString &questionBankPath, int currentQuestionIndex);
+    void saveSession(const QString &questionBankPath, int currentQuestionIndex, const QString &questionId = QString());
     bool loadSession(QString &questionBankPath, int &currentQuestionIndex);
+    bool loadSession(QString &questionBankPath, int &currentQuestionIndex, QString &questionId);
+    
+    // 题库面板状态管理
+    void savePanelState(const QStringList &expandedPaths, const QString &selectedQuestionPath);
+    bool loadPanelState(QStringList &expandedPaths, QString &selectedQuestionPath);
     
     // 完整会话状态管理
     void saveSessionState(const SessionState &state);

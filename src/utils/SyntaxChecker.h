@@ -32,6 +32,8 @@ private slots:
     
 private:
     QVector<SyntaxError> parseCompilerOutput(const QString &output);
+    QString improveErrorMessage(const QString &originalMessage, int line);
+    QString translateErrorMessage(const QString &message);
     
     QTimer *m_checkTimer;
     QProcess *m_process;

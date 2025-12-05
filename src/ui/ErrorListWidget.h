@@ -29,10 +29,12 @@ private slots:
     void onItemClicked(QListWidgetItem *item);
     void onFixAllClicked();
     void onFixSelectedClicked();
+    void onContextMenu(const QPoint &pos);
     
 private:
     void updateErrorCount();
     QString formatErrorMessage(const SyntaxError &error) const;
+    QString translateErrorMessage(const QString &message) const;
     
     QListWidget *m_listWidget;
     QLabel *m_countLabel;

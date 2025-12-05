@@ -14,11 +14,27 @@ void QuestionBank::loadFromDirectory(const QString &dirPath)
     m_questions.clear();
     
     QDir dir(dirPath);
+    if (!dir.exists()) {
+        qWarning() << "Question bank directory does not exist:" << dirPath;
+        emit questionsLoaded(0);
+        return;
+    }
+    
+    // 递归加载所有 JSON 文件
+    loadFromDirectoryRecursive(dirPath);
+    
+    qDebug() << "Loaded" << m_questions.size() << "questions from" << dirPath;
+    emit questionsLoaded(m_questions.size());
+}
+
+void QuestionBank::loadFromDirectoryRecursive(const QString &dirPath)
+{
+    QDir dir(dirPath);
     QStringList filters;
     filters << "*.json";
     
+    // 加载当前目录的 JSON 文件
     QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
-    
     for (const auto &fileInfo : files) {
         QFile file(fileInfo.absoluteFilePath());
         if (file.open(QIODevice::ReadOnly)) {
@@ -29,7 +45,7 @@ void QuestionBank::loadFromDirectory(const QString &dirPath)
                 for (const auto &val : arr) {
                     m_questions.append(Question(val.toObject()));
                 }
-            } else {
+            } else if (doc.isObject()) {
                 m_questions.append(Question(doc.object()));
             }
             
@@ -37,7 +53,11 @@ void QuestionBank::loadFromDirectory(const QString &dirPath)
         }
     }
     
-    emit questionsLoaded(m_questions.size());
+    // 递归扫描子目录
+    QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const auto &subDirInfo : subDirs) {
+        loadFromDirectoryRecursive(subDirInfo.absoluteFilePath());
+    }
 }
 
 void QuestionBank::addQuestion(const Question &question)

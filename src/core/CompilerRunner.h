@@ -9,6 +9,7 @@ struct CompileResult {
     bool success;
     QString output;
     QString error;
+    QString executablePath;  // 生成的可执行文件路径
 };
 
 // 测试失败原因

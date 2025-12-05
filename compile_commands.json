@@ -1,0 +1,380 @@
+[
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\CodePracticeSystem_autogen\\mocs_compilation.cpp.obj -c F:\\Xodor\\build\\CodePracticeSystem_autogen\\mocs_compilation.cpp",
+  "file": "F:\\Xodor\\build\\CodePracticeSystem_autogen\\mocs_compilation.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\CodePracticeSystem_autogen\\mocs_compilation.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\main.cpp.obj -c F:\\Xodor\\src\\main.cpp",
+  "file": "F:\\Xodor\\src\\main.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\main.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\MainWindow.cpp.obj -c F:\\Xodor\\src\\ui\\MainWindow.cpp",
+  "file": "F:\\Xodor\\src\\ui\\MainWindow.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\MainWindow.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionPanel.cpp.obj -c F:\\Xodor\\src\\ui\\QuestionPanel.cpp",
+  "file": "F:\\Xodor\\src\\ui\\QuestionPanel.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionPanel.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\CodeEditor.cpp.obj -c F:\\Xodor\\src\\ui\\CodeEditor.cpp",
+  "file": "F:\\Xodor\\src\\ui\\CodeEditor.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\CodeEditor.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIAnalysisPanel.cpp.obj -c F:\\Xodor\\src\\ui\\AIAnalysisPanel.cpp",
+  "file": "F:\\Xodor\\src\\ui\\AIAnalysisPanel.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIAnalysisPanel.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ImportDialog.cpp.obj -c F:\\Xodor\\src\\ui\\ImportDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ImportDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ImportDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\HistoryWidget.cpp.obj -c F:\\Xodor\\src\\ui\\HistoryWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\HistoryWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\HistoryWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionListWidget.cpp.obj -c F:\\Xodor\\src\\ui\\QuestionListWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\QuestionListWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionListWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\StyleManager.cpp.obj -c F:\\Xodor\\src\\ui\\StyleManager.cpp",
+  "file": "F:\\Xodor\\src\\ui\\StyleManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\StyleManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ModernTheme.cpp.obj -c F:\\Xodor\\src\\ui\\ModernTheme.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ModernTheme.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ModernTheme.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\WrongQuestionWidget.cpp.obj -c F:\\Xodor\\src\\ui\\WrongQuestionWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\WrongQuestionWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\WrongQuestionWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\SettingsDialog.cpp.obj -c F:\\Xodor\\src\\ui\\SettingsDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\SettingsDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\SettingsDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\OriginalQuestionDialog.cpp.obj -c F:\\Xodor\\src\\ui\\OriginalQuestionDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\OriginalQuestionDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\OriginalQuestionDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\PracticeWidget.cpp.obj -c F:\\Xodor\\src\\ui\\PracticeWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\PracticeWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\PracticeWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIImportDialog.cpp.obj -c F:\\Xodor\\src\\ui\\AIImportDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\AIImportDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIImportDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionBankManagerDialog.cpp.obj -c F:\\Xodor\\src\\ui\\QuestionBankManagerDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\QuestionBankManagerDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\QuestionBankManagerDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\SmartImportDialog.cpp.obj -c F:\\Xodor\\src\\ui\\SmartImportDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\SmartImportDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\SmartImportDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ExamGeneratorDialog.cpp.obj -c F:\\Xodor\\src\\ui\\ExamGeneratorDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ExamGeneratorDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ExamGeneratorDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\CodeVersionDialog.cpp.obj -c F:\\Xodor\\src\\ui\\CodeVersionDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\CodeVersionDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\CodeVersionDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIAssistantPanel.cpp.obj -c F:\\Xodor\\src\\ui\\AIAssistantPanel.cpp",
+  "file": "F:\\Xodor\\src\\ui\\AIAssistantPanel.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\AIAssistantPanel.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatBubbleDelegate.cpp.obj -c F:\\Xodor\\src\\ui\\ChatBubbleDelegate.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ChatBubbleDelegate.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatBubbleDelegate.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatBubbleWidget.cpp.obj -c F:\\Xodor\\src\\ui\\ChatBubbleWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ChatBubbleWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatBubbleWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatHistoryDialog.cpp.obj -c F:\\Xodor\\src\\ui\\ChatHistoryDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ChatHistoryDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ChatHistoryDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ErrorListWidget.cpp.obj -c F:\\Xodor\\src\\ui\\ErrorListWidget.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ErrorListWidget.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ErrorListWidget.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\MockExamManagerDialog.cpp.obj -c F:\\Xodor\\src\\ui\\MockExamManagerDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\MockExamManagerDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\MockExamManagerDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ExamReportDialog.cpp.obj -c F:\\Xodor\\src\\ui\\ExamReportDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\ExamReportDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\ExamReportDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionBank.cpp.obj -c F:\\Xodor\\src\\core\\QuestionBank.cpp",
+  "file": "F:\\Xodor\\src\\core\\QuestionBank.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionBank.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionBankManager.cpp.obj -c F:\\Xodor\\src\\core\\QuestionBankManager.cpp",
+  "file": "F:\\Xodor\\src\\core\\QuestionBankManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionBankManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\WrongQuestionBook.cpp.obj -c F:\\Xodor\\src\\core\\WrongQuestionBook.cpp",
+  "file": "F:\\Xodor\\src\\core\\WrongQuestionBook.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\WrongQuestionBook.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\Question.cpp.obj -c F:\\Xodor\\src\\core\\Question.cpp",
+  "file": "F:\\Xodor\\src\\core\\Question.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\Question.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionProgress.cpp.obj -c F:\\Xodor\\src\\core\\QuestionProgress.cpp",
+  "file": "F:\\Xodor\\src\\core\\QuestionProgress.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\QuestionProgress.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ProgressManager.cpp.obj -c F:\\Xodor\\src\\core\\ProgressManager.cpp",
+  "file": "F:\\Xodor\\src\\core\\ProgressManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ProgressManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\AutoSaver.cpp.obj -c F:\\Xodor\\src\\core\\AutoSaver.cpp",
+  "file": "F:\\Xodor\\src\\core\\AutoSaver.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\AutoSaver.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\CompilerRunner.cpp.obj -c F:\\Xodor\\src\\core\\CompilerRunner.cpp",
+  "file": "F:\\Xodor\\src\\core\\CompilerRunner.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\CompilerRunner.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\CodeVersionManager.cpp.obj -c F:\\Xodor\\src\\core\\CodeVersionManager.cpp",
+  "file": "F:\\Xodor\\src\\core\\CodeVersionManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\CodeVersionManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ExamSession.cpp.obj -c F:\\Xodor\\src\\core\\ExamSession.cpp",
+  "file": "F:\\Xodor\\src\\core\\ExamSession.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ExamSession.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ExamReportGenerator.cpp.obj -c F:\\Xodor\\src\\core\\ExamReportGenerator.cpp",
+  "file": "F:\\Xodor\\src\\core\\ExamReportGenerator.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\core\\ExamReportGenerator.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIService.cpp.obj -c F:\\Xodor\\src\\ai\\AIService.cpp",
+  "file": "F:\\Xodor\\src\\ai\\AIService.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIService.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\OllamaClient.cpp.obj -c F:\\Xodor\\src\\ai\\OllamaClient.cpp",
+  "file": "F:\\Xodor\\src\\ai\\OllamaClient.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\OllamaClient.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\CloudAIClient.cpp.obj -c F:\\Xodor\\src\\ai\\CloudAIClient.cpp",
+  "file": "F:\\Xodor\\src\\ai\\CloudAIClient.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\CloudAIClient.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\QuestionParser.cpp.obj -c F:\\Xodor\\src\\ai\\QuestionParser.cpp",
+  "file": "F:\\Xodor\\src\\ai\\QuestionParser.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\QuestionParser.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\FineTuneManager.cpp.obj -c F:\\Xodor\\src\\ai\\FineTuneManager.cpp",
+  "file": "F:\\Xodor\\src\\ai\\FineTuneManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\FineTuneManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\SmartQuestionImporter.cpp.obj -c F:\\Xodor\\src\\ai\\SmartQuestionImporter.cpp",
+  "file": "F:\\Xodor\\src\\ai\\SmartQuestionImporter.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\SmartQuestionImporter.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\UniversalQuestionParser.cpp.obj -c F:\\Xodor\\src\\ai\\UniversalQuestionParser.cpp",
+  "file": "F:\\Xodor\\src\\ai\\UniversalQuestionParser.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\UniversalQuestionParser.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\QuestionBankAnalyzer.cpp.obj -c F:\\Xodor\\src\\ai\\QuestionBankAnalyzer.cpp",
+  "file": "F:\\Xodor\\src\\ai\\QuestionBankAnalyzer.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\QuestionBankAnalyzer.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIAssistant.cpp.obj -c F:\\Xodor\\src\\ai\\AIAssistant.cpp",
+  "file": "F:\\Xodor\\src\\ai\\AIAssistant.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIAssistant.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\MockExamGenerator.cpp.obj -c F:\\Xodor\\src\\ai\\MockExamGenerator.cpp",
+  "file": "F:\\Xodor\\src\\ai\\MockExamGenerator.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\MockExamGenerator.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\TestDataGenerator.cpp.obj -c F:\\Xodor\\src\\ai\\TestDataGenerator.cpp",
+  "file": "F:\\Xodor\\src\\ai\\TestDataGenerator.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\TestDataGenerator.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\TestCaseFixer.cpp.obj -c F:\\Xodor\\src\\ai\\TestCaseFixer.cpp",
+  "file": "F:\\Xodor\\src\\ai\\TestCaseFixer.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\TestCaseFixer.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIJudge.cpp.obj -c F:\\Xodor\\src\\ai\\AIJudge.cpp",
+  "file": "F:\\Xodor\\src\\ai\\AIJudge.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ai\\AIJudge.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\TestCaseFixerDialog.cpp.obj -c F:\\Xodor\\src\\ui\\TestCaseFixerDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\TestCaseFixerDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\TestCaseFixerDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\BatchTestCaseFixerDialog.cpp.obj -c F:\\Xodor\\src\\ui\\BatchTestCaseFixerDialog.cpp",
+  "file": "F:\\Xodor\\src\\ui\\BatchTestCaseFixerDialog.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\ui\\BatchTestCaseFixerDialog.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\FileManager.cpp.obj -c F:\\Xodor\\src\\utils\\FileManager.cpp",
+  "file": "F:\\Xodor\\src\\utils\\FileManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\FileManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\ConfigManager.cpp.obj -c F:\\Xodor\\src\\utils\\ConfigManager.cpp",
+  "file": "F:\\Xodor\\src\\utils\\ConfigManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\ConfigManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CompilerDetector.cpp.obj -c F:\\Xodor\\src\\utils\\CompilerDetector.cpp",
+  "file": "F:\\Xodor\\src\\utils\\CompilerDetector.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CompilerDetector.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\SessionManager.cpp.obj -c F:\\Xodor\\src\\utils\\SessionManager.cpp",
+  "file": "F:\\Xodor\\src\\utils\\SessionManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\SessionManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CodeTemplateManager.cpp.obj -c F:\\Xodor\\src\\utils\\CodeTemplateManager.cpp",
+  "file": "F:\\Xodor\\src\\utils\\CodeTemplateManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CodeTemplateManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\ErrorHandler.cpp.obj -c F:\\Xodor\\src\\utils\\ErrorHandler.cpp",
+  "file": "F:\\Xodor\\src\\utils\\ErrorHandler.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\ErrorHandler.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CrashHandler.cpp.obj -c F:\\Xodor\\src\\utils\\CrashHandler.cpp",
+  "file": "F:\\Xodor\\src\\utils\\CrashHandler.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\CrashHandler.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\AIConnectionChecker.cpp.obj -c F:\\Xodor\\src\\utils\\AIConnectionChecker.cpp",
+  "file": "F:\\Xodor\\src\\utils\\AIConnectionChecker.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\AIConnectionChecker.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\AutoSaveManager.cpp.obj -c F:\\Xodor\\src\\utils\\AutoSaveManager.cpp",
+  "file": "F:\\Xodor\\src\\utils\\AutoSaveManager.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\AutoSaveManager.cpp.obj"
+},
+{
+  "directory": "F:/Xodor/build",
+  "command": "F:\\Qt\\qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NEEDS_QMAIN -DQT_NETWORK_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IF:/Xodor/build/CodePracticeSystem_autogen/include -IF:/Xodor/src -isystem F:/Qt/qt/6.10.0/mingw_64/include -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtCore -isystem F:/Qt/qt/6.10.0/mingw_64/mkspecs/win32-g++ -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtWidgets -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtGui -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtNetwork -isystem F:/Qt/qt/6.10.0/mingw_64/include/QtPrintSupport -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8 -o CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\SyntaxChecker.cpp.obj -c F:\\Xodor\\src\\utils\\SyntaxChecker.cpp",
+  "file": "F:\\Xodor\\src\\utils\\SyntaxChecker.cpp",
+  "output": "CMakeFiles\\CodePracticeSystem.dir\\src\\utils\\SyntaxChecker.cpp.obj"
+}
+]

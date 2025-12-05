@@ -154,7 +154,13 @@ void ProgressManager::setQuestionTitle(const QString &questionId, const QString 
     QuestionProgressRecord record = getProgress(questionId);
     record.questionTitle = title;
     m_progressMap[questionId] = record;
+    
+    qDebug() << "[ProgressManager] Set question title:" << questionId << "->" << title;
+    qDebug() << "[ProgressManager] Progress map size:" << m_progressMap.size();
+    
     save();
+    
+    emit progressUpdated(questionId);
 }
 
 int ProgressManager::getCompletedCount() const

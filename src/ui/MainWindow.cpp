@@ -1641,6 +1641,9 @@ void MainWindow::onAIJudgeCompleted(bool passed, const QString &comment, const Q
     // 更新进度管理器
     ProgressManager &progressMgr = ProgressManager::instance();
     
+    // 确保题目标题已保存（用于历史记录显示）
+    progressMgr.setQuestionTitle(questionId, currentQuestion.title());
+    
     // 记录AI判定结果
     progressMgr.recordAIJudge(questionId, passed, comment);
     
@@ -2298,6 +2301,9 @@ void MainWindow::showTestResults(const QVector<TestResult> &results)
         Question currentQuestion = m_questionBank->allQuestions()[m_currentQuestionIndex];
         QString code = m_codeEditor->code();
         bool allPassed = (passed == total && total > 0);
+        
+        // 确保题目标题已保存（用于历史记录显示）
+        ProgressManager::instance().setQuestionTitle(currentQuestion.id(), currentQuestion.title());
         
         ProgressManager::instance().recordAttempt(currentQuestion.id(), allPassed, code);
         

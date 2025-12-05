@@ -191,22 +191,22 @@ QString QuestionBankManager::importQuestionBank(const QString &sourcePath, const
     // 生成唯一ID
     QString bankId = generateBankId();
     
-    // 创建内部存储路径
-    QString internalPath = getBankStoragePath(bankId);
+    // 确保路径是相对于项目根目录的基础题库路径
+    QString normalizedPath = sourcePath;
     
-    // 复制题库文件
-    qDebug() << "Copying question bank from" << sourcePath << "to" << internalPath;
-    if (!copyDirectory(sourcePath, internalPath)) {
-        qWarning() << "Failed to copy question bank";
-        return QString();
+    // 如果传入的是绝对路径或其他路径，转换为基础题库路径
+    if (!normalizedPath.startsWith("data/基础题库/")) {
+        // 提取题库名称，构建正确的基础题库路径
+        normalizedPath = QString("data/基础题库/%1").arg(name);
+        qDebug() << "Normalized bank path from" << sourcePath << "to" << normalizedPath;
     }
     
     // 创建题库信息
     QuestionBankInfo info;
     info.id = bankId;
     info.name = name;
-    info.path = internalPath;
-    info.originalPath = sourcePath;
+    info.path = normalizedPath;  // 使用规范化的基础题库路径
+    info.originalPath = QString("data/原始题库/%1").arg(name);  // 原始题库路径
     info.questionCount = 0;  // 稍后更新
     info.importTime = QDateTime::currentDateTime();
     info.lastAccessTime = info.importTime;
@@ -225,7 +225,7 @@ QString QuestionBankManager::importQuestionBank(const QString &sourcePath, const
     emit bankListChanged();
     emit currentBankChanged(bankId);
     
-    qDebug() << "Question bank imported successfully:" << bankId;
+    qDebug() << "Question bank registered successfully:" << bankId << "at" << normalizedPath;
     
     return bankId;
 }
@@ -246,17 +246,8 @@ bool QuestionBankManager::deleteQuestionBank(const QString &bankId)
         return false;
     }
     
-    // 删除内部文件夹
-    QString bankPath = getBankStoragePath(bankId);
-    QDir dir(bankPath);
-    if (dir.exists()) {
-        if (!dir.removeRecursively()) {
-            qWarning() << "Failed to delete question bank directory:" << bankPath;
-            return false;
-        }
-    }
-    
-    // 从列表中移除
+    // 只从列表中移除，不删除实际文件
+    // （文件在 data/基础题库/ 下，用户可能还需要）
     m_banks.removeAt(index);
     
     // 如果删除的是当前题库，清空当前题库
@@ -270,7 +261,7 @@ bool QuestionBankManager::deleteQuestionBank(const QString &bankId)
     
     emit bankListChanged();
     
-    qDebug() << "Question bank deleted:" << bankId;
+    qDebug() << "Question bank unregistered:" << bankId;
     
     return true;
 }
@@ -280,6 +271,19 @@ bool QuestionBankManager::renameQuestionBank(const QString &bankId, const QStrin
     for (auto &bank : m_banks) {
         if (bank.id == bankId) {
             bank.name = newName;
+            save();
+            emit bankListChanged();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool QuestionBankManager::updateQuestionCount(const QString &bankId, int count)
+{
+    for (auto &bank : m_banks) {
+        if (bank.id == bankId) {
+            bank.questionCount = count;
             save();
             emit bankListChanged();
             return true;
@@ -418,4 +422,71 @@ void QuestionBankManager::load()
     }
     
     qDebug() << "Loaded" << m_banks.size() << "question banks";
+    
+    // 加载后自动验证和修复路径
+    validateAndFixBankPaths();
+}
+
+bool QuestionBankManager::validateAndFixBankPaths()
+{
+    bool hasChanges = false;
+    
+    for (auto &bank : m_banks) {
+        bool needsFix = false;
+        QString oldPath = bank.path;
+        
+        // 检查路径是否正确
+        // 1. 不应该包含 AppData 路径
+        if (bank.path.contains("AppData") || bank.path.contains("Roaming")) {
+            needsFix = true;
+            qWarning() << "Found invalid AppData path for bank:" << bank.name;
+        }
+        
+        // 2. 应该以 data/基础题库/ 开头
+        if (!bank.path.startsWith("data/基础题库/") && !bank.path.startsWith("data\\基础题库\\")) {
+            needsFix = true;
+            qWarning() << "Found non-standard path for bank:" << bank.name;
+        }
+        
+        // 3. 检查路径是否存在
+        QDir dir(bank.path);
+        if (!dir.exists()) {
+            // 尝试在基础题库中查找
+            QString expectedPath = QString("data/基础题库/%1").arg(bank.name);
+            QDir expectedDir(expectedPath);
+            if (expectedDir.exists()) {
+                needsFix = true;
+                qInfo() << "Found bank at expected location:" << expectedPath;
+            } else {
+                qWarning() << "Bank path does not exist:" << bank.path;
+                qWarning() << "Expected path also does not exist:" << expectedPath;
+            }
+        }
+        
+        // 修复路径
+        if (needsFix) {
+            QString newPath = QString("data/基础题库/%1").arg(bank.name);
+            QString newOriginalPath = QString("data/原始题库/%1").arg(bank.name);
+            
+            qInfo() << "Fixing bank path:";
+            qInfo() << "  Bank:" << bank.name;
+            qInfo() << "  Old path:" << oldPath;
+            qInfo() << "  New path:" << newPath;
+            
+            bank.path = newPath;
+            bank.originalPath = newOriginalPath;
+            bank.type = QuestionBankType::Processed;
+            
+            hasChanges = true;
+        }
+    }
+    
+    // 如果有修改，保存配置
+    if (hasChanges) {
+        qInfo() << "Bank paths have been fixed, saving configuration...";
+        save();
+        emit bankListChanged();
+    }
+    
+    return hasChanges;
 }

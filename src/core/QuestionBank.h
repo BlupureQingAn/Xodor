@@ -24,6 +24,7 @@ signals:
     void questionsLoaded(int count);
     
 private:
+    void loadFromDirectoryRecursive(const QString &dirPath);
     QVector<Question> m_questions;
 };
 

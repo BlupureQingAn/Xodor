@@ -122,6 +122,8 @@ void HistoryWidget::loadHistory()
     ProgressManager &pm = ProgressManager::instance();
     pm.load();  // 确保数据是最新的
     
+    qDebug() << "[HistoryWidget] Loading history...";
+    
     QuestionBankManager &qbm = QuestionBankManager::instance();
     
     // 获取所有有进度记录的题目
@@ -148,6 +150,10 @@ void HistoryWidget::loadHistory()
     for (const QString &questionId : questionIds) {
         QuestionProgressRecord record = pm.getProgress(questionId);
         
+        qDebug() << "[HistoryWidget] Question:" << questionId 
+                 << "Title:" << record.questionTitle
+                 << "Attempts:" << record.attemptCount;
+        
         // 跳过没有尝试过的题目
         if (record.attemptCount == 0) {
             continue;
@@ -163,6 +169,7 @@ void HistoryWidget::loadHistory()
         QString title = record.questionTitle;
         if (title.isEmpty()) {
             title = questionId;  // 如果没有标题，显示ID
+            qDebug() << "[HistoryWidget] WARNING: No title for question" << questionId;
         }
         m_historyTable->setItem(row, 1, new QTableWidgetItem(title));
         

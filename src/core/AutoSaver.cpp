@@ -67,15 +67,11 @@ void AutoSaver::performSave()
         dir.mkpath(".");
     }
     
-    QJsonObject json;
-    json["questionId"] = m_questionId;
-    json["code"] = m_content;
-    json["lastModified"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-    
-    QString filePath = QString("data/user_answers/%1.json").arg(m_questionId);
+    // 保存为 .cpp 文件（纯文本格式）
+    QString filePath = QString("data/user_answers/%1.cpp").arg(m_questionId);
     QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(json).toJson());
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        file.write(m_content.toUtf8());
         file.close();
         qDebug() << "[AutoSaver] Saved code to:" << filePath << "length:" << m_content.length();
         emit saved(m_questionId, m_content);

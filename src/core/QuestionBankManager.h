@@ -40,6 +40,7 @@ public:
     QString importQuestionBank(const QString &sourcePath, const QString &name, bool isAIParsed = false);
     bool deleteQuestionBank(const QString &bankId);
     bool renameQuestionBank(const QString &bankId, const QString &newName);
+    bool updateQuestionCount(const QString &bankId, int count);
     
     // 题库查询
     QVector<QuestionBankInfo> getAllBanks() const;
@@ -61,6 +62,9 @@ public:
     // 持久化
     void save();
     void load();
+    
+    // 路径验证和修复
+    bool validateAndFixBankPaths();
     
 signals:
     void bankListChanged();

@@ -16,6 +16,8 @@ public:
     QString ollamaUrl() const { return m_ollamaUrl; }
     QString ollamaModel() const { return m_ollamaModel; }
     QString cloudApiKey() const { return m_cloudApiKey; }
+    QString cloudApiUrl() const { return m_cloudApiUrl; }
+    QString cloudApiModel() const { return m_cloudApiModel; }
     bool useCloudMode() const { return m_useCloudMode; }
     
     // 判断当前使用哪种AI模式
@@ -26,6 +28,8 @@ public:
     void setOllamaUrl(const QString &url) { m_ollamaUrl = url; }
     void setOllamaModel(const QString &model) { m_ollamaModel = model; }
     void setCloudApiKey(const QString &key) { m_cloudApiKey = key; }
+    void setCloudApiUrl(const QString &url) { m_cloudApiUrl = url; }
+    void setCloudApiModel(const QString &model) { m_cloudApiModel = model; }
     void setUseCloudMode(bool useCloud) { m_useCloudMode = useCloud; }
     
 private:
@@ -37,6 +41,8 @@ private:
     QString m_ollamaUrl;
     QString m_ollamaModel;
     QString m_cloudApiKey;
+    QString m_cloudApiUrl;
+    QString m_cloudApiModel;
     bool m_useCloudMode = false;  // 当前使用的模式：false=本地，true=云端
 };
 

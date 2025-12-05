@@ -18,9 +18,8 @@ CodeTemplateManager::CodeTemplateManager()
 
 void CodeTemplateManager::initDefaultTemplates()
 {
-    // 基础模板
+    // 基础模板（移除第一行注释，避免行号偏移）
     m_templates["基础模板"] = 
-        "// 在这里编写你的代码\n"
         "#include <iostream>\n"
         "using namespace std;\n"
         "\n"

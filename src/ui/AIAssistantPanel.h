@@ -2,9 +2,8 @@
 #define AIASSISTANTPANEL_H
 
 #include <QWidget>
-#include <QListView>
-#include <QStandardItemModel>
-#include <QLineEdit>
+#include <QScrollArea>
+#include <QTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QDialog>
@@ -13,7 +12,7 @@
 #include "../core/Question.h"
 
 class OllamaClient;
-class ChatBubbleDelegate;
+class ChatBubbleWidget;
 
 // 使用AIAssistant.h中定义的ChatMessage结构体
 
@@ -44,9 +43,15 @@ public:
 signals:
     void assistantReady();
     void assistantError(const QString &error);
+    void requestCurrentCode();  // 请求获取当前代码
+    
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     
 private slots:
     void onSendMessage();
+    void onStopGeneration();  // 终止输出
     void onAnalyzeCode();  // 分析代码快捷按钮
     void onGetHint();      // 思路快捷按钮
     void onExplainConcept(); // 知识点快捷按钮
@@ -68,18 +73,22 @@ private:
     void saveConversationHistory();
     QString buildSystemPrompt();  // 构建费曼学习法系统提示词
     QString formatMessageContent(const QString &content);  // 格式化消息内容（支持代码块）
+    void scrollToBottom();  // 滚动到底部
+    void updateAllBubbleScales();  // 更新所有气泡的缩放
     
     // UI组件
-    QListView *m_chatListView;  // 对话显示区域
-    QStandardItemModel *m_chatModel;  // 数据模型
-    ChatBubbleDelegate *m_bubbleDelegate;  // 自定义绘制
-    QLineEdit *m_inputField;
+    QScrollArea *m_scrollArea;     // 滚动区域
+    QWidget *m_chatContainer;      // 消息容器
+    QVBoxLayout *m_chatLayout;     // 消息布局
+    QTextEdit *m_inputField;       // 改为 QTextEdit 支持多行
     QPushButton *m_sendButton;
+    QPushButton *m_stopButton;     // 终止输出
     QPushButton *m_analyzeButton;  // 分析代码
     QPushButton *m_hintButton;     // 思路
     QPushButton *m_conceptButton;  // 知识点
     QPushButton *m_newChatButton;  // 新对话
     QPushButton *m_historyButton;  // 历史记录
+    qreal m_fontScale;             // 字体缩放比例
     
     // 核心组件
     OllamaClient *m_aiClient;
@@ -93,7 +102,7 @@ private:
     QVector<ChatMessage> m_messages;
     QString m_currentAssistantMessage;  // 当前正在接收的AI消息
     bool m_isReceivingMessage;  // 是否正在接收流式消息
-    QStandardItem *m_currentAssistantItem;  // 当前AI消息的item
+    ChatBubbleWidget *m_currentAssistantBubble;  // 当前AI消息的气泡
     
     // 费曼学习法相关
     int m_questionCount;  // AI提问次数

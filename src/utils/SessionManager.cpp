@@ -34,6 +34,15 @@ QJsonObject SessionState::toJson() const
     // 题库信息
     json["questionBankPath"] = questionBankPath;
     json["currentQuestionIndex"] = currentQuestionIndex;
+    json["currentQuestionId"] = currentQuestionId;
+    
+    // 题库面板状态
+    QJsonArray expandedArray;
+    for (const QString &path : expandedBankPaths) {
+        expandedArray.append(path);
+    }
+    json["expandedBankPaths"] = expandedArray;
+    json["selectedQuestionPath"] = selectedQuestionPath;
     
     // 窗口状态
     json["windowGeometry"] = QString(windowGeometry.toBase64());
@@ -72,6 +81,16 @@ SessionState SessionState::fromJson(const QJsonObject &json)
     // 题库信息
     state.questionBankPath = json["questionBankPath"].toString();
     state.currentQuestionIndex = json["currentQuestionIndex"].toInt();
+    state.currentQuestionId = json["currentQuestionId"].toString();
+    
+    // 题库面板状态
+    if (json.contains("expandedBankPaths")) {
+        QJsonArray expandedArray = json["expandedBankPaths"].toArray();
+        for (const QJsonValue &value : expandedArray) {
+            state.expandedBankPaths.append(value.toString());
+        }
+    }
+    state.selectedQuestionPath = json["selectedQuestionPath"].toString();
     
     // 窗口状态
     if (json.contains("windowGeometry")) {
@@ -112,42 +131,32 @@ SessionState SessionState::fromJson(const QJsonObject &json)
 }
 
 // 基本会话管理
-void SessionManager::saveSession(const QString &questionBankPath, int currentQuestionIndex)
+void SessionManager::saveSession(const QString &questionBankPath, int currentQuestionIndex, const QString &questionId)
 {
-    QDir dir("data");
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
+    // 加载现有的 SessionState 并更新
+    SessionState state = loadSessionState();
+    state.questionBankPath = questionBankPath;
+    state.currentQuestionIndex = currentQuestionIndex;
+    state.currentQuestionId = questionId;
+    state.lastSaved = QDateTime::currentDateTime();
     
-    QJsonObject json;
-    json["questionBankPath"] = questionBankPath;
-    json["currentQuestionIndex"] = currentQuestionIndex;
-    json["lastSaved"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-    
-    QFile file(sessionFilePath());
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(json).toJson());
-        file.close();
-    }
+    // 保存完整的 SessionState
+    saveSessionState(state);
 }
 
 bool SessionManager::loadSession(QString &questionBankPath, int &currentQuestionIndex)
 {
-    QFile file(sessionFilePath());
-    if (!file.open(QIODevice::ReadOnly)) {
-        return false;
-    }
-    
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-    
-    if (!doc.isObject()) {
-        return false;
-    }
-    
-    QJsonObject json = doc.object();
-    questionBankPath = json["questionBankPath"].toString();
-    currentQuestionIndex = json["currentQuestionIndex"].toInt();
+    QString questionId;  // 忽略题目ID
+    return loadSession(questionBankPath, currentQuestionIndex, questionId);
+}
+
+bool SessionManager::loadSession(QString &questionBankPath, int &currentQuestionIndex, QString &questionId)
+{
+    // 从完整的 SessionState 加载
+    SessionState state = loadSessionState();
+    questionBankPath = state.questionBankPath;
+    currentQuestionIndex = state.currentQuestionIndex;
+    questionId = state.currentQuestionId;
     
     return !questionBankPath.isEmpty();
 }
@@ -420,4 +429,25 @@ QStringList SessionManager::listBackups()
     }
     
     return backups;
+}
+
+// 题库面板状态管理
+void SessionManager::savePanelState(const QStringList &expandedPaths, const QString &selectedQuestionPath)
+{
+    // 加载现有的 SessionState 并更新面板状态
+    SessionState state = loadSessionState();
+    state.expandedBankPaths = expandedPaths;
+    state.selectedQuestionPath = selectedQuestionPath;
+    state.lastSaved = QDateTime::currentDateTime();
+    
+    // 保存完整的 SessionState
+    saveSessionState(state);
+}
+
+bool SessionManager::loadPanelState(QStringList &expandedPaths, QString &selectedQuestionPath)
+{
+    SessionState state = loadSessionState();
+    expandedPaths = state.expandedBankPaths;
+    selectedQuestionPath = state.selectedQuestionPath;
+    return !expandedPaths.isEmpty() || !selectedQuestionPath.isEmpty();
 }

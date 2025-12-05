@@ -17,6 +17,7 @@ public:
     void setCode(const QString &code);
     QString code() const;
     void setQuestionId(const QString &id);
+    QString getQuestionId() const { return m_currentQuestionId; }
     
     // 获取AutoSaver（用于设置版本管理器）
     AutoSaver* autoSaver() const { return m_autoSaver; }
@@ -44,9 +45,15 @@ private:
     void setupSyntaxChecker();
     void setupErrorIndicators();
     bool handleBracketCompletion(QKeyEvent *event);
+    bool shouldCompleteAngleBracket();  // 判断是否应该补全尖括号
+    bool handleDotCompletion();  // 处理点号补全（STL容器成员）
+    bool handleArrowCompletion();  // 处理箭头操作符补全（迭代器等）
+    bool handleScopeCompletion();  // 处理作用域操作符补全（std::等）
+    void handleKeywordCompletion();  // 处理关键字和常用函数补全
     void insertMatchingBracket(const QString &openBracket, const QString &closeBracket);
     void markErrors(const QVector<SyntaxError> &errors);
     void clearErrorMarkers();
+    void toggleComment();  // 切换注释
     
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

@@ -10,6 +10,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTabWidget>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
@@ -134,9 +140,62 @@ void SettingsDialog::setupUI()
         }
     )");
     
-    m_ollamaModelEdit = new QLineEdit(localTab);
-    m_ollamaModelEdit->setPlaceholderText("qwen2.5:7b");
-    m_ollamaModelEdit->setStyleSheet(m_ollamaUrlEdit->styleSheet());
+    // 模型选择下拉框（可编辑）
+    m_ollamaModelCombo = new QComboBox(localTab);
+    m_ollamaModelCombo->setEditable(true);
+    m_ollamaModelCombo->setPlaceholderText("选择或输入模型名称");
+    m_ollamaModelCombo->setStyleSheet(R"(
+        QComboBox {
+            background-color: #1a1a1a;
+            color: #e8e8e8;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        QComboBox:focus {
+            border-color: #660000;
+        }
+        QComboBox::drop-down {
+            border: none;
+            width: 30px;
+        }
+        QComboBox::down-arrow {
+            image: none;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #e8e8e8;
+            margin-right: 10px;
+        }
+        QComboBox QAbstractItemView {
+            background-color: #1a1a1a;
+            color: #e8e8e8;
+            border: 2px solid #660000;
+            selection-background-color: #660000;
+        }
+    )");
+    
+    // 检测模型按钮
+    m_detectModelsBtn = new QPushButton("🔍 检测模型", localTab);
+    m_detectModelsBtn->setStyleSheet(R"(
+        QPushButton {
+            background-color: #2a5a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+        QPushButton:hover {
+            background-color: #3a7a3a;
+        }
+        QPushButton:pressed {
+            background-color: #1a4a1a;
+        }
+    )");
+    
+    QHBoxLayout *modelLayout = new QHBoxLayout();
+    modelLayout->addWidget(m_ollamaModelCombo, 1);
+    modelLayout->addWidget(m_detectModelsBtn);
     
     QLabel *urlLabel = new QLabel("服务地址:", localTab);
     urlLabel->setStyleSheet("color: #e8e8e8; font-weight: bold;");
@@ -144,15 +203,16 @@ void SettingsDialog::setupUI()
     modelLabel->setStyleSheet("color: #e8e8e8; font-weight: bold;");
     
     ollamaForm->addRow(urlLabel, m_ollamaUrlEdit);
-    ollamaForm->addRow(modelLabel, m_ollamaModelEdit);
+    ollamaForm->addRow(modelLabel, modelLayout);
     
     localLayout->addLayout(ollamaForm);
     
     QLabel *localTip = new QLabel(
         "💡 提示：\n"
         "1. 访问 https://ollama.ai 下载安装\n"
-        "2. 运行命令：ollama pull qwen2.5:7b\n"
-        "3. 启动服务：ollama serve",
+        "2. 运行命令：ollama pull qwen2.5:7b（或其他模型）\n"
+        "3. 启动服务：ollama serve\n"
+        "4. 点击\"检测模型\"按钮自动识别已安装的模型",
         localTab
     );
     localTip->setStyleSheet("color: #888; font-size: 9pt; margin-top: 10px;");
@@ -339,6 +399,7 @@ void SettingsDialog::setupUI()
     connect(m_browseCompilerBtn, &QPushButton::clicked, this, &SettingsDialog::onBrowseCompiler);
     connect(m_testCompilerBtn, &QPushButton::clicked, this, &SettingsDialog::onTestCompiler);
     connect(m_detectCompilerBtn, &QPushButton::clicked, this, &SettingsDialog::onDetectCompiler);
+    connect(m_detectModelsBtn, &QPushButton::clicked, this, &SettingsDialog::onDetectOllamaModels);
     connect(m_saveBtn, &QPushButton::clicked, this, &SettingsDialog::onSave);
     connect(m_cancelBtn, &QPushButton::clicked, this, &SettingsDialog::onCancel);
 }
@@ -349,7 +410,11 @@ void SettingsDialog::loadSettings()
     
     m_compilerPathEdit->setText(config.compilerPath());
     m_ollamaUrlEdit->setText(config.ollamaUrl());
-    m_ollamaModelEdit->setText(config.ollamaModel());
+    
+    // 设置当前模型到下拉框
+    QString currentModel = config.ollamaModel();
+    m_ollamaModelCombo->setCurrentText(currentModel);
+    
     m_cloudApiKeyEdit->setText(config.cloudApiKey());
     
     // 根据当前模式选择标签页
@@ -367,42 +432,50 @@ void SettingsDialog::saveSettings()
     // 保存编译器配置
     config.setCompilerPath(m_compilerPathEdit->text());
     
-    // 保存AI配置
+    // 保存AI配置 - 始终保存所有配置，避免丢失
     QString cloudApiKey = m_cloudApiKeyEdit->text().trimmed();
-    QString ollamaModel = m_ollamaModelEdit->text().trimmed();
+    QString ollamaModel = m_ollamaModelCombo->currentText().trimmed();
     QString ollamaUrl = m_ollamaUrlEdit->text().trimmed();
     
-    // 获取当前选中的标签页
+    // 保存本地Ollama配置（如果有）
+    if (!ollamaModel.isEmpty()) {
+        config.setOllamaModel(ollamaModel);
+        config.setOllamaUrl(ollamaUrl.isEmpty() ? "http://localhost:11434" : ollamaUrl);
+    }
+    
+    // 保存云端API配置（如果有）
+    if (!cloudApiKey.isEmpty()) {
+        config.setCloudApiKey(cloudApiKey);
+    }
+    
+    // 获取当前选中的标签页，决定使用哪种模式
     int currentTab = m_aiTabWidget->currentIndex();
     
     if (currentTab == 0) {
         // 本地Ollama标签页
-        if (!ollamaModel.isEmpty()) {
-            // 保存本地配置（不清空云端配置）
-            config.setOllamaModel(ollamaModel);
-            config.setOllamaUrl(ollamaUrl.isEmpty() ? "http://localhost:11434" : ollamaUrl);
-            config.setUseCloudMode(false);  // 设置当前使用本地模式
-            
-            QMessageBox::information(this, "配置成功",
-                QString("已切换到本地Ollama模式\n\n模型：%1").arg(ollamaModel));
-        } else {
-            QMessageBox::warning(this, "配置错误", "请输入本地模型名称");
+        if (ollamaModel.isEmpty()) {
+            QMessageBox::warning(this, "配置错误", "请输入本地模型名称或点击\"检测模型\"");
             return;
         }
+        
+        config.setUseCloudMode(false);  // 设置当前使用本地模式
+        QMessageBox::information(this, "配置成功",
+            QString("✅ 已切换到本地Ollama模式\n\n"
+                    "模型：%1\n"
+                    "地址：%2\n\n"
+                    "💡 云端API配置已保留").arg(ollamaModel, ollamaUrl.isEmpty() ? "http://localhost:11434" : ollamaUrl));
     } else {
         // 云端API标签页
-        if (!cloudApiKey.isEmpty()) {
-            // 保存云端配置（不清空本地配置）
-            config.setCloudApiKey(cloudApiKey);
-            config.setUseCloudMode(true);  // 设置当前使用云端模式
-            
-            QMessageBox::information(this, "配置成功",
-                "已切换到云端API模式\n\n"
-                "AI分析功能将使用云端API服务（DeepSeek）");
-        } else {
+        if (cloudApiKey.isEmpty()) {
             QMessageBox::warning(this, "配置错误", "请输入API Key");
             return;
         }
+        
+        config.setUseCloudMode(true);  // 设置当前使用云端模式
+        QMessageBox::information(this, "配置成功",
+            "✅ 已切换到云端API模式\n\n"
+            "AI分析功能将使用云端API服务\n\n"
+            "💡 本地Ollama配置已保留");
     }
     
     config.save();
@@ -472,8 +545,113 @@ void SettingsDialog::onDetectCompiler()
 void SettingsDialog::onSave()
 {
     saveSettings();
-    QMessageBox::information(this, "保存成功", "设置已保存\n\n部分设置可能需要重启程序后生效");
+    
+    // 发送AI配置更改信号
+    emit aiConfigChanged();
+    
+    QMessageBox::information(this, "保存成功", "设置已保存并立即生效");
     accept();
+}
+
+void SettingsDialog::onDetectOllamaModels()
+{
+    QString ollamaUrl = m_ollamaUrlEdit->text().trimmed();
+    if (ollamaUrl.isEmpty()) {
+        ollamaUrl = "http://localhost:11434";
+        m_ollamaUrlEdit->setText(ollamaUrl);
+    }
+    
+    // 禁用按钮，显示检测中
+    m_detectModelsBtn->setEnabled(false);
+    m_detectModelsBtn->setText("🔄 检测中...");
+    
+    // 创建临时的OllamaClient来检测模型
+    QNetworkAccessManager *tempManager = new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl(ollamaUrl + "/api/tags"));
+    request.setTransferTimeout(5000);
+    
+    QNetworkReply *reply = tempManager->get(request);
+    
+    // 连接完成信号
+    connect(reply, &QNetworkReply::finished, this, [this, reply, tempManager]() {
+        // 恢复按钮状态
+        m_detectModelsBtn->setEnabled(true);
+        m_detectModelsBtn->setText("🔍 检测模型");
+        
+        if (reply->error() == QNetworkReply::NoError) {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            
+            if (!doc.isNull() && doc.isObject()) {
+                QJsonArray modelsArray = doc.object()["models"].toArray();
+                
+                if (modelsArray.isEmpty()) {
+                    QMessageBox::information(this, "检测结果",
+                        "Ollama服务运行正常，但未检测到已安装的模型\n\n"
+                        "请先下载模型，例如：\n"
+                        "ollama pull qwen2.5:7b\n"
+                        "ollama pull llama3.2:3b\n"
+                        "ollama pull deepseek-coder:6.7b");
+                } else {
+                    // 清空现有选项
+                    m_ollamaModelCombo->clear();
+                    
+                    QStringList modelNames;
+                    for (const QJsonValue &val : modelsArray) {
+                        QString modelName = val.toObject()["name"].toString();
+                        if (!modelName.isEmpty()) {
+                            modelNames.append(modelName);
+                            m_ollamaModelCombo->addItem(modelName);
+                        }
+                    }
+                    
+                    // 自动选择第一个模型
+                    if (!modelNames.isEmpty()) {
+                        m_ollamaModelCombo->setCurrentIndex(0);
+                    }
+                    
+                    QMessageBox::information(this, "检测成功",
+                        QString("✅ 检测到 %1 个已安装的模型：\n\n%2\n\n"
+                                "已自动选择第一个模型，你也可以手动选择其他模型")
+                        .arg(modelNames.size())
+                        .arg(modelNames.join("\n")));
+                }
+            } else {
+                QMessageBox::warning(this, "检测失败",
+                    "无法解析Ollama服务响应\n\n"
+                    "请检查Ollama服务是否正常运行");
+            }
+        } else {
+            QString errorMsg;
+            switch (reply->error()) {
+                case QNetworkReply::ConnectionRefusedError:
+                    errorMsg = "无法连接到Ollama服务\n\n"
+                              "请检查：\n"
+                              "1. Ollama是否已安装\n"
+                              "2. 服务是否正在运行（ollama serve）\n"
+                              "3. 服务地址是否正确";
+                    break;
+                case QNetworkReply::HostNotFoundError:
+                    errorMsg = "找不到Ollama服务器\n\n"
+                              "请检查服务地址配置是否正确";
+                    break;
+                case QNetworkReply::TimeoutError:
+                    errorMsg = "连接超时\n\n"
+                              "请检查网络连接和Ollama服务状态";
+                    break;
+                default:
+                    errorMsg = QString("连接失败：%1\n\n"
+                                      "请检查Ollama服务状态")
+                              .arg(reply->errorString());
+                    break;
+            }
+            
+            QMessageBox::warning(this, "检测失败", errorMsg);
+        }
+        
+        reply->deleteLater();
+        tempManager->deleteLater();
+    });
 }
 
 void SettingsDialog::onCancel()

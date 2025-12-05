@@ -12,11 +12,14 @@ public:
     explicit OllamaClient(QObject *parent = nullptr);
     
     void setBaseUrl(const QString &url);
+    QString baseUrl() const { return m_baseUrl; }
     void setModel(const QString &model);
+    QString model() const { return m_model; }
     QString currentModel() const { return m_model; }
     
     // 云端API支持
     void setApiKey(const QString &apiKey);
+    QString apiKey() const { return m_apiKey; }
     void setCloudMode(bool enabled);
     bool isCloudMode() const { return m_cloudMode; }
     
@@ -32,6 +35,9 @@ public:
     
     // 获取可用模型列表
     QStringList getAvailableModels();
+    
+    // 终止当前请求
+    void abortCurrentRequest();
 
 signals:
     // 流式输出信号
@@ -49,6 +55,8 @@ private:
     QString m_model;
     QString m_apiKey;
     bool m_cloudMode;
+    QNetworkReply *m_currentReply;  // 当前正在进行的请求
+    bool m_isAborting;  // 标记是否正在终止请求
 };
 
 #endif // OLLAMACLIENT_H

@@ -13,10 +13,14 @@ class SettingsDialog : public QDialog
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     
+signals:
+    void aiConfigChanged();  // AI配置已更改信号
+    
 private slots:
     void onBrowseCompiler();
     void onTestCompiler();
     void onDetectCompiler();
+    void onDetectOllamaModels();  // 检测本地Ollama模型
     void onSave();
     void onCancel();
     
@@ -34,7 +38,8 @@ private:
     // AI设置
     QTabWidget *m_aiTabWidget;
     QLineEdit *m_ollamaUrlEdit;
-    QLineEdit *m_ollamaModelEdit;
+    QComboBox *m_ollamaModelCombo;  // 改为下拉框，支持选择检测到的模型
+    QPushButton *m_detectModelsBtn;  // 检测模型按钮
     QLineEdit *m_cloudApiKeyEdit;
     
     // 编辑器设置

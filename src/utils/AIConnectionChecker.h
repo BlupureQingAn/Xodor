@@ -34,7 +34,6 @@ signals:
     
 private slots:
     void handleOllamaReply(QNetworkReply *reply);
-    void handleCloudApiReply(QNetworkReply *reply);
     
 private:
     QNetworkAccessManager *m_networkManager;

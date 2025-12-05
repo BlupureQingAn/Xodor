@@ -260,7 +260,7 @@ QString StyleManager::getAIPanelStyle()
     return getQuestionPanelStyle();
 }
 
-QString StyleManager::getQuestionListStyle()
+QString StyleManager::getQuestionBankPanelStyle()
 {
     return QString(R"(
         QWidget {

@@ -399,6 +399,25 @@ QString SmartQuestionImporter::buildAIPrompt(const FileChunk &chunk)
    - 边界条件（空输入、最小值、最大值）
    - 特殊情况（负数、零、重复、无解）
 
+⚠️ 【测试数据生成的严格要求 - 非常重要！】
+1. 所有测试数据必须是完整的、可直接使用的实际数据
+2. 绝对禁止使用以下任何形式：
+   - 省略号：...、...（重复N次）、...重复
+   - 文字描述：（此处省略）、（重复n次）、（数据过长省略）
+   - 符号代替：[...]、<省略>、【略】
+   - 不完整数据：描述说100行但只给几行
+3. 如果数据量大，必须生成完整的实际数据
+4. 输入输出必须严格符合题目格式要求
+5. 每个测试用例都必须可以直接复制粘贴使用
+
+❌ 错误示例：
+input: "100 1\n1 0\n...（重复98行）\n0 0"
+output: "1\n2\n...（共100行）"
+
+✅ 正确示例：
+input: "5 1\n1 0\n1 0\n1 0\n1 0\n0 0"
+output: "1\n2\n3\n4\n5"
+
 JSON格式：
 {
   "questions": [
@@ -408,9 +427,9 @@ JSON格式：
       "description": "完整描述",
       "tags": ["数组", "哈希表"],
       "testCases": [
-        {"input": "输入", "output": "输出", "description": "基本测试"},
-        {"input": "输入", "output": "输出", "description": "边界条件"},
-        {"input": "输入", "output": "输出", "description": "特殊情况"}
+        {"input": "完整的实际输入数据", "output": "完整的实际输出数据", "description": "基本测试"},
+        {"input": "完整的实际输入数据", "output": "完整的实际输出数据", "description": "边界条件"},
+        {"input": "完整的实际输入数据", "output": "完整的实际输出数据", "description": "特殊情况"}
       ]
     }
   ]
@@ -421,7 +440,7 @@ JSON格式：
 )";
     
     prompt += chunk.content;
-    prompt += "\n---\n\n请返回纯JSON，不要其他文字。";
+    prompt += "\n---\n\n请返回纯JSON，不要其他文字。记住：测试数据必须是完整的实际数据，不能有任何省略！";
     
     return prompt;
 }
