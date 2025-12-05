@@ -10,8 +10,10 @@
 OllamaClient::OllamaClient(QObject *parent)
     : AIService(parent)
     , m_baseUrl("http://localhost:11434")
-    , m_model("qwen2.5:7b")
+    , m_model("qwen2.5-coder:7b")  // 默认使用qwen2.5-coder
     , m_cloudMode(false)
+    , m_currentReply(nullptr)
+    , m_isAborting(false)
 {
     m_networkManager = new QNetworkAccessManager(this);
     connect(m_networkManager, &QNetworkAccessManager::finished,
@@ -36,16 +38,11 @@ void OllamaClient::setApiKey(const QString &apiKey)
 void OllamaClient::setCloudMode(bool enabled)
 {
     m_cloudMode = enabled;
-    if (m_cloudMode) {
-        // 云端API使用OpenAI兼容的端点
-        m_baseUrl = "https://api.deepseek.com";  // 默认使用DeepSeek
-        m_model = "deepseek-chat";  // 默认模型
-        qDebug() << "[OllamaClient] 切换到云端API模式";
-    } else {
-        // 本地Ollama
-        m_baseUrl = "http://localhost:11434";
-        qDebug() << "[OllamaClient] 切换到本地Ollama模式";
-    }
+    qDebug() << "[OllamaClient] Cloud mode set to:" << enabled;
+    
+    // 注意：不在这里设置baseUrl和model
+    // 这些应该由调用者根据配置设置
+    // 这样可以支持不同的云端API提供商
 }
 
 void OllamaClient::analyzeCode(const QString &questionDesc, const QString &code)
@@ -162,12 +159,18 @@ void OllamaClient::sendRequest(const QString &prompt, const QString &context)
         
         qDebug() << "[OllamaClient] 云端API模式 - 发送请求到:" << url.toString();
     } else {
-        // 本地Ollama格式
+        // 本地Ollama格式 - 使用新的 /api/chat 端点
+        QJsonArray messages;
+        QJsonObject message;
+        message["role"] = "user";
+        message["content"] = prompt;
+        messages.append(message);
+        
         json["model"] = m_model;
-        json["prompt"] = prompt;
+        json["messages"] = messages;
         json["stream"] = true;
         
-        url = QUrl(m_baseUrl + "/api/generate");
+        url = QUrl(m_baseUrl + "/api/chat");
         
         qDebug() << "[OllamaClient] 本地Ollama模式 - 发送请求到:" << url.toString();
     }
@@ -230,8 +233,15 @@ void OllamaClient::sendRequest(const QString &prompt, const QString &context)
                         chunk = delta["content"].toString();
                     }
                 } else {
-                    // 本地Ollama格式: response
-                    chunk = obj["response"].toString();
+                    // 本地Ollama格式
+                    // 新API (/api/chat): message.content
+                    // 旧API (/api/generate): response
+                    if (obj.contains("message")) {
+                        QJsonObject message = obj["message"].toObject();
+                        chunk = message["content"].toString();
+                    } else if (obj.contains("response")) {
+                        chunk = obj["response"].toString();
+                    }
                 }
                 
                 if (!chunk.isEmpty()) {
@@ -274,6 +284,13 @@ void OllamaClient::handleNetworkReply(QNetworkReply *reply)
     qDebug() << "[OllamaClient] Reply对象:" << reply;
     qDebug() << "[OllamaClient] URL:" << reply->url().toString();
     
+    // 如果正在终止或这不是当前请求，忽略它
+    if (m_isAborting) {
+        qDebug() << "[OllamaClient] 正在终止请求，忽略回调";
+        reply->deleteLater();
+        return;
+    }
+    
     QString context = reply->property("context").toString();
     
     qDebug() << "[OllamaClient] 收到响应, Context:" << context;
@@ -281,6 +298,13 @@ void OllamaClient::handleNetworkReply(QNetworkReply *reply)
     qDebug() << "[OllamaClient] 错误信息:" << reply->errorString();
     
     if (reply->error() != QNetworkReply::NoError) {
+        // 忽略用户主动取消的错误
+        if (reply->error() == QNetworkReply::OperationCanceledError) {
+            qDebug() << "[OllamaClient] 请求已被用户取消 (handleNetworkReply, context:" << context << ")";
+            reply->deleteLater();
+            return;
+        }
+        
         QString errorMsg;
         
         // 根据错误类型提供友好的错误信息
@@ -331,8 +355,8 @@ void OllamaClient::handleNetworkReply(QNetworkReply *reply)
     qDebug() << "[OllamaClient] 完整响应长度:" << response.length();
     qDebug() << "[OllamaClient] 响应前100字符:" << response.left(100);
     
-    if (context == "code_analysis" || context == "custom" || context == "question_parse") {
-        qDebug() << "[OllamaClient] 发送 codeAnalysisReady 信号";
+    if (context == "code_analysis" || context == "custom" || context == "question_parse" || context == "ai_judge") {
+        qDebug() << "[OllamaClient] 发送 codeAnalysisReady 信号 (context:" << context << ")";
         emit codeAnalysisReady(response);
     } else if (context == "generate_questions") {
         // 解析生成的题目JSON
@@ -347,6 +371,13 @@ void OllamaClient::handleNetworkReply(QNetworkReply *reply)
 
 void OllamaClient::sendChatMessage(const QString &message, const QString &systemPrompt)
 {
+    // 如果有正在进行的请求，先终止它
+    if (m_currentReply) {
+        m_currentReply->abort();
+        m_currentReply->deleteLater();
+        m_currentReply = nullptr;
+    }
+    
     QJsonObject json;
     QUrl url;
     
@@ -371,22 +402,39 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
         json["model"] = m_model;
         json["messages"] = messages;
         json["stream"] = true;
+        json["max_tokens"] = 500;  // 限制输出长度
         
         url = QUrl(m_baseUrl + "/v1/chat/completions");
         
         qDebug() << "[OllamaClient] 云端聊天模式 - 发送消息";
     } else {
-        // 本地Ollama格式
-        QString fullPrompt = message;
+        // 本地Ollama格式 - 使用新的 /api/chat 端点
+        QJsonArray messages;
+        
+        // 添加系统提示词
         if (!systemPrompt.isEmpty()) {
-            fullPrompt = systemPrompt + "\n\n" + message;
+            QJsonObject systemMsg;
+            systemMsg["role"] = "system";
+            systemMsg["content"] = systemPrompt;
+            messages.append(systemMsg);
         }
         
+        // 添加用户消息
+        QJsonObject userMsg;
+        userMsg["role"] = "user";
+        userMsg["content"] = message;
+        messages.append(userMsg);
+        
         json["model"] = m_model;
-        json["prompt"] = fullPrompt;
+        json["messages"] = messages;
         json["stream"] = true;
         
-        url = QUrl(m_baseUrl + "/api/generate");
+        // 添加参数限制输出长度
+        QJsonObject options;
+        options["num_predict"] = 500;  // 限制生成的token数量
+        json["options"] = options;
+        
+        url = QUrl(m_baseUrl + "/api/chat");
         
         qDebug() << "[OllamaClient] 本地聊天模式 - 发送消息";
     }
@@ -402,11 +450,13 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
     request.setTransferTimeout(300000);
     
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(json).toJson());
+    m_currentReply = reply;  // 记录当前请求
     reply->setProperty("context", "chat");
     reply->setProperty("fullResponse", QString());
     
     // 连接readyRead信号以处理流式数据
     connect(reply, &QNetworkReply::readyRead, this, [this, reply]() {
+        QString context = reply->property("context").toString();
         QString fullResponse = reply->property("fullResponse").toString();
         
         // 读取新数据
@@ -443,19 +493,33 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
                     }
                 } else {
                     // 本地Ollama格式
-                    chunk = obj["response"].toString();
+                    // 新API (/api/chat): message.content
+                    // 旧API (/api/generate): response
+                    if (obj.contains("message")) {
+                        QJsonObject message = obj["message"].toObject();
+                        chunk = message["content"].toString();
+                    } else if (obj.contains("response")) {
+                        chunk = obj["response"].toString();
+                    }
                 }
                 
                 if (!chunk.isEmpty()) {
                     fullResponse += chunk;
-                    // 发射流式数据块信号
-                    emit streamingChunk(chunk);
+                    
+                    // 只为非AI判题的请求发送流式数据块信号
+                    // AI判题使用 "ai_judge" context，不应该显示在AI导师面板
+                    if (context != "ai_judge") {
+                        emit streamingChunk(chunk);
+                    }
                 }
                 
                 // 检查是否完成
                 bool done = obj["done"].toBool();
                 if (done) {
-                    emit streamingFinished();
+                    // 只为非AI判题的请求发送完成信号
+                    if (context != "ai_judge") {
+                        emit streamingFinished();
+                    }
                 }
             }
         }
@@ -466,13 +530,95 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
     
     // 错误处理
     connect(reply, &QNetworkReply::errorOccurred, this, [this, reply](QNetworkReply::NetworkError code) {
-        QString errorMsg = QString("网络错误: %1").arg(reply->errorString());
-        emit error(errorMsg);
+        QString context = reply->property("context").toString();
+        
+        // 忽略用户主动取消的错误
+        if (code == QNetworkReply::OperationCanceledError) {
+            qDebug() << "[OllamaClient] 请求已被用户取消 (context:" << context << ")";
+            reply->deleteLater();
+            return;
+        }
+        
+        // 只为聊天context发送错误信号到UI
+        // 其他context（如ai_judge）的错误不应该显示在聊天界面
+        if (context == "chat") {
+            QString errorMsg;
+            
+            // 根据错误类型提供友好的错误信息
+            switch (code) {
+                case QNetworkReply::ConnectionRefusedError:
+                    errorMsg = "无法连接到AI服务\n\n"
+                              "请检查：\n"
+                              "1. AI服务是否正在运行\n"
+                              "2. 服务地址是否正确\n"
+                              "3. 防火墙是否阻止连接";
+                    break;
+                    
+                case QNetworkReply::HostNotFoundError:
+                    errorMsg = "找不到AI服务器\n\n"
+                              "请检查服务地址配置是否正确";
+                    break;
+                    
+                case QNetworkReply::TimeoutError:
+                    errorMsg = "请求超时\n\n"
+                              "可能原因：\n"
+                              "1. 网络连接不稳定\n"
+                              "2. AI服务响应缓慢\n"
+                              "3. 模型正在加载中";
+                    break;
+                    
+                case QNetworkReply::ContentNotFoundError:
+                    errorMsg = "API端点不存在\n\n"
+                              "可能原因：\n"
+                              "1. Ollama版本过旧，请更新到最新版本\n"
+                              "2. API地址配置错误\n"
+                              "3. 请在设置中检测并选择正确的模型";
+                    break;
+                    
+                default:
+                    errorMsg = QString("网络请求失败\n\n"
+                                      "错误信息：%1\n\n"
+                                      "请检查AI服务状态").arg(reply->errorString());
+                    break;
+            }
+            
+            emit error(errorMsg);
+        } else {
+            // 非聊天context的错误只记录日志，不显示在UI
+            qWarning() << "[OllamaClient] 网络错误 (context:" << context << "):" << reply->errorString();
+        }
+        
         reply->deleteLater();
     });
     
     // 完成后清理
-    connect(reply, &QNetworkReply::finished, this, [reply]() {
-        reply->deleteLater();
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        // 只有在不是终止状态时才处理
+        if (!m_isAborting && m_currentReply == reply) {
+            m_currentReply = nullptr;
+        }
     });
+}
+
+void OllamaClient::abortCurrentRequest()
+{
+    if (m_currentReply && !m_isAborting) {
+        qDebug() << "[OllamaClient] 终止当前请求";
+        m_isAborting = true;  // 设置终止标志
+        
+        // 保存指针并清空成员变量（这样handleNetworkReply会忽略它）
+        QNetworkReply *replyToAbort = m_currentReply;
+        m_currentReply = nullptr;
+        
+        // 断开所有信号连接，避免触发任何回调
+        replyToAbort->disconnect();
+        
+        // 终止请求
+        replyToAbort->abort();
+        replyToAbort->deleteLater();
+        
+        m_isAborting = false;  // 重置标志
+        
+        qDebug() << "[OllamaClient] 请求已终止";
+    }
 }
