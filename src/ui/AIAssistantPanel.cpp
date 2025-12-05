@@ -48,28 +48,21 @@ void AIAssistantPanel::setupUI()
     mainLayout->setContentsMargins(8, 8, 8, 8);
     mainLayout->setSpacing(8);
     
-    // 标题栏
-    QHBoxLayout *titleLayout = new QHBoxLayout();
-    QLabel *titleLabel = new QLabel("🤖 AI 导师", this);
-    QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(12);
-    titleFont.setBold(true);
-    titleLabel->setFont(titleFont);
+    // 顶部按钮栏（新对话和历史记录）
+    QHBoxLayout *topButtonLayout = new QHBoxLayout();
     
     m_newChatButton = new QPushButton("🆕 新对话", this);
     m_newChatButton->setToolTip("开始新对话");
     m_newChatButton->setFixedHeight(30);
     
-    m_historyButton = new QPushButton("📜", this);
+    m_historyButton = new QPushButton("📜 历史", this);
     m_historyButton->setToolTip("查看历史记录");
-    m_historyButton->setFixedSize(30, 30);
+    m_historyButton->setFixedHeight(30);
     
-    titleLayout->addWidget(titleLabel);
-    titleLayout->addStretch();
-    titleLayout->addWidget(m_newChatButton);
-    titleLayout->addWidget(m_historyButton);
+    topButtonLayout->addWidget(m_newChatButton);
+    topButtonLayout->addWidget(m_historyButton);
     
-    mainLayout->addLayout(titleLayout);
+    mainLayout->addLayout(topButtonLayout);
     
     // 对话显示区域（使用QScrollArea + ChatBubbleWidget）
     m_scrollArea = new QScrollArea(this);
