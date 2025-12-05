@@ -118,7 +118,10 @@ void HistoryWidget::loadHistory()
 {
     m_historyTable->setRowCount(0);
     
+    // 重新加载进度数据
     ProgressManager &pm = ProgressManager::instance();
+    pm.load();  // 确保数据是最新的
+    
     QuestionBankManager &qbm = QuestionBankManager::instance();
     
     // 获取所有有进度记录的题目
