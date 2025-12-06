@@ -66,6 +66,10 @@ void QuestionBankPanel::setupUI()
             border: none;
             outline: none;
         }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
+            outline: none;
+        }
         QListWidget::item:hover {
             background-color: #323232;
         }

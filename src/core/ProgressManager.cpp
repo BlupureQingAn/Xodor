@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QDate>
 #include <QSet>
+#include <QDebug>
 #include <algorithm>
 
 ProgressManager& ProgressManager::instance()
@@ -54,9 +55,32 @@ void ProgressManager::load()
     m_progressMap.clear();
     QJsonArray arr = doc.array();
     
+    bool needsMigration = false;
+    
     for (const auto &val : arr) {
         QuestionProgressRecord record = QuestionProgressRecord::fromJson(val.toObject());
+        
+        // 数据迁移：修复已完成但正确率为0的题目
+        if ((record.status == QuestionStatus::Completed || record.status == QuestionStatus::Mastered) &&
+            record.attemptCount > 0 && record.correctCount == 0) {
+            // 这些题目之前通过了，但correctCount没有更新
+            record.correctCount = record.attemptCount;
+            needsMigration = true;
+        }
+        
+        // 数据迁移：修复AI判题通过但正确率为0的题目
+        if (record.aiJudgePassed && record.attemptCount > 0 && record.correctCount == 0) {
+            record.correctCount = record.attemptCount;
+            needsMigration = true;
+        }
+        
         m_progressMap[record.questionId] = record;
+    }
+    
+    // 如果有数据需要迁移，立即保存
+    if (needsMigration) {
+        qDebug() << "[ProgressManager] Migrated progress data for" << m_progressMap.size() << "questions";
+        save();
     }
 }
 
@@ -97,6 +121,8 @@ void ProgressManager::recordAttempt(const QString &questionId, bool correct, con
     record.attemptCount++;
     if (correct) {
         record.correctCount++;
+        // 如果本次通过，将正确次数设置为等于尝试次数，确保正确率100%
+        record.correctCount = record.attemptCount;
     }
     
     record.lastAttemptTime = QDateTime::currentDateTime();
@@ -114,11 +140,13 @@ void ProgressManager::recordAttempt(const QString &questionId, bool correct, con
         record.status = QuestionStatus::InProgress;
     }
     
-    // 如果连续3次正确，标记为已掌握
-    if (correct && record.correctCount >= 3 && record.accuracy() >= 75.0) {
-        record.status = QuestionStatus::Mastered;
-    } else if (correct) {
-        record.status = QuestionStatus::Completed;
+    // 如果通过测试，标记为已完成（但不自动标记为已掌握）
+    if (correct) {
+        // 只有当前状态不是"已掌握"时才更新为"已完成"
+        // 这样可以保留用户手动设置的"已掌握"状态
+        if (record.status != QuestionStatus::Mastered) {
+            record.status = QuestionStatus::Completed;
+        }
     }
     
     m_progressMap[questionId] = record;
@@ -238,6 +266,8 @@ void ProgressManager::recordAIJudge(const QString &questionId, bool passed, cons
     record.attemptCount++;
     if (passed) {
         record.correctCount++;
+        // 如果AI判题通过，将正确次数设置为等于尝试次数，确保正确率100%
+        record.correctCount = record.attemptCount;
     }
     
     // 更新时间
@@ -252,11 +282,9 @@ void ProgressManager::recordAIJudge(const QString &questionId, bool passed, cons
     }
     
     if (passed) {
-        // AI判定通过，更新状态为已完成
-        // 如果连续多次正确，标记为已掌握
-        if (record.correctCount >= 3 && record.accuracy() >= 75.0) {
-            record.status = QuestionStatus::Mastered;
-        } else {
+        // AI判定通过，更新状态为已完成（但不自动标记为已掌握）
+        // 只有当前状态不是"已掌握"时才更新为"已完成"
+        if (record.status != QuestionStatus::Mastered) {
             record.status = QuestionStatus::Completed;
         }
     }

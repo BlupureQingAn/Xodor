@@ -692,7 +692,7 @@ void MainWindow::loadConfiguration()
     
     m_compilerRunner->setCompilerPath(compilerPath);
     
-    // 配置AI服务
+    // 配置AI服务（静默加载，不进行连接检测）
     if (config.useCloudApi()) {
         // 使用云端API
         m_ollamaClient->setCloudMode(true);
@@ -712,6 +712,8 @@ void MainWindow::loadConfiguration()
         qDebug() << "[MainWindow]   URL:" << config.ollamaUrl();
         qDebug() << "[MainWindow]   Model:" << config.ollamaModel();
     }
+    
+    // 注意：AI连接检测在构造函数中延迟500ms后进行，避免阻塞启动
 }
 
 void MainWindow::loadLastSession()
@@ -1492,6 +1494,10 @@ void MainWindow::onShowOperationHistory()
         }
         QListWidget::item:selected {
             background-color: #660000;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
         }
     )");
     
@@ -2449,25 +2455,28 @@ void MainWindow::checkAIConnection()
     // 显示检查提示
     statusBar()->showMessage("正在检查AI服务连接...", 0);
     
-    // 开始检查
-    QString ollamaUrl = config.ollamaUrl();
-    QString ollamaModel = config.ollamaModel();
-    QString cloudApiKey = config.cloudApiKey();
-    QString cloudApiUrl = "https://api.openai.com/v1/chat/completions";
-    
-    if (ollamaUrl.isEmpty()) {
-        ollamaUrl = "http://localhost:11434";
+    // 根据用户配置的模式，只检查对应的服务
+    if (config.useCloudApi()) {
+        // 云端API模式：只检查云端API
+        QString cloudApiKey = config.cloudApiKey();
+        QString cloudApiUrl = "https://api.openai.com/v1/chat/completions";
+        checker->checkCloudApiConnection(cloudApiKey, cloudApiUrl);
+        qDebug() << "[MainWindow] 检查云端API连接...";
+    } else {
+        // 本地Ollama模式：只检查Ollama
+        QString ollamaUrl = config.ollamaUrl();
+        QString ollamaModel = config.ollamaModel();
+        
+        if (ollamaUrl.isEmpty()) {
+            ollamaUrl = "http://localhost:11434";
+        }
+        if (ollamaModel.isEmpty()) {
+            ollamaModel = "qwen";
+        }
+        
+        checker->checkOllamaConnection(ollamaUrl, ollamaModel);
+        qDebug() << "[MainWindow] 检查Ollama连接...";
     }
-    if (ollamaModel.isEmpty()) {
-        ollamaModel = "qwen";
-    }
-    
-    // 检查Ollama连接（总是检查）
-    checker->checkOllamaConnection(ollamaUrl, ollamaModel);
-    
-    // 检查云端API（总是检查，即使没有配置）
-    // 这样可以确保 m_pendingChecks 计数正确
-    checker->checkCloudApiConnection(cloudApiKey, cloudApiUrl);
 }
 
 void MainWindow::showAIConnectionStatus(const AIConnectionStatus &status)
@@ -2634,6 +2643,11 @@ void MainWindow::showAIConfigDialog(const AIConnectionStatus &status)
             }
             QListWidget::item:selected {
                 background-color: #660000;
+                color: white;
+                outline: none;
+            }
+            QListWidget::item:selected:hover {
+                background-color: #880000;
                 color: white;
             }
         )");

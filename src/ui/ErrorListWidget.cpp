@@ -88,10 +88,16 @@ ErrorListWidget::ErrorListWidget(QWidget *parent)
             padding: 4px 8px;
             border-bottom: 1px solid #2a2a2a;
             color: #cccccc;
+            outline: none;
         }
         QListWidget::item:selected {
-            background-color: #094771;
+            background-color: #660000;
             color: white;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
+            outline: none;
         }
         QListWidget::item:hover {
             background-color: #2a2d2e;

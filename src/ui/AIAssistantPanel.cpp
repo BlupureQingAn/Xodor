@@ -25,6 +25,8 @@ AIAssistantPanel::AIAssistantPanel(OllamaClient *aiClient, QWidget *parent)
     , m_hasQuestion(false)
     , m_isReceivingMessage(false)
     , m_currentAssistantBubble(nullptr)
+    , m_thinkingTimer(nullptr)
+    , m_thinkingDots(1)
     , m_questionCount(0)
     , m_userLevel("beginner")
     , m_fontScale(1.0)
@@ -72,6 +74,25 @@ void AIAssistantPanel::setupUI()
         QScrollArea {
             background-color: #1e1e1e;
             border: none;
+        }
+        QScrollBar:vertical {
+            background: #1e1e1e;
+            width: 14px;
+            margin: 0px;
+        }
+        QScrollBar::handle:vertical {
+            background: #4a4a4a;
+            border-radius: 7px;
+            min-height: 30px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #5a5a5a;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
         }
     )");
     
@@ -371,10 +392,7 @@ void AIAssistantPanel::onExplainConcept()
 
 void AIAssistantPanel::onStreamingChunk(const QString &chunk)
 {
-    if (!m_isReceivingMessage) {
-        startAssistantMessage();
-    }
-    
+    // 气泡已经在sendChatMessage中创建，直接追加内容
     appendToAssistantMessage(chunk);
 }
 
@@ -505,16 +523,29 @@ void AIAssistantPanel::startAssistantMessage()
     m_sendButton->setVisible(false);
     m_stopButton->setVisible(true);
     
-    // 创建新的AI消息气泡
-    m_currentAssistantBubble = new ChatBubbleWidget("", false, m_chatContainer);
+    // 创建新的AI消息气泡，显示"思考中"动画
+    m_currentAssistantBubble = new ChatBubbleWidget("●", false, m_chatContainer);
     m_currentAssistantBubble->setFontScale(m_fontScale);
     
     // 插入到布局中（在stretch之前）
     m_chatLayout->insertWidget(m_chatLayout->count() - 1, m_currentAssistantBubble);
+    
+    // 启动"思考中"动画
+    m_thinkingDots = 1;
+    if (!m_thinkingTimer) {
+        m_thinkingTimer = new QTimer(this);
+        connect(m_thinkingTimer, &QTimer::timeout, this, &AIAssistantPanel::updateThinkingAnimation);
+    }
+    m_thinkingTimer->start(500);  // 每500ms更新一次
 }
 
 void AIAssistantPanel::appendToAssistantMessage(const QString &chunk)
 {
+    // 停止"思考中"动画
+    if (m_thinkingTimer && m_thinkingTimer->isActive()) {
+        m_thinkingTimer->stop();
+    }
+    
     m_currentAssistantMessage += chunk;
     
     // 更新当前AI消息气泡的内容
@@ -613,6 +644,9 @@ void AIAssistantPanel::sendChatMessage(const QString &message)
         
         qDebug() << "[AIAssistantPanel] Full message length:" << fullMessage.length();
         qDebug() << "[AIAssistantPanel] Calling sendChatMessage...";
+        
+        // 立即创建"思考中"气泡
+        startAssistantMessage();
         
         // 发送消息
         m_aiClient->sendChatMessage(fullMessage, systemPrompt);
@@ -842,33 +876,28 @@ void AIAssistantPanel::loadConversationById(const QString &questionId)
 
 QString AIAssistantPanel::buildSystemPrompt()
 {
-    return R"(你是一位编程导师，帮助学生学习C++编程。
+    return R"(你是编程导师，帮助学生学习C++。
 
 【核心原则】
-1. 🎯 准确第一：确保技术建议完全正确
-2. 💡 简洁直接：少说废话，多给代码
-3. 🔍 仔细验证：分析代码前必须手动模拟执行
+1. 准确第一：确保技术建议完全正确
+2. 简洁直接：直接指出问题，多给代码
+3. 仔细验证：分析代码前手动模拟执行
 
 【回答要求】
-- 根据问题复杂度决定回答长度
-- 简单问题：一句话 + 代码示例
-- 复杂问题：可以适当展开，但避免冗长
-- 直接指出问题，不要铺垫
-- 用代码示例说明，而不是文字描述
+- 简单问题：一句话 + 代码
+- 复杂问题：可适当展开但避免冗长
+- 用代码示例说明，少文字描述
 - 一次只讲一个核心问题
+- 每次回答结尾添加简短总结（1-2句话）
 
-【回答格式参考】
-简单问题：
-"循环条件错了，应该是 `i < n`：
+【格式参考】
+简单："循环条件错了，应该是 `i < n`：
 ```cpp
-for (int i = 0; i < n; i++) {
-    // ...
-}
+for (int i = 0; i < n; i++) { }
 ```
-数组下标从0到n-1。"
+**总结**：数组下标从0到n-1。"
 
-复杂问题（可以多说一点）：
-"你的算法思路有问题，这道题需要用动态规划：
+复杂："这题需要动态规划：
 ```cpp
 int dp[n+1];
 dp[0] = 0;
@@ -876,21 +905,16 @@ for (int i = 1; i <= n; i++) {
     dp[i] = min(dp[i-1] + cost1, dp[i-2] + cost2);
 }
 ```
-dp[i]表示到第i步的最小代价。状态转移方程是从前一步或前两步转移过来。"
+dp[i]表示到第i步的最小代价。
 
-【代码分析要求】
-- 逐行读代码，理解变量作用域
-- 手动模拟执行，验证逻辑
-- 区分数组不同元素（point[0]和point[1]独立）
-- 确认分析正确再回答
+**总结**：用dp数组记录每步的最优解，从前面的状态转移过来。"
 
 【禁止】
-- ❌ 过多的鼓励性话语
-- ❌ 重复说明同一个问题
-- ❌ 没验证就指出"问题"
-- ❌ 使用过于专业的术语
+- 过多鼓励性话语
+- 重复说明
+- 未验证就指出问题
 
-记住：简洁、准确、多代码少废话。根据问题复杂度灵活调整回答长度。)";
+记住：简洁、准确、多代码少废话，结尾要有小总结。)";
 }
 
 QString AIAssistantPanel::formatMessageContent(const QString &content)
@@ -949,6 +973,29 @@ void AIAssistantPanel::scrollToBottom()
         QScrollBar *scrollBar = m_scrollArea->verticalScrollBar();
         scrollBar->setValue(scrollBar->maximum());
     });
+}
+
+void AIAssistantPanel::updateThinkingAnimation()
+{
+    if (!m_currentAssistantBubble || !m_isReceivingMessage) {
+        if (m_thinkingTimer) {
+            m_thinkingTimer->stop();
+        }
+        return;
+    }
+    
+    // 如果已经有内容了，停止动画
+    if (!m_currentAssistantMessage.isEmpty()) {
+        if (m_thinkingTimer) {
+            m_thinkingTimer->stop();
+        }
+        return;
+    }
+    
+    // 循环显示 ●、●●、●●●
+    m_thinkingDots = (m_thinkingDots % 3) + 1;
+    QString dots = QString("●").repeated(m_thinkingDots);
+    m_currentAssistantBubble->setContent(dots);
 }
 
 void AIAssistantPanel::updateAllBubbleScales()

@@ -105,6 +105,10 @@ void MockExamManagerDialog::setupUI()
         }
         QListWidget::item:selected {
             background-color: #660000;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
         }
         QListWidget::item:hover {
             background-color: #3a3a3a;

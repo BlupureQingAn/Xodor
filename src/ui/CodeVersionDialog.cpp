@@ -53,14 +53,21 @@ void CodeVersionDialog::setupUI()
             padding: 8px;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 9pt;
+            outline: none;
         }
         QListWidget::item {
             padding: 8px;
             border-radius: 4px;
             margin: 2px;
+            outline: none;
         }
         QListWidget::item:selected {
             background-color: #660000;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
+            outline: none;
         }
         QListWidget::item:hover {
             background-color: #2a2a2a;

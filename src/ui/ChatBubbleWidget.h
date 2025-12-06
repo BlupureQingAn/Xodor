@@ -29,6 +29,7 @@ private:
     QString formatMarkdown(const QString &content);
     QString formatUserMessage(const QString &content);
     void adjustHeight();
+    QString applyCppSyntaxHighlight(const QString &code);
     
     QTextBrowser *m_textBrowser;
     QString m_content;

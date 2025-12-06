@@ -90,6 +90,10 @@ void WrongQuestionWidget::setupUI()
         }
         QTableWidget::item:selected {
             background-color: #660000;
+            outline: none;
+        }
+        QTableWidget::item:selected:hover {
+            background-color: #880000;
         }
         QHeaderView::section {
             background-color: #242424;

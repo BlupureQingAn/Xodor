@@ -70,6 +70,11 @@ void QuestionBankManagerDialog::setupUI()
         QListWidget::item:selected {
             background-color: #660000;
             color: white;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
+            color: white;
         }
     )");
     

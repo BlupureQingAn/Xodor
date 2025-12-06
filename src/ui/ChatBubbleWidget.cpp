@@ -3,9 +3,14 @@
 #include <QPainterPath>
 #include <QRegularExpression>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QWheelEvent>
 #include <QApplication>
 #include <QAbstractTextDocumentLayout>
+#include <QTextCursor>
+#include <QTextBlock>
+#include <QTextLayout>
+#include <QTimer>
 
 ChatBubbleWidget::ChatBubbleWidget(const QString &content, bool isUser, QWidget *parent)
     : QWidget(parent)
@@ -16,14 +21,14 @@ ChatBubbleWidget::ChatBubbleWidget(const QString &content, bool isUser, QWidget 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     
     QVBoxLayout *layout = new QVBoxLayout(this);
-    // 减小布局边距：左右保持，上下改为6px
-    layout->setContentsMargins(isUser ? 10 : 5, 6, isUser ? 5 : 10, 6);
+    // 设置布局边距：左右保持，上下增加到10px
+    layout->setContentsMargins(isUser ? 10 : 5, 10, isUser ? 5 : 10, 10);
     
     m_textBrowser = new QTextBrowser(this);
     m_textBrowser->setOpenExternalLinks(false);
     m_textBrowser->setReadOnly(true);
     m_textBrowser->setFrameShape(QFrame::NoFrame);
-    m_textBrowser->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_textBrowser->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // 关键：让 QTextBrowser 根据 widget 宽度自动换行
     m_textBrowser->setLineWrapMode(QTextEdit::WidgetWidth);
@@ -31,8 +36,8 @@ ChatBubbleWidget::ChatBubbleWidget(const QString &content, bool isUser, QWidget 
     m_textBrowser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     m_textBrowser->viewport()->installEventFilter(this);
     
-    // 减小文档边距：从8px改为4px
-    m_textBrowser->document()->setDocumentMargin(4);
+    // 设置文档边距为0，避免额外空白
+    m_textBrowser->document()->setDocumentMargin(0);
     m_textBrowser->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     m_textBrowser->setCursor(Qt::IBeamCursor);
     
@@ -44,9 +49,33 @@ ChatBubbleWidget::ChatBubbleWidget(const QString &content, bool isUser, QWidget 
             selection-background-color: #4a90e2;
             selection-color: #ffffff;
         }
+        QScrollBar:vertical {
+            background: transparent;
+            width: 8px;
+            margin: 2px;
+        }
+        QScrollBar::handle:vertical {
+            background: #4a4a4a;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #5a5a5a;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
     )");
     
     layout->addWidget(m_textBrowser);
+    
+    // 设置滚动条的滚动步幅（减小步幅使滚动更平滑）
+    if (m_textBrowser->verticalScrollBar()) {
+        m_textBrowser->verticalScrollBar()->setSingleStep(10);  // 默认是15，改为10
+    }
     
     // 设置内容
     setContent(content);
@@ -56,19 +85,52 @@ void ChatBubbleWidget::setContent(const QString &content)
 {
     m_content = content;
     
-    QString html;
     if (m_isUser) {
-        html = formatUserMessage(content);
+        // 用户消息：使用纯文本模式，避免HTML渲染问题
+        m_textBrowser->setPlainText(content.trimmed());
+        
+        // 设置字体
+        int fontSize = qRound(11 * m_fontScale);
+        QFont font = m_textBrowser->font();
+        font.setPointSize(fontSize);
+        m_textBrowser->setFont(font);
+        
+        // 关键：设置固定行高，避免不同文本内容导致高度差异
+        QTextDocument *doc = m_textBrowser->document();
+        QTextOption textOption = doc->defaultTextOption();
+        textOption.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+        doc->setDefaultTextOption(textOption);
+        
+        // 设置固定行高（使用QTextBlockFormat）
+        QTextCursor cursor(doc);
+        cursor.select(QTextCursor::Document);
+        QTextBlockFormat blockFormat = cursor.blockFormat();
+        QFontMetrics fm(font);
+        blockFormat.setLineHeight(fm.lineSpacing(), QTextBlockFormat::FixedHeight);
+        cursor.setBlockFormat(blockFormat);
+        
+        // 设置文本颜色
+        QPalette palette = m_textBrowser->palette();
+        palette.setColor(QPalette::Text, QColor(240, 240, 240));
+        m_textBrowser->setPalette(palette);
     } else {
-        html = formatMarkdown(content);
-    }
-    
-    m_textBrowser->setHtml(html);
-    
-    // 调试：检查HTML末尾是否有多余空白
-    if (html.length() > content.length() * 2) {
-        qDebug() << "[ChatBubbleWidget] Warning: HTML length" << html.length() 
-                 << "is much larger than content length" << content.length();
+        // AI消息：使用HTML格式支持Markdown
+        QString html = formatMarkdown(content);
+        m_textBrowser->setHtml(html);
+        
+        // 移除QTextDocument末尾可能的空段落
+        QTextDocument *doc = m_textBrowser->document();
+        QTextCursor cursor(doc);
+        cursor.movePosition(QTextCursor::End);
+        
+        // 如果末尾有空块，删除它
+        QTextBlock lastBlock = doc->lastBlock();
+        if (lastBlock.isValid() && lastBlock.text().trimmed().isEmpty() && doc->blockCount() > 1) {
+            cursor.movePosition(QTextCursor::End);
+            cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+            cursor.removeSelectedText();
+            cursor.deletePreviousChar(); // 删除换行符
+        }
     }
     
     // 让 Qt 自动计算高度
@@ -78,25 +140,75 @@ void ChatBubbleWidget::setContent(const QString &content)
 void ChatBubbleWidget::adjustHeight()
 {
     QTextDocument *doc = m_textBrowser->document();
-    doc->setTextWidth(m_textBrowser->viewport()->width());
     
-    // 使用 documentLayout 获取更精确的高度
-    QAbstractTextDocumentLayout *layout = doc->documentLayout();
-    int docHeight = qRound(layout->documentSize().height());
-    int margin = doc->documentMargin();
+    // 获取可用宽度：使用widget的实际宽度减去布局边距
+    int availableWidth = width();
+    if (availableWidth <= 0) {
+        // 如果宽度还没确定，延迟到下次
+        QTimer::singleShot(0, this, &ChatBubbleWidget::adjustHeight);
+        return;
+    }
     
-    // QTextBrowser 的高度 = 文档高度 + 文档边距
-    int textBrowserHeight = docHeight + margin * 2;
-    m_textBrowser->setFixedHeight(textBrowserHeight);
+    // 减去布局边距（左右边距）
+    int leftMargin = m_isUser ? 10 : 5;
+    int rightMargin = m_isUser ? 5 : 10;
+    int textWidth = availableWidth - leftMargin - rightMargin;
     
-    // Widget 的高度 = QTextBrowser 高度 + 布局边距（上下各6px）
-    int widgetHeight = textBrowserHeight + 12;
-    setMinimumHeight(widgetHeight);
-    setMaximumHeight(widgetHeight);  // 设置最大高度，避免多余空间
+    // 设置文档宽度
+    doc->setTextWidth(textWidth);
     
-    // 调试日志（可选）
-    // qDebug() << "[ChatBubbleWidget] Adjusted height - doc:" << docHeight 
-    //          << "margin:" << margin << "final:" << widgetHeight;
+    if (m_isUser) {
+        // 用户消息：使用文档的自然高度
+        QAbstractTextDocumentLayout *layout = doc->documentLayout();
+        QSizeF docSize = layout->documentSize();
+        
+        int contentHeight = qCeil(docSize.height());
+        int textBrowserHeight = contentHeight + 8;  // 添加小的上下边距
+        
+        m_textBrowser->setFixedHeight(textBrowserHeight);
+        
+        // Widget 的高度 = QTextBrowser 高度 + 布局边距（上下各10px）
+        int widgetHeight = textBrowserHeight + 20;
+        setMinimumHeight(widgetHeight);
+        setMaximumHeight(widgetHeight);
+    } else {
+        // AI消息使用原来的方法（因为有Markdown格式）
+        doc->setTextWidth(m_textBrowser->viewport()->width());
+        
+        QAbstractTextDocumentLayout *layout = doc->documentLayout();
+        QSizeF docSize = layout->documentSize();
+        
+        int contentHeight = qCeil(docSize.height());
+        int textBrowserHeight = contentHeight + 8;
+        
+        // 设置最大高度限制为600px，超过则显示滚动条
+        const int maxBubbleHeight = 600;
+        bool needsScrollBar = textBrowserHeight > maxBubbleHeight;
+        
+        if (needsScrollBar) {
+            textBrowserHeight = maxBubbleHeight;
+            
+            int scrollBarWidth = 10;
+            doc->setTextWidth(m_textBrowser->viewport()->width() - scrollBarWidth);
+            
+            docSize = layout->documentSize();
+            contentHeight = qCeil(docSize.height());
+            int newTextBrowserHeight = contentHeight + 8;
+            
+            if (newTextBrowserHeight > maxBubbleHeight) {
+                textBrowserHeight = maxBubbleHeight;
+            } else {
+                textBrowserHeight = newTextBrowserHeight;
+            }
+        }
+        
+        m_textBrowser->setFixedHeight(textBrowserHeight);
+        
+        // Widget 的高度 = QTextBrowser 高度 + 布局边距（上下各10px）
+        int widgetHeight = textBrowserHeight + 20;
+        setMinimumHeight(widgetHeight);
+        setMaximumHeight(widgetHeight);
+    }
 }
 
 QString ChatBubbleWidget::content() const
@@ -117,9 +229,9 @@ void ChatBubbleWidget::setFontScale(qreal scale)
 
 QString ChatBubbleWidget::formatUserMessage(const QString &content)
 {
+    // 此函数已不再使用，用户消息现在使用纯文本模式
+    // 保留此函数以防需要回退
     int fontSize = qRound(11 * m_fontScale);
-    
-    // 去除首尾的空白字符和换行符
     QString trimmed = content.trimmed();
     
     QString escaped = trimmed;
@@ -128,12 +240,12 @@ QString ChatBubbleWidget::formatUserMessage(const QString &content)
     escaped.replace(">", "&gt;");
     escaped.replace("\n", "<br>");
     
-    // 再次trim，确保没有首尾空白
-    escaped = escaped.trimmed();
+    while (escaped.endsWith("<br>")) {
+        escaped.chop(4);
+    }
     
-    // 用户消息：行间距 1.5，更舒适
-    return QString("<div style='color: #f0f0f0; font-size: %1pt; line-height: 1.5; letter-spacing: normal;'>%2</div>")
-           .arg(fontSize).arg(escaped);
+    return QString("<span style='color: #f0f0f0; font-size: %1pt; line-height: 1.5;'>%2</span>")
+           .arg(fontSize).arg(escaped.trimmed());
 }
 
 QString ChatBubbleWidget::formatMarkdown(const QString &content)
@@ -151,9 +263,16 @@ QString ChatBubbleWidget::formatMarkdown(const QString &content)
         QRegularExpressionMatch match = it.next();
         QString lang = match.captured(1).trimmed();
         QString code = match.captured(2);
+        
+        // HTML转义
         code.replace("&", "&amp;");
         code.replace("<", "&lt;");
         code.replace(">", "&gt;");
+        
+        // 应用语法高亮（C++/C）
+        if (lang.isEmpty() || lang == "cpp" || lang == "c++" || lang == "c") {
+            code = applyCppSyntaxHighlight(code);
+        }
         
         int fontSize = qRound(11 * m_fontScale);
         QString langLabel = lang.isEmpty() ? "代码" : lang;
@@ -257,11 +376,7 @@ QString ChatBubbleWidget::formatMarkdown(const QString &content)
     result.replace(QRegularExpression("__([^_]+)__"), 
                   "<b style='color: #ffd700; letter-spacing: normal;'>\\1</b>");
     
-    // 斜体（支持 *text* 和 _text_）
-    result.replace(QRegularExpression("\\*([^\\*]+)\\*"), 
-                  "<i style='color: #e8e8e8;'>\\1</i>");
-    result.replace(QRegularExpression("(?<!_)_([^_]+)_(?!_)"), 
-                  "<i style='color: #e8e8e8;'>\\1</i>");
+    // 斜体已禁用 - 不处理 *text* 和 _text_
     
     // 删除线（支持 ~~text~~）
     result.replace(QRegularExpression("~~([^~]+)~~"), 
@@ -318,6 +433,7 @@ bool ChatBubbleWidget::eventFilter(QObject *obj, QEvent *event)
     if (obj == m_textBrowser->viewport() && event->type() == QEvent::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
         
+        // Ctrl+滚轮：缩放字体
         if (wheelEvent->modifiers() & Qt::ControlModifier) {
             QWidget *parent = parentWidget();
             while (parent) {
@@ -331,7 +447,23 @@ bool ChatBubbleWidget::eventFilter(QObject *obj, QEvent *event)
             return true;
         }
         
-        // 传递给父 widget 处理滚动
+        // 普通滚轮：检查是否需要气泡内部滚动
+        QScrollBar *scrollBar = m_textBrowser->verticalScrollBar();
+        if (scrollBar && scrollBar->isVisible()) {
+            int delta = wheelEvent->angleDelta().y();
+            int currentValue = scrollBar->value();
+            
+            // 向上滚动且未到顶部，或向下滚动且未到底部
+            bool canScrollUp = (delta > 0 && currentValue > scrollBar->minimum());
+            bool canScrollDown = (delta < 0 && currentValue < scrollBar->maximum());
+            
+            if (canScrollUp || canScrollDown) {
+                // 气泡内部可以滚动，让QTextBrowser处理
+                return false;
+            }
+        }
+        
+        // 气泡内部不能滚动，传递给父widget
         if (parentWidget()) {
             QApplication::sendEvent(parentWidget(), event);
         }
@@ -384,4 +516,72 @@ void ChatBubbleWidget::paintEvent(QPaintEvent *event)
     painter.drawPath(path);
     
     QWidget::paintEvent(event);
+}
+
+QString ChatBubbleWidget::applyCppSyntaxHighlight(const QString &code)
+{
+    QString result = code;
+    
+    // C++ 关键字
+    QStringList keywords = {
+        "int", "float", "double", "char", "bool", "void", "long", "short", "unsigned", "signed",
+        "if", "else", "for", "while", "do", "switch", "case", "default", "break", "continue",
+        "return", "const", "static", "extern", "auto", "register", "volatile",
+        "struct", "union", "enum", "typedef", "sizeof",
+        "class", "public", "private", "protected", "virtual", "friend", "inline",
+        "new", "delete", "this", "operator", "namespace", "using", "template", "typename",
+        "try", "catch", "throw", "true", "false", "nullptr"
+    };
+    
+    // 预处理指令
+    QStringList preprocessor = {
+        "#include", "#define", "#ifdef", "#ifndef", "#endif", "#if", "#else", "#elif", "#pragma"
+    };
+    
+    // 标准库函数和类型
+    QStringList stdlib = {
+        "std", "cout", "cin", "endl", "string", "vector", "map", "set", "list", "queue",
+        "stack", "pair", "make_pair", "sort", "find", "push_back", "size", "empty",
+        "printf", "scanf", "malloc", "free", "memset", "memcpy", "strlen", "strcpy"
+    };
+    
+    // 1. 高亮字符串（绿色）
+    result.replace(QRegularExpression("\"([^\"]*)\""), 
+                   "<span style='color: #ce9178;'>\"\\1\"</span>");
+    
+    // 2. 高亮字符（绿色）
+    result.replace(QRegularExpression("'([^']*)'"), 
+                   "<span style='color: #ce9178;'>'\\1'</span>");
+    
+    // 3. 高亮注释（绿色）
+    result.replace(QRegularExpression("//(.*)"), 
+                   "<span style='color: #6a9955;'>//\\1</span>");
+    
+    // 4. 高亮数字（浅绿色）
+    result.replace(QRegularExpression("\\b(\\d+\\.?\\d*)\\b"), 
+                   "<span style='color: #b5cea8;'>\\1</span>");
+    
+    // 5. 高亮预处理指令（紫色）
+    for (const QString &prep : preprocessor) {
+        result.replace(QRegularExpression(QString("\\b(%1)\\b").arg(QRegularExpression::escape(prep))),
+                      QString("<span style='color: #c586c0;'>%1</span>").arg(prep));
+    }
+    
+    // 6. 高亮关键字（蓝色）
+    for (const QString &keyword : keywords) {
+        result.replace(QRegularExpression(QString("\\b(%1)\\b").arg(keyword)),
+                      QString("<span style='color: #569cd6;'>%1</span>").arg(keyword));
+    }
+    
+    // 7. 高亮标准库（青色）
+    for (const QString &lib : stdlib) {
+        result.replace(QRegularExpression(QString("\\b(%1)\\b").arg(lib)),
+                      QString("<span style='color: #4ec9b0;'>%1</span>").arg(lib));
+    }
+    
+    // 8. 高亮函数调用（黄色）
+    result.replace(QRegularExpression("\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\("),
+                   "<span style='color: #dcdcaa;'>\\1</span>(");
+    
+    return result;
 }

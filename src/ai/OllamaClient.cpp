@@ -402,7 +402,7 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
         json["model"] = m_model;
         json["messages"] = messages;
         json["stream"] = true;
-        json["max_tokens"] = 800;  // 适度限制，允许复杂问题展开
+        // 不设置max_tokens，允许AI自由输出
         
         url = QUrl(m_baseUrl + "/v1/chat/completions");
         
@@ -429,10 +429,7 @@ void OllamaClient::sendChatMessage(const QString &message, const QString &system
         json["messages"] = messages;
         json["stream"] = true;
         
-        // 添加参数限制输出长度（给AI更多灵活性）
-        QJsonObject options;
-        options["num_predict"] = 800;  // 适度限制，允许复杂问题展开
-        json["options"] = options;
+        // 不设置num_predict，允许AI自由输出
         
         url = QUrl(m_baseUrl + "/api/chat");
         

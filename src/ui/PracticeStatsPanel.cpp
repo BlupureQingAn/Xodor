@@ -25,18 +25,18 @@ protected:
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         
-        // 根据题目数量选择颜色（红色主题渐变）
+        // 根据题目数量选择颜色（从深红到粉红渐变）
         QColor color;
         if (m_count == 0) {
             color = QColor("#2d2d2d");  // 无活动 - 深灰
         } else if (m_count <= 2) {
-            color = QColor("#440000");  // 1-2题 - 深红
+            color = QColor("#660000");  // 1-2题 - 深红
         } else if (m_count <= 5) {
-            color = QColor("#660000");  // 3-5题 - 中红
+            color = QColor("#990033");  // 3-5题 - 红色
         } else if (m_count <= 10) {
-            color = QColor("#880000");  // 6-10题 - 亮红
+            color = QColor("#cc3366");  // 6-10题 - 玫瑰红
         } else {
-            color = QColor("#aa0000");  // 10+题 - 鲜红
+            color = QColor("#fcb1ce");  // 10+题 - 粉红
         }
         
         painter.setBrush(color);
@@ -287,10 +287,10 @@ void PracticeStatsPanel::createDifficultyChart()
         bar->setFormat(QString("%1 / %2").arg(value).arg(total));
         // 9pt字体 * 1.5 = 13.5pt，进度条高度增加到45px
         bar->setFixedHeight(45);
-        bar->setStyleSheet(QString(
+        bar->setStyleSheet(
             "QProgressBar {"
             "    border: 1px solid #4a4a4a;"
-            "    border-radius: 22px;"
+            "    border-radius: 0px;"
             "    background-color: #2d2d2d;"
             "    text-align: center;"
             "    color: #e8e8e8;"
@@ -298,11 +298,11 @@ void PracticeStatsPanel::createDifficultyChart()
             "    padding: 2px;"
             "}"
             "QProgressBar::chunk {"
-            "    background-color: %1;"
-            "    border-radius: 19px;"
+            "    background-color: #660000;"
+            "    border-radius: 0px;"
             "    margin: 2px;"
             "}"
-        ).arg(color.name()));
+        );
         
         layout->addWidget(labelWidget);
         layout->addWidget(bar);
@@ -450,18 +450,18 @@ void PracticeStatsPanel::updateHeatMap(const QMap<QDate, int> &activityData)
                     .arg(currentDate.toString("yyyy-MM-dd"))
                     .arg(count));
                 
-                // 根据数量设置颜色深度（红色主题渐变）
+                // 根据数量设置颜色深度（从深红到粉红渐变）
                 QString color;
                 if (count == 0) {
                     color = "#2d2d2d";  // 无活动
                 } else if (count <= 2) {
-                    color = "#440000";  // 1-2题
+                    color = "#660000";  // 1-2题 - 深红
                 } else if (count <= 5) {
-                    color = "#660000";  // 3-5题
+                    color = "#990033";  // 3-5题 - 红色
                 } else if (count <= 10) {
-                    color = "#880000";  // 6-10题
+                    color = "#cc3366";  // 6-10题 - 玫瑰红
                 } else {
-                    color = "#aa0000";  // 10+题
+                    color = "#fcb1ce";  // 10+题 - 粉红
                 }
                 
                 cell->setStyleSheet(QString(

@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QDialog>
 #include <QMessageBox>
+#include <QTimer>
 #include "../ai/AIAssistant.h"
 #include "../core/Question.h"
 
@@ -75,6 +76,7 @@ private:
     QString formatMessageContent(const QString &content);  // 格式化消息内容（支持代码块）
     void scrollToBottom();  // 滚动到底部
     void updateAllBubbleScales();  // 更新所有气泡的缩放
+    void updateThinkingAnimation();  // 更新"思考中"动画
     
     // UI组件
     QScrollArea *m_scrollArea;     // 滚动区域
@@ -103,6 +105,10 @@ private:
     QString m_currentAssistantMessage;  // 当前正在接收的AI消息
     bool m_isReceivingMessage;  // 是否正在接收流式消息
     ChatBubbleWidget *m_currentAssistantBubble;  // 当前AI消息的气泡
+    
+    // "思考中"动画
+    QTimer *m_thinkingTimer;  // 动画定时器
+    int m_thinkingDots;  // 当前显示的点数（1-3）
     
     // 费曼学习法相关
     int m_questionCount;  // AI提问次数

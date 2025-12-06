@@ -28,15 +28,22 @@ ChatHistoryDialog::ChatHistoryDialog(QWidget *parent)
             border: 1px solid #444;
             border-radius: 4px;
             padding: 4px;
+            outline: none;
         }
         QListWidget::item {
             padding: 8px;
             border-radius: 4px;
             margin: 2px;
+            outline: none;
         }
         QListWidget::item:selected {
-            background-color: #3b82f6;
+            background-color: #660000;
             color: white;
+            outline: none;
+        }
+        QListWidget::item:selected:hover {
+            background-color: #880000;
+            outline: none;
         }
         QListWidget::item:hover {
             background-color: #374151;
