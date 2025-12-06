@@ -215,6 +215,9 @@ void QuestionBankPanel::onDifficultyFilterChanged()
     // 应用筛选
     applyFilters();
     
+    // 发出信号通知筛选改变
+    emit difficultyFiltersChanged(m_activeDifficultyFilters);
+    
     qDebug() << "[QuestionBankPanel] Difficulty filters changed. Active:" 
              << m_activeDifficultyFilters.size() << "filters";
 }

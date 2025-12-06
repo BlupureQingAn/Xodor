@@ -44,6 +44,9 @@ signals:
     // 题库被选中
     void bankSelected(const QString &bankPath);
     
+    // 难度筛选改变
+    void difficultyFiltersChanged(const QSet<Difficulty> &filters);
+    
 private slots:
     void onSearchTextChanged(const QString &text);
     void onQuestionSelected(const QString &filePath, const Question &question);

@@ -638,6 +638,18 @@ void MainWindow::setupConnections()
     connect(m_questionBankPanel, &QuestionBankPanel::bankSelected,
             this, &MainWindow::onBankSelectedFromPanel);
     
+    // 难度筛选改变信号
+    connect(m_questionBankPanel, &QuestionBankPanel::difficultyFiltersChanged,
+            this, [this](const QSet<Difficulty> &filters) {
+        // 保存难度筛选状态
+        QList<int> filterList;
+        for (Difficulty d : filters) {
+            filterList.append(static_cast<int>(d));
+        }
+        SessionManager::instance().saveDifficultyFilters(filterList);
+        qDebug() << "[MainWindow] Saved difficulty filters:" << filterList.size();
+    });
+    
     // 进度管理器信号 - 更新题目状态图标
     connect(&ProgressManager::instance(), &ProgressManager::progressUpdated,
             m_questionBankPanel, &QuestionBankPanel::updateQuestionStatus);
