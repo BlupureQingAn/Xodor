@@ -117,6 +117,12 @@ void ChatHistoryDialog::loadConversationList()
         info.messageCount = obj["messages"].toArray().size();
         info.filePath = fileInfo.filePath();
         
+        // 如果设置了当前题目ID，只显示该题目的对话
+        if (!m_currentQuestionId.isEmpty() && info.questionId != m_currentQuestionId) {
+            qDebug() << "[ChatHistoryDialog] Skipping conversation for different question:" << info.questionId;
+            continue;
+        }
+        
         m_conversations.append(info);
         
         // 添加到列表
@@ -230,4 +236,13 @@ QString ChatHistoryDialog::formatDateTime(const QDateTime &dt) const
     } else {
         return dt.toString("yyyy-MM-dd hh:mm");
     }
+}
+
+void ChatHistoryDialog::setCurrentQuestionId(const QString &questionId)
+{
+    m_currentQuestionId = questionId;
+    qDebug() << "[ChatHistoryDialog] Set current question filter:" << questionId;
+    
+    // 重新加载对话列表（只显示当前题目的对话）
+    loadConversationList();
 }

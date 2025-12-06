@@ -25,6 +25,9 @@ public:
     
     QString getSelectedConversationId() const { return m_selectedId; }
     
+    // 设置当前题目ID，只显示该题目的对话历史
+    void setCurrentQuestionId(const QString &questionId);
+    
 signals:
     void conversationSelected(const QString &questionId);
     void conversationDeleted(const QString &questionId);
@@ -47,6 +50,7 @@ private:
     QLabel *m_infoLabel;
     
     QString m_selectedId;
+    QString m_currentQuestionId;  // 当前题目ID，用于过滤
     QVector<ConversationInfo> m_conversations;
 };
 

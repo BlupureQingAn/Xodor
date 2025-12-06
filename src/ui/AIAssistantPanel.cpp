@@ -233,7 +233,16 @@ void AIAssistantPanel::refreshChat()
 
 void AIAssistantPanel::viewHistory()
 {
+    // 检查是否有当前题目
+    if (!m_hasQuestion) {
+        QMessageBox::information(this, "提示", "请先选择一道题目");
+        return;
+    }
+    
     ChatHistoryDialog dialog(this);
+    
+    // 设置当前题目ID，只显示当前题目的对话历史
+    dialog.setCurrentQuestionId(m_currentQuestion.id());
     
     connect(&dialog, &ChatHistoryDialog::conversationSelected,
             this, [this](const QString &questionId) {
