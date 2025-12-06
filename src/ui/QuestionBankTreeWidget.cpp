@@ -20,7 +20,8 @@ QuestionBankTreeWidget::QuestionBankTreeWidget(QWidget *parent)
     , m_rootItem(nullptr)
 {
     setupUI();
-    loadBankTree();
+    // 注意：不在构造函数中加载树，等待筛选状态恢复后再加载
+    // loadBankTree() 会在 MainWindow 中调用 refreshBankTree() 时执行
 }
 
 void QuestionBankTreeWidget::setupUI()

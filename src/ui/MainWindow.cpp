@@ -77,6 +77,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_questionBankPanel->restoreDifficultyFilters(filters);
     qDebug() << "[MainWindow] Restored difficulty filters on startup:" << filters.size();
     
+    // 初始加载题库树（应用筛选）
+    m_questionBankPanel->refreshBankTree();
+    
     // 自动加载上次的题库
     loadLastSession();
     
