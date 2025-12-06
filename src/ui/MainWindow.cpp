@@ -68,6 +68,15 @@ MainWindow::MainWindow(QWidget *parent)
     // 恢复窗口状态
     restoreWindowState();
     
+    // 恢复难度筛选状态（在加载题库之前恢复，确保筛选生效）
+    QList<int> filterList = SessionManager::instance().loadDifficultyFilters();
+    QSet<Difficulty> filters;
+    for (int f : filterList) {
+        filters.insert(static_cast<Difficulty>(f));
+    }
+    m_questionBankPanel->restoreDifficultyFilters(filters);
+    qDebug() << "[MainWindow] Restored difficulty filters on startup:" << filters.size();
+    
     // 自动加载上次的题库
     loadLastSession();
     
@@ -754,14 +763,7 @@ void MainWindow::loadLastSession()
                     qDebug() << "[MainWindow] Restored panel state - Expanded:" << expandedPaths.size() << "Selected:" << selectedQuestionPath;
                 }
                 
-                // 恢复难度筛选状态
-                QList<int> filterList = SessionManager::instance().loadDifficultyFilters();
-                QSet<Difficulty> filters;
-                for (int f : filterList) {
-                    filters.insert(static_cast<Difficulty>(f));
-                }
-                m_questionBankPanel->restoreDifficultyFilters(filters);
-                qDebug() << "[MainWindow] Restored difficulty filters:" << filters.size();
+                // 注意：难度筛选状态已在构造函数中恢复，这里不需要重复恢复
                 
                 // 优先使用题目ID查找题目
                 bool foundById = false;
