@@ -85,6 +85,7 @@ set(SOURCES
     src/core/QuestionBankManager.cpp
     src/core/WrongQuestionBook.cpp
     src/core/Question.cpp
+    src/core/MarkdownQuestionParser.cpp
     src/core/QuestionProgress.cpp
     src/core/ProgressManager.cpp
     src/core/AutoSaver.cpp

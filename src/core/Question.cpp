@@ -1,6 +1,9 @@
 #include "Question.h"
+#include "MarkdownQuestionParser.h"
 #include <QUuid>
 #include <QJsonArray>
+#include <QFile>
+#include <QTextStream>
 
 Question::Question()
     : m_type(QuestionType::Code)
@@ -94,4 +97,37 @@ QJsonObject Question::toJson() const
     json["referenceAnswer"] = m_referenceAnswer;
     
     return json;
+}
+
+// Markdown支持方法实现
+Question Question::fromMarkdownFile(const QString &filePath)
+{
+    return MarkdownQuestionParser::parseFromFile(filePath);
+}
+
+Question Question::fromMarkdown(const QString &content)
+{
+    return MarkdownQuestionParser::parseFromContent(content);
+}
+
+bool Question::saveAsMarkdown(const QString &filePath) const
+{
+    QString markdown = toMarkdown();
+    
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+    
+    QTextStream out(&file);
+    out.setEncoding(QStringConverter::Utf8);
+    out << markdown;
+    file.close();
+    
+    return true;
+}
+
+QString Question::toMarkdown() const
+{
+    return MarkdownQuestionParser::generateMarkdown(*this);
 }

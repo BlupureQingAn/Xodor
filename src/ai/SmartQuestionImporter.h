@@ -108,6 +108,19 @@ private:
     // 新增：保存运行时题库JSON
     bool saveRuntimeQuestionBank();
     
+    // MD拆分相关方法
+    void generateSplitRules(const QString &content, const QString &fileName);
+    QVector<QString> splitByRules(const QString &content, const QJsonObject &rules);
+    void extractMetadataForQuestion(const QString &content, int questionIndex);
+    bool saveAsMarkdownFile(const QString &content, const QJsonObject &metadata, const QString &filePath);
+    QString buildSplitRulesPrompt(const QString &content);
+    QString buildMetadataPrompt(const QString &content);
+    
+    // 拆分规则相关
+    QJsonObject m_currentSplitRules;
+    QVector<QString> m_splitQuestions;
+    int m_currentQuestionIndex;
+    
     // 配置参数
     static const int MAX_CHUNK_SIZE = 8000;  // 每个块最大字符数
     static const int MIN_TEST_CASES = 3;     // 最少测试用例数

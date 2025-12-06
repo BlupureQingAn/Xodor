@@ -592,7 +592,7 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
         q.setTestCases(testCases);
         q.setType(QuestionType::Code);
         
-        // 立即保存题目到文件
+        // 立即保存题目到文件（MD格式）
         QString safeTitle = q.title();
         safeTitle.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
         safeTitle = safeTitle.trimmed();
@@ -600,17 +600,11 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
             safeTitle = QString("题目%1").arg(m_progress.totalQuestions + 1);
         }
         
-        QString questionFilePath = QString("%1/%2.json").arg(subDir).arg(safeTitle);
+        // 保存为MD文件（新格式）
+        QString mdFilePath = QString("%1/%2.md").arg(subDir).arg(safeTitle);
+        bool isOverwrite = QFile::exists(mdFilePath);
         
-        // 检查文件是否已存在
-        bool isOverwrite = QFile::exists(questionFilePath);
-        
-        QFile jsonFile(questionFilePath);
-        if (jsonFile.open(QIODevice::WriteOnly)) {
-            QJsonDocument doc(q.toJson());
-            jsonFile.write(doc.toJson(QJsonDocument::Indented));
-            jsonFile.close();
-            
+        if (q.saveAsMarkdown(mdFilePath)) {
             // 添加到内存列表（用于后续加载）
             m_questions.append(q);
             m_progress.totalQuestions++;
@@ -619,14 +613,14 @@ void SmartQuestionImporter::parseAIResponseAndGenerateTests(const QString &respo
             QString diffEmoji = (q.difficulty() == Difficulty::Easy) ? "🟢" : 
                                (q.difficulty() == Difficulty::Hard) ? "🔴" : "🟡";
             QString saveStatus = isOverwrite ? "✓已覆盖" : "✓已保存";
-            emit logMessage(QString("    %1 %2 [%3] - %4个测试用例 %5")
+            emit logMessage(QString("    %1 %2 [%3] - %4个测试用例 %5 (MD)")
                 .arg(diffEmoji)
                 .arg(q.title())
                 .arg(diffStr)
                 .arg(testCases.size())
                 .arg(saveStatus));
         } else {
-            emit logMessage(QString("    ❌ 保存失败: %1").arg(q.title()));
+            emit logMessage(QString("    ❌ MD保存失败: %1").arg(q.title()));
         }
     }
 }

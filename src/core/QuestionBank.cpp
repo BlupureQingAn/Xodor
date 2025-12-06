@@ -30,26 +30,50 @@ void QuestionBank::loadFromDirectory(const QString &dirPath)
 void QuestionBank::loadFromDirectoryRecursive(const QString &dirPath)
 {
     QDir dir(dirPath);
-    QStringList filters;
-    filters << "*.json";
     
-    // 加载当前目录的 JSON 文件
-    QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
-    for (const auto &fileInfo : files) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            
-            if (doc.isArray()) {
-                QJsonArray arr = doc.array();
-                for (const auto &val : arr) {
-                    m_questions.append(Question(val.toObject()));
+    // 优先加载MD文件（新格式）
+    QStringList mdFilters;
+    mdFilters << "*.md";
+    QFileInfoList mdFiles = dir.entryInfoList(mdFilters, QDir::Files);
+    
+    for (const auto &fileInfo : mdFiles) {
+        QString fileName = fileInfo.fileName().toLower();
+        // 跳过README等非题目文件
+        if (fileName.contains("readme") || 
+            fileName.contains("拆分规则") ||
+            fileName.contains("出题模式") ||
+            fileName.contains("规律")) {
+            continue;
+        }
+        
+        Question q = Question::fromMarkdownFile(fileInfo.absoluteFilePath());
+        if (!q.id().isEmpty()) {
+            m_questions.append(q);
+        }
+    }
+    
+    // 如果当前目录没有MD文件，尝试加载JSON文件（向后兼容）
+    if (mdFiles.isEmpty()) {
+        QStringList jsonFilters;
+        jsonFilters << "*.json";
+        QFileInfoList jsonFiles = dir.entryInfoList(jsonFilters, QDir::Files);
+        
+        for (const auto &fileInfo : jsonFiles) {
+            QFile file(fileInfo.absoluteFilePath());
+            if (file.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                
+                if (doc.isArray()) {
+                    QJsonArray arr = doc.array();
+                    for (const auto &val : arr) {
+                        m_questions.append(Question(val.toObject()));
+                    }
+                } else if (doc.isObject()) {
+                    m_questions.append(Question(doc.object()));
                 }
-            } else if (doc.isObject()) {
-                m_questions.append(Question(doc.object()));
+                
+                file.close();
             }
-            
-            file.close();
         }
     }
     

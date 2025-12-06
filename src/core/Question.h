@@ -53,6 +53,12 @@ public:
     void setTestCases(const QVector<TestCase> &cases) { m_testCases = cases; }
     void setReferenceAnswer(const QString &ans) { m_referenceAnswer = ans; }
     
+    // Markdown支持
+    static Question fromMarkdownFile(const QString &filePath);
+    static Question fromMarkdown(const QString &content);
+    bool saveAsMarkdown(const QString &filePath) const;
+    QString toMarkdown() const;
+    
 private:
     QString m_id;
     QString m_title;
