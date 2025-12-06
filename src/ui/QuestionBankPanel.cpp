@@ -145,11 +145,11 @@ void QuestionBankPanel::setupUI()
     connect(m_treeWidget, &QuestionBankTreeWidget::bankSelected,
             this, &QuestionBankPanel::onBankSelected);
     
-    connect(m_easyCheckBox, &QCheckBox::stateChanged,
+    connect(m_easyCheckBox, &QCheckBox::checkStateChanged,
             this, &QuestionBankPanel::onDifficultyFilterChanged);
-    connect(m_mediumCheckBox, &QCheckBox::stateChanged,
+    connect(m_mediumCheckBox, &QCheckBox::checkStateChanged,
             this, &QuestionBankPanel::onDifficultyFilterChanged);
-    connect(m_hardCheckBox, &QCheckBox::stateChanged,
+    connect(m_hardCheckBox, &QCheckBox::checkStateChanged,
             this, &QuestionBankPanel::onDifficultyFilterChanged);
 }
 
