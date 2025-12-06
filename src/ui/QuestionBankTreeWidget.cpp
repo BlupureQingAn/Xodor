@@ -48,6 +48,10 @@ void QuestionBankTreeWidget::setupUI()
             background-color: #660000;
             color: #ffffff;
         }
+        QTreeWidget::item:selected:hover {
+            background-color: #880000;  /* 更浅的红色 */
+            color: #ffffff;
+        }
         QTreeWidget::item:hover {
             background-color: #323232;
         }
