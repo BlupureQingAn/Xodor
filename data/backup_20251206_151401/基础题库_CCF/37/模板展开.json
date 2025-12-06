@@ -1,0 +1,53 @@
+{
+    "description": "实现一个模板语言解释器。支持三种语句：1. 直接赋值（立即求值）；2. 间接赋值（建立映射，使用时重新求值）；3. 输出变量值的长度模 1000000007。变量名和字符串由小写字母和数字组成。保证无循环依赖。",
+    "difficulty": "hard",
+    "id": "37_7068164638923931813",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "字符串",
+        "依赖解析"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1，展示间接赋值",
+            "input": "6\n1 a hello\n1 b world\n2 c $a $b\n3 c\n1 a hi\n3 c",
+            "isAIGenerated": false,
+            "output": "10\n7"
+        },
+        {
+            "description": "基本测试：样例2，展示未定义变量和重新赋值",
+            "input": "5\n1 var value\n3 var\n3 val\n1 var $var $val $var\n3 var",
+            "isAIGenerated": false,
+            "output": "5\n0\n10"
+        },
+        {
+            "description": "边界条件：输出未定义变量，长度为0",
+            "input": "1\n3 undefined",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：字符串长度达到上限50",
+            "input": "3\n1 a aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n3 a\n2 b $a",
+            "isAIGenerated": true,
+            "output": "50"
+        },
+        {
+            "description": "特殊情况：间接赋值依赖的变量被修改",
+            "input": "4\n1 x a\n2 y $x\n1 x b\n3 y",
+            "isAIGenerated": true,
+            "output": "1"
+        },
+        {
+            "description": "压力测试：大量语句，但输出简单",
+            "input": "2000\n1 start start\n2 next $start\n3 next",
+            "isAIGenerated": true,
+            "output": "5"
+        }
+    ],
+    "title": "模板展开",
+    "type": "code"
+}

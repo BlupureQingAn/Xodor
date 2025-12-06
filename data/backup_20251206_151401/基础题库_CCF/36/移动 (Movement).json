@@ -1,0 +1,52 @@
+{
+    "description": "给定一个 n×n 的场地，机器人从 (x,y) 出发，按照指令序列移动。指令包括 f（向前，y+1）、b（向后，y-1）、l（向左，x-1）、r（向右，x+1）。如果移动后位置超出场地范围（1≤x,y≤n），则位置不变。处理 k 个查询，每个查询给出起始位置和指令序列，输出最终位置。",
+    "difficulty": "easy",
+    "id": "36_10455790953085830556",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "坐标处理"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入输出",
+            "input": "3 2\n1 1 ffrrbbll\n3 3 frbl",
+            "isAIGenerated": false,
+            "output": "1 1\n2 2"
+        },
+        {
+            "description": "基本测试：向前移动到达边界",
+            "input": "5 1\n3 3 fff",
+            "isAIGenerated": false,
+            "output": "3 5"
+        },
+        {
+            "description": "边界条件：向左移动超出边界，位置不变",
+            "input": "2 1\n1 1 l",
+            "isAIGenerated": false,
+            "output": "1 1"
+        },
+        {
+            "description": "边界条件：场地大小为1，任何移动都超出边界",
+            "input": "1 1\n1 1 f",
+            "isAIGenerated": true,
+            "output": "1 1"
+        },
+        {
+            "description": "特殊情况：空指令序列，位置不变",
+            "input": "100 1\n50 50 ",
+            "isAIGenerated": true,
+            "output": "50 50"
+        },
+        {
+            "description": "综合测试：混合指令和边界处理",
+            "input": "10 2\n5 5 frlbrf\n10 10 rrrrr",
+            "isAIGenerated": true,
+            "output": "6 6\n10 10"
+        }
+    ],
+    "title": "移动 (Movement)",
+    "type": "code"
+}

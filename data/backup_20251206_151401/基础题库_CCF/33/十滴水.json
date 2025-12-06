@@ -1,0 +1,53 @@
+{
+    "description": "一维网格上（1×c），初始某些格子有 1~4 滴水。进行 n 次操作，每次选择一个有水的格子，水滴数加一。若某格水滴数 ≥5，则清空该格，并向左右最近的有水格子各加一滴水（连锁反应，最左侧先爆开）。每次操作后，输出有水的格子数量。\n\n输入格式：第一行三个整数 c, m, n。接下来 m 行每行两个整数 x, w（第 x 格有 w 滴水）。接下来 n 行每行一个整数 p（操作第 p 格）。\n输出格式：输出 n 行，每行一个整数（有水的格子数）。",
+    "difficulty": "medium",
+    "id": "33_16920142999276041013",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "数据结构",
+        "队列"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "5 5 2\n1 2\n2 4\n3 4\n4 4\n5 2\n3\n1",
+            "isAIGenerated": false,
+            "output": "2\n1"
+        },
+        {
+            "description": "基本测试：操作中间格子引发连锁，左右格子都爆开",
+            "input": "3 2 1\n1 4\n3 4\n2",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "边界条件：只有一个格子，操作后爆开，无水",
+            "input": "1 1 1\n1 4\n1",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "边界条件：初始无水，操作无效（题目保证操作格有水，此为极端情况）",
+            "input": "5 0 2\n1\n2",
+            "isAIGenerated": true,
+            "output": "0\n0"
+        },
+        {
+            "description": "特殊情况：多次操作引发连锁，最终全部无水",
+            "input": "5 3 3\n1 4\n3 4\n5 4\n1\n3\n5",
+            "isAIGenerated": true,
+            "output": "2\n1\n0"
+        },
+        {
+            "description": "特殊情况：操作不相邻格子，无连锁反应",
+            "input": "4 2 2\n1 3\n4 3\n1\n4",
+            "isAIGenerated": true,
+            "output": "2\n2"
+        }
+    ],
+    "title": "十滴水",
+    "type": "code"
+}

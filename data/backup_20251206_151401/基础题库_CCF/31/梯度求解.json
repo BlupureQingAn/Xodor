@@ -1,0 +1,59 @@
+{
+    "description": "给定一个由常数、自变量和加法、减法、乘法组成的函数 f(x1, x2, ..., xn) 的逆波兰表达式。要求计算函数 u = f 在给定点 (a1, a2, ..., an) 处对某个自变量 xi 的偏导数值，结果对 10^9+7 取模。",
+    "difficulty": "hard",
+    "id": "31_1117016092693300921",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "栈",
+        "数学",
+        "动态规划"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "2 2\nx1 x1 x1 * x2 + *\n1 2 3\n2 3 4",
+            "isAIGenerated": false,
+            "output": "15\n3"
+        },
+        {
+            "description": "基本测试：常数函数",
+            "input": "1 1\n5\n1 10",
+            "isAIGenerated": false,
+            "output": "0"
+        },
+        {
+            "description": "基本测试：自变量本身",
+            "input": "1 1\nx1\n1 5",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "基本测试：混合运算",
+            "input": "3 1\nx1 x2 * x3 +\n1 1 2 3",
+            "isAIGenerated": true,
+            "output": "2"
+        },
+        {
+            "description": "边界条件：多个自变量，长表达式",
+            "input": "100 1\nx1 x2 + x3 + ... x100 +\n1 0 0 ... 0",
+            "isAIGenerated": true,
+            "output": "1"
+        },
+        {
+            "description": "特殊情况：负常数",
+            "input": "1 1\n-100000\n1 0",
+            "isAIGenerated": true,
+            "output": "0"
+        },
+        {
+            "description": "特殊情况：零点求导",
+            "input": "2 1\nx1 x2 *\n1 0 0",
+            "isAIGenerated": true,
+            "output": "0"
+        }
+    ],
+    "title": "梯度求解",
+    "type": "code"
+}

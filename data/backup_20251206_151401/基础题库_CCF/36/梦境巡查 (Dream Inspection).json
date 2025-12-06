@@ -1,0 +1,53 @@
+{
+    "description": "有 n+1 个区域，从0号区域（梦之源）出发，依次巡查1到n号区域后返回。从区域i到i+1需要消耗能量 a_i，到达区域i（1≤i≤n）可获得补给 b_i。初始能量 w 需满足 w ≥ a_0 且每次出发前剩余能量 ≥ 当前区域消耗。现假设有且仅有一个区域 i 发生意外（b_i=0），求对于每个 i，能完成巡查的最小初始能量 w(i)。",
+    "difficulty": "medium",
+    "id": "36_9377403538506259857",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "贪心",
+        "模拟",
+        "前缀和"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1",
+            "input": "3\n5 5 5 5\n0 100 0",
+            "isAIGenerated": false,
+            "output": "10 20 10"
+        },
+        {
+            "description": "基本测试：样例2",
+            "input": "3\n9 4 6 2\n9 4 6",
+            "isAIGenerated": false,
+            "output": "15 10 9"
+        },
+        {
+            "description": "边界条件：n=1，只有一个区域发生意外",
+            "input": "1\n10 5\n0",
+            "isAIGenerated": false,
+            "output": "15"
+        },
+        {
+            "description": "特殊情况：所有消耗和补给都为0",
+            "input": "2\n0 0 0\n0 0",
+            "isAIGenerated": true,
+            "output": "0 0"
+        },
+        {
+            "description": "特殊情况：补给充足，意外影响小",
+            "input": "3\n1 2 3 4\n5 5 5",
+            "isAIGenerated": true,
+            "output": "1 1 1"
+        },
+        {
+            "description": "边界条件：最大消耗，无补给",
+            "input": "3\n1000 1000 1000 1000\n0 0 0",
+            "isAIGenerated": true,
+            "output": "2000 2000 2000"
+        }
+    ],
+    "title": "梦境巡查 (Dream Inspection)",
+    "type": "code"
+}

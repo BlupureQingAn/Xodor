@@ -1,0 +1,48 @@
+{
+    "description": "给定一棵 n 个结点的树，每个结点有一个权值，构成 0 到 n-1 的排列。有 m 条限制，每条限制给定两个结点 x 和 y，求从 x 到 y 的简单路径上所有点权值集合的 mex 值。\n\n输入格式：第一行 n, m，第二行 n 个正整数表示权值，接下来 n-1 行每行两个整数表示边，接下来 m 行每行两个整数表示查询。\n输出格式：m 行，每行一个 mex 值。\n\n约束：1 ≤ n, m ≤ 2×10^5。",
+    "difficulty": "medium",
+    "id": "39_6955691606558909276",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "树",
+        "图论",
+        "mex",
+        "路径查询"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入，树结构，三条查询",
+            "input": "7 3\n1 0 2 6 3 4 5\n1 2\n2 5\n2 6\n1 3\n3 7\n1 4\n5 3\n6 3\n7 4",
+            "isAIGenerated": false,
+            "output": "4\n3\n0"
+        },
+        {
+            "description": "基本测试：链状树，路径包含所有点，mex为5；路径为[1,2,3]，mex为0",
+            "input": "5 2\n0 1 2 3 4\n1 2\n2 3\n3 4\n4 5\n1 5\n2 4",
+            "isAIGenerated": false,
+            "output": "5\n0"
+        },
+        {
+            "description": "边界条件：单节点树，路径只有权值0，mex为1",
+            "input": "1 1\n0\n\n1 1",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "特殊情况：自环路径（查询相同点），路径集合只有一个权值",
+            "input": "3 3\n2 0 1\n1 2\n2 3\n1 1\n2 2\n1 3",
+            "isAIGenerated": true,
+            "output": "0\n0\n3"
+        },
+        {
+            "description": "特殊情况：星形树，中心权值3，叶子权值0,1,2",
+            "input": "4 2\n3 2 1 0\n1 2\n1 3\n1 4\n2 3\n3 4",
+            "isAIGenerated": true,
+            "output": "0\n0"
+        }
+    ],
+    "title": "造题计划（上）",
+    "type": "code"
+}

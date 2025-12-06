@@ -1,0 +1,54 @@
+{
+    "description": "实现 HPACK 压缩算法的解码部分。给定静态表格大小 S 和动态表格大小 D，静态表格的键值对，Huffman 树结构，以及 N 条指令。指令分为：1. 表格引用指令（输出编号对应条目）；2. 字面量并索引指令（输出并插入动态表格）；3. 字面量不索引指令（输出但不插入）。字符串可能是普通字符串或 Huffman 编码字符串。需要解码并输出每条指令对应的 key: value。\n\n输入格式：第一行 S 和 D，接下来 S 行静态表格，一行 Huffman 树结构，一行 N，接下来 N 行指令。\n输出格式：N 行，每行 key: value。\n\n约束：1 ≤ S ≤ 64, 1 ≤ D ≤ 120, 1 ≤ N ≤ 1000，Huffman 编码长度不超过 8 位，字符串长度 ≤ 150。",
+    "difficulty": "hard",
+    "id": "39_11531987740942011443",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "字符串",
+        "编码解码",
+        "数据结构"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入，包含所有指令类型和 Huffman 编码",
+            "input": "3 3\nFoo Bar\nFoo Barz\nbar barzz1\n001b01c1d1a\n11\n1 1\n3 3 ABCD\n3 0 H898007 HHIJK\n2 0 H898007 EFGH\n1 4\n2 0 DDDD EEEE\n2 5 GGGG\n1 4\n1 6\n2 0 HHHH IIII\n1 4",
+            "isAIGenerated": false,
+            "output": "Foo: Bar\nbar: ABCD\nabcd: HIJK\nabcd: EFGH\nabcd: EFGH\nDDDD: EEEE\nabcd: GGGG\nabcd: GGGG\nabcd: EFGH\nHHH: IIII\nHHH: IIII"
+        },
+        {
+            "description": "基本测试：简单指令，无 Huffman 编码",
+            "input": "2 2\nkey1 val1\nkey2 val2\n1a1b\n3\n1 1\n2 0 newkey newval\n1 3",
+            "isAIGenerated": false,
+            "output": "key1: val1\nnewkey: newval\nnewkey: newval"
+        },
+        {
+            "description": "特殊情况：Huffman 编码字符串，键为 Huffman 编码",
+            "input": "1 1\nHello World\n001a1b1c\n4\n3 0 H414243 Good\n1 1\n2 1 Morning\n1 2",
+            "isAIGenerated": false,
+            "output": "ABC: Good\nHello: World\nHello: Morning\nHello: Morning"
+        },
+        {
+            "description": "边界条件：静态表格满，引用最后一条",
+            "input": "64 120\na b\na b\n... (重复64行)\n1x1y1z\n1\n1 64",
+            "isAIGenerated": true,
+            "output": "a: b"
+        },
+        {
+            "description": "特殊情况：动态表格满后淘汰最旧条目",
+            "input": "3 3\nk v\nk v\nk v\n1a\n5\n2 0 k1 v1\n2 0 k2 v2\n2 0 k3 v3\n2 0 k4 v4\n1 6",
+            "isAIGenerated": true,
+            "output": "k1: v1\nk2: v2\nk3: v3\nk4: v4\nk2: v2"
+        },
+        {
+            "description": "特殊情况：普通字符串以 H 开头，需特殊处理",
+            "input": "1 1\nfoo bar\n1a\n2\n3 0 HHHHH test\n3 0 H test2",
+            "isAIGenerated": true,
+            "output": "HHHH: test\n: test2"
+        }
+    ],
+    "title": "HTTP 头信息",
+    "type": "code"
+}

@@ -1,0 +1,54 @@
+{
+    "description": "判断给定的化学方程式是否可以配平（即是否存在非零系数解）。化学式已简化为只包含小写字母和数字的字符串（不含括号）。通过建立元素守恒的齐次线性方程组，判断系数矩阵的秩是否小于未知数个数。\n\n输入格式：第一行一个正整数 n。接下来 n 行，每行第一个整数 m 表示物质个数，随后 m 个字符串给出化学式。\n输出格式：输出 n 行，每行 Y（可配平）或 N（不可配平）。",
+    "difficulty": "hard",
+    "id": "33_14088060052966483400",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数学",
+        "线性代数",
+        "字符串解析",
+        "高斯消元"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "6\n2 o2 o3\n3 c1o1 c1o2 o2\n2 n2o4 n1o2\n4 cu1 h1n1o3 cu1n2o6 h2o1\n4 al2s3o12 n1h5o1 al1o3h3 n2h8s1o4\n4 c1o1 c1o2 o2 h2o1",
+            "isAIGenerated": false,
+            "output": "Y\nY\nY\nN\nY\nY"
+        },
+        {
+            "description": "基本测试：简单不可配平方程（H2 + O2）",
+            "input": "1\n2 h2 o2",
+            "isAIGenerated": false,
+            "output": "N"
+        },
+        {
+            "description": "边界条件：只有一个物质，总是可配平（系数任意非零）",
+            "input": "1\n1 h2o1",
+            "isAIGenerated": false,
+            "output": "Y"
+        },
+        {
+            "description": "特殊情况：元素种类数等于物质数，但方程组无解",
+            "input": "1\n2 h2 o2",
+            "isAIGenerated": true,
+            "output": "N"
+        },
+        {
+            "description": "特殊情况：可配平方程（2H2 + O2 -> 2H2O）",
+            "input": "1\n3 h2 o2 h2o1",
+            "isAIGenerated": true,
+            "output": "Y"
+        },
+        {
+            "description": "特殊情况：元素比例不一致，不可配平",
+            "input": "1\n2 c1o2 c2o4",
+            "isAIGenerated": true,
+            "output": "N"
+        }
+    ],
+    "title": "化学方程式配平",
+    "type": "code"
+}

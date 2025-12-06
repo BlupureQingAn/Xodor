@@ -1,0 +1,53 @@
+{
+    "description": "给定长度为 n 的数组 a，定义区间 [l, r] 的价值为 f([l, r]) = l * r * gcd(a_l, a_{l+1}, ..., a_r)。求所有区间价值之和模 998244353。",
+    "difficulty": "hard",
+    "id": "37_15126841398245509990",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数学",
+        "数论",
+        "区间GCD"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1",
+            "input": "5\n10 2 6 6 8",
+            "isAIGenerated": false,
+            "output": "586"
+        },
+        {
+            "description": "基本测试：样例2",
+            "input": "20\n7 6 5 5 17 18 13 3 11 12 7 9 16 15 5 19 20 13 14 6",
+            "isAIGenerated": false,
+            "output": "57254"
+        },
+        {
+            "description": "边界条件：n=1，区间只有[1,1]，价值=1*1*1=1",
+            "input": "1\n1",
+            "isAIGenerated": false,
+            "output": "1"
+        },
+        {
+            "description": "特殊情况：所有数相同，gcd恒为1",
+            "input": "3\n1 1 1",
+            "isAIGenerated": true,
+            "output": "20"
+        },
+        {
+            "description": "特殊情况：gcd变化",
+            "input": "4\n2 4 6 8",
+            "isAIGenerated": true,
+            "output": "110"
+        },
+        {
+            "description": "边界条件：较大n，所有数相同，结果需取模",
+            "input": "1000\n1 1 1",
+            "isAIGenerated": true,
+            "output": "91652024"
+        }
+    ],
+    "title": "集体锻炼",
+    "type": "code"
+}

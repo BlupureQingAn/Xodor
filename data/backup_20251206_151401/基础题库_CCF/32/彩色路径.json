@@ -1,0 +1,54 @@
+{
+    "description": "给定一个 N 个节点 M 条边的有向图。每个节点 i 有颜色 C[i] ∈ {0, …, K-1}。每条边有长度 D[j]。寻找一条从节点 0 到节点 N-1 的理想观光路线，满足：1. 简单路径。2. 彩色路径：路径上每个节点的颜色互不相同。3. 节点数不超过 L。求满足条件的最长路径长度。",
+    "difficulty": "hard",
+    "id": "32_4037331211345626866",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "图论",
+        "动态规划",
+        "状态压缩",
+        "最短路"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "6 9 4 10\n0 2 2 3 3 9\n0 0 0 1 1 1 2 3 4\n1 2 4 3 4 5 4 5 5\n1 2 4 3 2 8 5 3 1",
+            "isAIGenerated": false,
+            "output": "9"
+        },
+        {
+            "description": "基本测试：简单链状图，颜色都不同",
+            "input": "3 2 3 3\n0 1 2\n0 1\n1 2\n5 6",
+            "isAIGenerated": false,
+            "output": "11"
+        },
+        {
+            "description": "边界条件：只有两个节点，一条边",
+            "input": "2 1 2 2\n0 1\n0\n1\n10",
+            "isAIGenerated": false,
+            "output": "10"
+        },
+        {
+            "description": "特殊情况：节点数限制L=3，但最短路径需要4个节点，无解（输出应为-1或特定标识，根据题意，若无法到达应输出-1，此处假设输出-1表示无解）",
+            "input": "4 4 3 4\n0 1 2 3\n0 0 1 2\n1 2 2 3\n1 1 1 1\n2 1 4",
+            "isAIGenerated": true,
+            "output": "-1"
+        },
+        {
+            "description": "一般情况：多条路径，选择最长且满足颜色互异、节点数限制的路径",
+            "input": "5 6 5 5\n0 1 2 3 4\n0 0 1 1 2 3\n1 2 3 4 4 4\n2 3 4 5 6 7\n2 1 5",
+            "isAIGenerated": true,
+            "output": "20"
+        },
+        {
+            "description": "特殊情况：路径上出现重复颜色，不符合彩色路径条件，无解",
+            "input": "4 3 4 2\n0 0 0 1\n0 1 2\n1 2 3\n10 10 10",
+            "isAIGenerated": true,
+            "output": "-1"
+        }
+    ],
+    "title": "彩色路径",
+    "type": "code"
+}

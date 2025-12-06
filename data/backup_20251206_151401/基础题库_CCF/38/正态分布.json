@@ -1,0 +1,58 @@
+{
+    "description": "对于正态分布随机变量 X ~ N(μ, σ²)，查表计算 P(X ≤ n)。首先将 X 转换为标准正态分布 Z = (X - μ)/σ，则 P(X ≤ n) = P(Z ≤ (n - μ)/σ)。题目模拟查表过程，给定 μ、σ 和 n，计算概率在表中的行和列。行下标从 1 开始：0.0 对应第 1 行，0.1 对应第 2 行，依此类推；列下标从 1 开始：0.00 对应第 1 列，0.01 对应第 2 列，依此类推。输入第一行是查询个数 k，接下来 k 行每行三个整数 μ、σ、n。输出每行两个整数 i 和 j，表示结果位于第 i 行第 j 列。",
+    "difficulty": "easy",
+    "id": "38_5148480332693408413",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "数学",
+        "模拟"
+    ],
+    "testCases": [
+        {
+            "description": "样例测试",
+            "input": "4\n0 1 1\n2 10 127\n2 50 227\n5 100 350",
+            "isAIGenerated": false,
+            "output": "11 1\n126 1\n46 1\n35 6"
+        },
+        {
+            "description": "基本测试：n 等于 μ，Z=0，对应第 1 行第 1 列",
+            "input": "1\n0 1 0",
+            "isAIGenerated": false,
+            "output": "1 1"
+        },
+        {
+            "description": "基本测试：n 等于 μ，Z=0，对应第 1 行第 1 列",
+            "input": "1\n5 10 5",
+            "isAIGenerated": false,
+            "output": "1 1"
+        },
+        {
+            "description": "边界条件：Z=1.49，对应第 150 行第 1 列（最大行）",
+            "input": "1\n0 100 149",
+            "isAIGenerated": true,
+            "output": "150 1"
+        },
+        {
+            "description": "边界条件：Z=1.50，超过表范围，但题目未说明如何处理，假设仍取最大行第 1 列",
+            "input": "1\n0 100 150",
+            "isAIGenerated": true,
+            "output": "150 1"
+        },
+        {
+            "description": "边界条件：n 等于 μ，Z=0",
+            "input": "1\n1000 1 1000",
+            "isAIGenerated": true,
+            "output": "1 1"
+        },
+        {
+            "description": "边界条件：Z=1000，远超过表范围，假设取最大行第 1 列",
+            "input": "1\n0 1 1000",
+            "isAIGenerated": true,
+            "output": "150 1"
+        }
+    ],
+    "title": "正态分布",
+    "type": "code"
+}

@@ -1,0 +1,59 @@
+{
+    "description": "小 P 设计了一个蒙特卡洛实验来估算 π 的值。给定参数 a，在平面直角坐标系上画一个边长为 2a 的正方形（左下角 (-a,-a)，右上角 (a,a)）和一个以原点为圆心、半径为 a 的圆。随机生成 n 个坐标点（均在正方形内，含边界），统计有多少个点落在圆内（含边界）。使用公式 π ≈ 4m/n 估算 π 的值，其中 m 是落在圆内的点数。\n\n输入格式：第一行两个正整数 n 和 a，接下来 n 行每行两个数表示坐标。\n输出格式：一个实数，表示估算的 π 值。\n\n约束：0 < n, a ≤ 1000，坐标点均在正方形内，实数坐标最多两位小数。输出结果与标准答案绝对误差小于 0.0001 即可。",
+    "difficulty": "easy",
+    "id": "39_8879696976435027793",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "模拟",
+        "几何",
+        "概率"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例1，只有(-5,5)在圆外，m=3，π≈4*3/4=3.0",
+            "input": "4 5\n3 4\n-5 5\n0 0\n3 4",
+            "isAIGenerated": false,
+            "output": "3.0"
+        },
+        {
+            "description": "基本测试：样例2，三个点在圆内，m=3，π≈4*3/5=2.4",
+            "input": "5 5\n3.01 3.99\n-5 5\n0 0\n2.9 4.1\n-3 -4",
+            "isAIGenerated": false,
+            "output": "2.4"
+        },
+        {
+            "description": "基本测试：一个点在圆心，m=1，π≈4*1/1=4.0",
+            "input": "1 10\n0 0",
+            "isAIGenerated": false,
+            "output": "4.0"
+        },
+        {
+            "description": "边界条件：所有点相同且在圆内，m=n，π≈4.0",
+            "input": "1000 1\n0.5 0.5\n0.5 0.5\n... (重复1000次)",
+            "isAIGenerated": true,
+            "output": "4.0"
+        },
+        {
+            "description": "边界条件：所有点在正方形角上且在圆外，m=0，π≈0.0",
+            "input": "1000 1000\n1000 1000\n1000 1000\n... (重复1000次)",
+            "isAIGenerated": true,
+            "output": "0.0"
+        },
+        {
+            "description": "边界条件：a很小，点在圆心，m=1，π≈4.0",
+            "input": "1 0.01\n0 0",
+            "isAIGenerated": true,
+            "output": "4.0"
+        },
+        {
+            "description": "特殊情况：n=0（根据约束n>0，但测试非法输入）",
+            "input": "0 5",
+            "isAIGenerated": true,
+            "output": "undefined"
+        }
+    ],
+    "title": "蒙特卡洛 (Monte Carlo)",
+    "type": "code"
+}

@@ -1,0 +1,54 @@
+{
+    "description": "给定 n 个单词及其频率，通过迭代合并相邻词汇对生成词汇表，直到词汇表达到指定长度 m 或所有单词合并为一个词汇。合并优先级：频率最高 > 拼接后长度最短 > 前一个词汇长度最短 > 拼接后字典序最小。输出按加入顺序的词汇表。",
+    "difficulty": "hard",
+    "id": "34_13220861207206112979",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "字符串",
+        "模拟",
+        "优先队列",
+        "哈希表"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "4 8\ncut 15\ncute 10\nbut 6\nexecute 3",
+            "isAIGenerated": false,
+            "output": "b\nc\ne\nt\nu\nx\nut\ncut"
+        },
+        {
+            "description": "边界条件：单个单词，m大于可能词汇数",
+            "input": "1 5\naaa 10",
+            "isAIGenerated": false,
+            "output": "a\naa\naaa"
+        },
+        {
+            "description": "边界条件：m等于字符种类数，无需合并",
+            "input": "3 26\na 1\nb 1\nc 1",
+            "isAIGenerated": false,
+            "output": "a\nb\nc"
+        },
+        {
+            "description": "特殊情况：频率差异大，优先合并高频对",
+            "input": "2 10\nab 100\nba 1",
+            "isAIGenerated": true,
+            "output": "a\nb\nab"
+        },
+        {
+            "description": "特殊情况：频率相同，测试优先级规则",
+            "input": "3 10\naa 5\nab 5\nba 5",
+            "isAIGenerated": true,
+            "output": "a\nb\naa\nab\nba"
+        },
+        {
+            "description": "边界条件：总频率很大，但m大于词汇数",
+            "input": "2 100\na 1000000\nb 1",
+            "isAIGenerated": true,
+            "output": "a\nb"
+        }
+    ],
+    "title": "文本分词",
+    "type": "code"
+}

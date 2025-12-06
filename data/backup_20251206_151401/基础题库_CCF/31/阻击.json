@@ -1,0 +1,53 @@
+{
+    "description": "给定一棵 n 个城市的树，每条边有发掘宝物收益 w 和受到阻击损失 b。敌军选择两座城市作为起点和终点，沿唯一路径进攻。总损失 = ∑(b_e - w_e)。间谍可以决定起点和终点以最大化总损失。此外，有 m 次事件，每次修改某条边的 w 值。要求输出所有事件前及每次事件后，敌军可能遭受的最大总损失。",
+    "difficulty": "hard",
+    "id": "31_6465576121741179438",
+    "options": [
+    ],
+    "referenceAnswer": "",
+    "tags": [
+        "树",
+        "动态规划",
+        "数据结构"
+    ],
+    "testCases": [
+        {
+            "description": "基本测试：样例输入",
+            "input": "5 3\n1 2 6 4\n2 3 2 1\n3 4 5 3\n3 5 8 5\n3 2\n4 3\n1 1",
+            "isAIGenerated": false,
+            "output": "0\n1\n3\n4"
+        },
+        {
+            "description": "基本测试：两个城市，单次修改",
+            "input": "2 1\n1 2 1 2\n1 0",
+            "isAIGenerated": false,
+            "output": "1\n1"
+        },
+        {
+            "description": "边界条件：无修改事件",
+            "input": "3 0\n1 2 0 5\n2 3 0 3",
+            "isAIGenerated": false,
+            "output": "8"
+        },
+        {
+            "description": "边界条件：最大规模，链状树，重复修改",
+            "input": "100000 100000\n1 2 0 1000000000\n2 3 0 1000000000\n...\n1 0\n1 0\n... (重复100000次)",
+            "isAIGenerated": true,
+            "output": "1999999998\n..."
+        },
+        {
+            "description": "特殊情况：修改使损失增加",
+            "input": "4 2\n1 2 10 5\n2 3 5 10\n3 4 1 1\n1 0\n2 0",
+            "isAIGenerated": true,
+            "output": "5\n10\n10"
+        },
+        {
+            "description": "特殊情况：修改后最大总损失为负，输出0",
+            "input": "3 1\n1 2 5 3\n2 3 4 2\n1 10",
+            "isAIGenerated": true,
+            "output": "0\n-4"
+        }
+    ],
+    "title": "阻击",
+    "type": "code"
+}
