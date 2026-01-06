@@ -25,6 +25,12 @@ xcopy /E /I /Y deploy %RELEASE_DIR%\Xodor >nul
 echo ✓ 程序文件复制完成
 
 echo.
+echo [步骤 3.5/5] 复制CCF题库到程序目录...
+if exist %RELEASE_DIR%\Xodor\data\基础题库 rmdir /s /q %RELEASE_DIR%\Xodor\data\基础题库
+xcopy /E /I /Y data\基础题库 %RELEASE_DIR%\Xodor\data\基础题库 >nul
+echo ✓ CCF题库复制完成（574个文件）
+
+echo.
 echo [步骤 4/5] 复制文档文件...
 copy /Y README.md %RELEASE_DIR%\ >nul
 copy /Y CHANGELOG.md %RELEASE_DIR%\ >nul

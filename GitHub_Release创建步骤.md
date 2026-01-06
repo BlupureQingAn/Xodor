@@ -2,7 +2,8 @@
 
 ## ✅ 准备工作已完成
 
-- ✅ 压缩包已创建: `Xodor-v1.0.0-Windows-x64.zip` (46.13 MB)
+- ✅ 压缩包已创建: `Xodor-v1.0.0-Windows-x64.zip` (46.33 MB)
+- ✅ 包含CCF题库: 574个文件
 - ✅ 位置: `F:\Xodor\Xodor-v1.0.0-Windows-x64.zip`
 
 ---
@@ -140,7 +141,7 @@ Xodor 是一个集成 AI 辅助功能的现代化代码练习平台，深度整�
 
 ### 文件列表
 
-- **Xodor-v1.0.0-Windows-x64.zip** (46 MB)
+- **Xodor-v1.0.0-Windows-x64.zip** (46.33 MB)
   - 包含完整的可执行程序
   - 包含所有必需的 DLL 文件
   - 包含预置的 CCF 题库（574道题）
