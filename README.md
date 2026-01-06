@@ -6,7 +6,6 @@
 
 **一个集成 AI 辅助功能的现代化代码练习平台**
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Qt](https://img.shields.io/badge/Qt-6.9.2-green.svg)](https://www.qt.io/)
 [![C++](https://img.shields.io/badge/C++-17-blue.svg)](https://isocpp.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
@@ -276,8 +275,7 @@ Xodor/
 │   ├── 基础题库/         # 题库文件
 │   └── config/           # 配置文件
 ├── CMakeLists.txt        # CMake 配置
-├── README.md             # 项目说明
-└── LICENSE               # 许可证
+└── README.md             # 项目说明
 ```
 
 ### 核心模块
@@ -470,12 +468,6 @@ cmake --install build --prefix deploy
 - 实际行为
 - 系统环境
 - 错误日志
-
----
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
 ---
 
