@@ -119,6 +119,8 @@ Xodor 是一个专为编程学习者设计的智能代码练习系统，深度�
 
 ## 🚀 快速开始
 
+> **💡 评委老师测试提示**: 程序已预置 CCF 题库和测试 API Key，下载后即可直接使用 AI 功能！
+
 ### 系统要求
 
 - **操作系统**：Windows 10/11 (64-bit)
@@ -156,19 +158,42 @@ build/CodePracticeSystem.exe
 
 ### 首次配置
 
-1. **配置 AI 服务**（设置 → AI 配置）：
-   - **本地模式**：安装 Ollama，下载模型
-   - **云端模式**：配置 API Key 和端点
+#### 1. 配置 AI 服务（设置 → AI 配置）
 
-2. **导入题库**：
-   - 文件 → 导入题库
-   - 支持 Markdown、JSON 格式
-   - 可使用 AI 智能导入
+**推荐：使用云端模式（已提供测试 API Key）**
 
-3. **开始练习**：
-   - 选择题目
-   - 编写代码
-   - AI 判题或运行测试
+为方便评委老师测试，我们提供了预配置的 DeepSeek API Key：
+
+- **API 端点**: `https://api.deepseek.com`
+- **API Key**: `sk-1a8bae2865f1443c99b924ffd14c4252`
+- **模型**: `deepseek-chat`
+
+**配置步骤**：
+1. 打开程序，点击菜单栏 **设置 → AI 配置**
+2. 选择 **云端模式**
+3. 填入以下信息：
+   - API URL: `https://api.deepseek.com`
+   - API Key: `sk-1a8bae2865f1443c99b924ffd14c4252`
+   - 模型: `deepseek-chat`
+4. 点击 **测试连接** 验证配置
+5. 点击 **保存** 完成配置
+
+**其他选项**：
+- **本地模式**：安装 Ollama，下载 qwen2.5-coder 模型（需要额外配置）
+
+#### 2. 导入题库
+
+程序已预置 CCF 题库（45道题），首次启动会自动加载。
+
+- 文件 → 导入题库（导入更多题目）
+- 支持 Markdown、JSON 格式
+- 可使用 AI 智能导入
+
+#### 3. 开始练习
+
+- 在左侧题库列表选择题目
+- 在代码编辑器中编写代码
+- 点击 **AI 判题** 获取智能反馈
 
 ---
 
@@ -409,6 +434,27 @@ cmake --install build --prefix deploy
 ### AI 配置文件
 
 位置：`C:/Users/用户名/AppData/Roaming/CodePractice/CodePracticeSystem/config.json`
+
+#### 测试配置（推荐）
+
+为方便评委老师测试，可使用以下预配置：
+
+```json
+{
+  "ai": {
+    "mode": "cloud",
+    "cloud": {
+      "url": "https://api.deepseek.com",
+      "apiKey": "sk-1a8bae2865f1443c99b924ffd14c4252",
+      "model": "deepseek-chat"
+    }
+  }
+}
+```
+
+**注意**: 此 API Key 仅供评审测试使用，请勿用于其他用途。
+
+#### 完整配置示例
 
 ```json
 {
