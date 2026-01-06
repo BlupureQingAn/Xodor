@@ -42,17 +42,14 @@ public:
     void setQuestion(const Question &question);
     
 signals:
-    void runTests();
     void aiJudgeRequested();  // AI判题请求信号
     void nextQuestion();
     void previousQuestion();
     
 private:
     void setupUI();
-    QString convertMarkdownToHtml(const QString &markdown);
     
     ZoomableTextBrowser *m_questionBrowser;
-    QPushButton *m_runTestsBtn;
     QPushButton *m_aiJudgeBtn;  // AI判题按钮
     QPushButton *m_prevBtn;
     QPushButton *m_nextBtn;

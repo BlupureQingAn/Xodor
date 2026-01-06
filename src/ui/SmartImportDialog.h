@@ -26,7 +26,7 @@ public:
 private slots:
     void onProgressUpdated(const ImportProgress &progress);
     void onLogMessage(const QString &message);
-    void onImportCompleted(bool success, const QString &message);
+    void onImportCompleted(const ImportResult &result);
     void onCancelClicked();
     
 private:

@@ -596,8 +596,6 @@ void MainWindow::setupConnections()
     });
     
     // 题目面板信号
-    connect(m_questionPanel, &QuestionPanel::runTests, 
-            this, &MainWindow::onRunTests);
     connect(m_questionPanel, &QuestionPanel::nextQuestion, 
             this, &MainWindow::onNextQuestion);
     connect(m_questionPanel, &QuestionPanel::previousQuestion, 
@@ -731,41 +729,11 @@ void MainWindow::loadLastSession()
             return;
         }
         
-        // 清空现有题库
+        // 使用QuestionBank的加载方法（自动支持MD和JSON）
         m_questionBank->clear();
+        m_questionBank->loadFromDirectory(questionBankPath);
         
-        // 递归扫描所有子目录中的.json文件（支持分层结构）
-        QStringList jsonFiles;
-        
-        // 先扫描根目录
-        jsonFiles.append(bankDir.entryList(QStringList() << "*.json", QDir::Files));
-        
-        // 再扫描所有子目录
-        QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-        for (const QString &subDir : subDirs) {
-            QDir subDirectory(questionBankPath + "/" + subDir);
-            QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
-            for (const QString &file : subFiles) {
-                jsonFiles.append(subDir + "/" + file);
-            }
-        }
-        
-        // 加载所有题目
-        if (!jsonFiles.isEmpty()) {
-            for (const QString &jsonFile : jsonFiles) {
-                QString filePath = questionBankPath + "/" + jsonFile;
-                QFile file(filePath);
-                if (file.open(QIODevice::ReadOnly)) {
-                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                    file.close();
-                    
-                    if (doc.isObject()) {
-                        m_questionBank->addQuestion(Question(doc.object()));
-                    }
-                }
-            }
-            
-            if (m_questionBank->count() > 0) {
+        if (m_questionBank->count() > 0) {
                 m_currentBankPath = questionBankPath;  // 记住当前题库路径
                 m_questionBankPanel->refreshBankTree();
                 
@@ -807,7 +775,6 @@ void MainWindow::loadLastSession()
                     QString("✅ 已恢复上次会话：%1 道题目，当前第 %2 题")
                     .arg(m_questionBank->count())
                     .arg(m_currentQuestionIndex + 1), 5000);
-            }
         } else {
             // 题库为空
             SessionManager::instance().clearSession();
@@ -924,15 +891,27 @@ void MainWindow::onImportQuestionBank()
         return;
     }
     
-    // 检查题库是否已存在
+    // 检查题库是否已存在（文件夹 + 注册状态）
     QString bankPath = QString("data/基础题库/%1").arg(categoryName);
-    bool bankExists = QDir(bankPath).exists();
+    bool folderExists = QDir(bankPath).exists();
+    bool isRegistered = false;
+    bool isIgnored = QuestionBankManager::instance().isInIgnoreList(categoryName);
     
-    if (bankExists) {
+    // 检查是否已注册
+    QVector<QuestionBankInfo> banks = QuestionBankManager::instance().getAllBanks();
+    for (const QuestionBankInfo &info : banks) {
+        if (info.name == categoryName) {
+            isRegistered = true;
+            break;
+        }
+    }
+    
+    // 只有当文件夹存在且题库已注册时才提示覆盖
+    if (folderExists && isRegistered) {
         QMessageBox::StandardButton reply = QMessageBox::question(
             this,
             "题库已存在",
-            QString("题库【%1】已存在！\n\n"
+            QString("题库【%1】已存在且已注册！\n\n"
                     "导入操作将：\n"
                     "• 保留现有题目\n"
                     "• 添加新题目\n"
@@ -945,6 +924,23 @@ void MainWindow::onImportQuestionBank()
         if (reply != QMessageBox::Yes) {
             return;
         }
+    } else if (folderExists && !isRegistered) {
+        // 文件夹存在但未注册（可能被移除注册了）
+        qDebug() << "[MainWindow] Bank folder exists but not registered:" << categoryName;
+        
+        // 如果在忽略列表中，先从忽略列表移除（用户想重新导入）
+        if (isIgnored) {
+            qDebug() << "[MainWindow] Removing from ignore list:" << categoryName;
+            QuestionBankManager::instance().removeFromIgnoreList(categoryName);
+        }
+        
+        // 提示用户这是重新导入
+        QMessageBox::information(
+            this,
+            "重新导入题库",
+            QString("检测到题库【%1】的文件夹存在但未注册。\n\n"
+                    "将作为新题库导入并注册。").arg(categoryName)
+        );
     }
     
     // 使用AI智能导入
@@ -956,84 +952,25 @@ void MainWindow::onImportQuestionBank()
         // 3. data/基础题库/{categoryName}/*.md - Markdown格式（查看备份）
         // 4. data/config/ccf_parse_rule.json - 解析规则
         
-        // 从基础题库加载JSON（支持分层结构）
-        QString bankPath = QString("data/基础题库/%1").arg(categoryName);
+        // bankPath 已在前面定义，这里直接使用
         
         // 清空现有题库
         m_questionBank->clear();
         
-        // 递归扫描所有子目录中的.json文件
-        QDir bankDir(bankPath);
-        QStringList jsonFiles;
+        // 使用QuestionBank的递归加载功能（支持MD和JSON）
+        m_questionBank->loadFromDirectory(bankPath);
         
-        // 先扫描根目录
-        jsonFiles.append(bankDir.entryList(QStringList() << "*.json", QDir::Files));
-        
-        // 再扫描所有子目录
-        QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-        for (const QString &subDir : subDirs) {
-            QDir subDirectory(bankPath + "/" + subDir);
-            QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
-            for (const QString &file : subFiles) {
-                jsonFiles.append(subDir + "/" + file);
-            }
-        }
-        
-        if (!jsonFiles.isEmpty()) {
-            // 加载所有题目
-            for (const QString &jsonFile : jsonFiles) {
-                QString filePath = bankPath + "/" + jsonFile;
-                QFile file(filePath);
-                if (file.open(QIODevice::ReadOnly)) {
-                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                    file.close();
-                    
-                    if (doc.isObject()) {
-                        m_questionBank->addQuestion(Question(doc.object()));
-                    }
-                }
-            }
-        }
-        
-        // 注册题库到QuestionBankManager（如果是新题库）
-        if (!bankExists) {
+        // 注册题库到QuestionBankManager
+        if (!isRegistered) {
+            // 未注册的题库（新题库或被移除注册的题库）
             QString bankId = QuestionBankManager::instance().importQuestionBank(bankPath, categoryName, true);
-            qDebug() << "题库已注册到管理器，ID:" << bankId;
+            qDebug() << "[MainWindow] 题库已注册到管理器，ID:" << bankId;
         } else {
-            // 如果题库已存在，更新题目数量
+            // 如果题库已注册，更新题目数量（使用已加载的题目数量）
             QVector<QuestionBankInfo> banks = QuestionBankManager::instance().getAllBanks();
             for (const QuestionBankInfo &info : banks) {
                 if (info.name == categoryName) {
-                    // 重新统计题目数量
-                    int questionCount = 0;
-                    QDir dir(bankPath);
-                    QStringList filters;
-                    filters << "*.json";
-                    
-                    // 递归统计所有JSON文件中的题目
-                    std::function<void(const QString&)> countQuestions = [&](const QString &path) {
-                        QDir currentDir(path);
-                        QFileInfoList files = currentDir.entryInfoList(filters, QDir::Files);
-                        for (const auto &fileInfo : files) {
-                            QFile file(fileInfo.absoluteFilePath());
-                            if (file.open(QIODevice::ReadOnly)) {
-                                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                                if (doc.isArray()) {
-                                    questionCount += doc.array().size();
-                                } else if (doc.isObject()) {
-                                    questionCount += 1;
-                                }
-                                file.close();
-                            }
-                        }
-                        
-                        QFileInfoList subDirs = currentDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-                        for (const auto &subDirInfo : subDirs) {
-                            countQuestions(subDirInfo.absoluteFilePath());
-                        }
-                    };
-                    
-                    countQuestions(bankPath);
+                    int questionCount = m_questionBank->count();
                     QuestionBankManager::instance().updateQuestionCount(info.id, questionCount);
                     qDebug() << "题库题目数量已更新:" << categoryName << "共" << questionCount << "道题目";
                     break;
@@ -1187,15 +1124,21 @@ void MainWindow::onManageQuestionBanks()
     
     // 连接信号
     connect(dialog, &QuestionBankManagerDialog::bankDeleted, this, [this](const QString &bankId) {
-        // 如果删除的是当前题库，清空
+        qDebug() << "[MainWindow] Bank deleted:" << bankId;
+        
+        // 如果删除的是当前题库，清空编辑器
         if (QuestionBankManager::instance().getCurrentBankId() == bankId) {
+            qDebug() << "[MainWindow] Deleted bank was current bank, clearing editor";
             m_questionBank->clear();
             m_currentQuestionIndex = -1;
             m_questionPanel->setQuestion(Question());
             m_codeEditor->setCode("");
-            m_questionBankPanel->refreshBankTree();
-            m_practiceWidget->refreshQuestionList();
         }
+        
+        // 无论删除哪个题库，都刷新题目列表和题库面板
+        qDebug() << "[MainWindow] Refreshing question bank tree and practice widget";
+        m_questionBankPanel->refreshBankTree();
+        m_practiceWidget->refreshQuestionList();
     });
     
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -1396,9 +1339,7 @@ void MainWindow::onManageMockExams()
     }
     
     // 创建模拟题管理对话框
-    // 传入当前题库的所有题目和AI客户端
     MockExamManagerDialog *dialog = new MockExamManagerDialog(
-        m_questionBank->allQuestions(),
         m_ollamaClient,
         this
     );
@@ -1574,44 +1515,6 @@ void MainWindow::onShowOperationHistory()
     dialog->setStyleSheet("QDialog { background-color: #242424; }");
     dialog->exec();
     delete dialog;
-}
-
-void MainWindow::onRunTests()
-{
-    if (m_currentQuestionIndex < 0 || m_currentQuestionIndex >= m_questionBank->count()) {
-        QMessageBox::warning(this, "警告", "没有加载题目");
-        return;
-    }
-    
-    QString code = m_codeEditor->code();
-    if (code.trimmed().isEmpty()) {
-        QMessageBox::warning(this, "警告", "请先编写代码");
-        return;
-    }
-    
-    // 编译代码
-    CompileResult compileResult = m_compilerRunner->compile(code);
-    
-    if (!compileResult.success) {
-        ErrorHandler::handleCompileError(this, compileResult.error);
-        return;
-    }
-    
-    // 运行测试
-    Question currentQuestion = m_questionBank->allQuestions()[m_currentQuestionIndex];
-    QVector<TestCase> testCases = currentQuestion.testCases();
-    
-    if (testCases.isEmpty()) {
-        QMessageBox::information(this, "提示", "该题目没有测试用例");
-        return;
-    }
-    
-    // 获取可执行文件路径（从编译结果推断）
-    QString exePath = QDir::tempPath() + "/code.exe";
-    QVector<TestResult> results = m_compilerRunner->runTests(exePath, testCases);
-    
-    // 显示测试结果
-    showTestResults(results);
 }
 
 void MainWindow::onAIJudgeRequested()

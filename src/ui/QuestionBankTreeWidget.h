@@ -77,6 +77,8 @@ private:
     Question loadQuestionFromFile(const QString &filePath) const;
     QString getQuestionStatusIcon(const QString &questionId) const;
     bool shouldShowQuestion(const Question &question) const;
+    bool isConfigFile(const QString &fileName) const;
+    bool shouldSkipDirectory(const QString &dirName) const;
     
     // 根节点
     QTreeWidgetItem *m_rootItem;

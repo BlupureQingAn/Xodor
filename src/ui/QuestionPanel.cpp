@@ -1,4 +1,5 @@
 #include "QuestionPanel.h"
+#include "../utils/MarkdownRenderer.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
@@ -21,7 +22,6 @@ void QuestionPanel::setupUI()
     btnLayout->setSpacing(8);
     
     m_prevBtn = new QPushButton("◀ 上一题", this);
-    m_runTestsBtn = new QPushButton("▶ 运行测试", this);
     m_aiJudgeBtn = new QPushButton("🤖 AI判题", this);
     m_aiJudgeBtn->setToolTip(QString::fromUtf8("让AI分析代码逻辑，判断是否符合题目要求"));
     m_nextBtn = new QPushButton("下一题 ▶", this);
@@ -46,19 +46,16 @@ void QuestionPanel::setupUI()
     )";
     
     m_prevBtn->setStyleSheet(buttonStyle);
-    m_runTestsBtn->setStyleSheet(buttonStyle);
     m_aiJudgeBtn->setStyleSheet(buttonStyle);
     m_nextBtn->setStyleSheet(buttonStyle);
     
     btnLayout->addWidget(m_prevBtn);
-    btnLayout->addWidget(m_runTestsBtn);
     btnLayout->addWidget(m_aiJudgeBtn);
     btnLayout->addWidget(m_nextBtn);
     
     mainLayout->addWidget(m_questionBrowser);
     mainLayout->addLayout(btnLayout);
     
-    connect(m_runTestsBtn, &QPushButton::clicked, this, &QuestionPanel::runTests);
     connect(m_aiJudgeBtn, &QPushButton::clicked, this, &QuestionPanel::aiJudgeRequested);
     connect(m_nextBtn, &QPushButton::clicked, this, &QuestionPanel::nextQuestion);
     connect(m_prevBtn, &QPushButton::clicked, this, &QuestionPanel::previousQuestion);
@@ -115,7 +112,7 @@ void QuestionPanel::setQuestion(const Question &question)
                     margin-top: 20px;
                 }
                 p {
-                    margin: 12px 0;
+                    margin: 6px 0;
                     white-space: pre-wrap;
                 }
                 code {
@@ -229,25 +226,29 @@ void QuestionPanel::setQuestion(const Question &question)
     
     html += "</div>";
     
-    // 题目描述 - 转换Markdown格式
-    QString desc = question.description();
-    desc = convertMarkdownToHtml(desc);
+    // 题目描述 - 使用统一的Markdown渲染器
+    QString desc = MarkdownRenderer::toHtml(question.description(), true);
     html += "<div class='content'>" + desc + "</div>";
     
     // 测试用例
     if (!question.testCases().isEmpty()) {
         html += "<h3 style='color: #e8e8e8; margin-top: 25px;'>示例</h3>";
+        html += "<p style='color: #b0b0b0; font-size: 9pt; margin: 8px 0;'>💡 提示：选中文本后按Ctrl+C复制</p>";
         int caseNum = 1;
         for (const TestCase &tc : question.testCases()) {
             html += QString("<div class='test-case'>");
             html += QString("<div class='test-case-title'>示例 %1</div>").arg(caseNum++);
+            
+            // 输入部分
             html += "<div class='io-label'>输入：</div>";
-            // 保留换行符，使用<br>替换\n
-            QString inputHtml = tc.input.toHtmlEscaped().replace("\n", "<br>");
+            QString inputHtml = tc.input.toHtmlEscaped();
             html += QString("<div class='io-block'>%1</div>").arg(inputHtml);
+            
+            // 输出部分
             html += "<div class='io-label'>输出：</div>";
-            QString outputHtml = tc.expectedOutput.toHtmlEscaped().replace("\n", "<br>");
+            QString outputHtml = tc.expectedOutput.toHtmlEscaped();
             html += QString("<div class='io-block'>%1</div>").arg(outputHtml);
+            
             html += "</div>";
         }
     }
@@ -255,80 +256,4 @@ void QuestionPanel::setQuestion(const Question &question)
     html += "</body></html>";
     
     m_questionBrowser->setHtml(html);
-}
-
-QString QuestionPanel::convertMarkdownToHtml(const QString &markdown)
-{
-    QString html = markdown;
-    
-    // 处理代码块
-    QRegularExpression codeBlockRegex(R"(```(\w*)\n([\s\S]*?)```)", QRegularExpression::MultilineOption);
-    html.replace(codeBlockRegex, "<pre><code>\\2</code></pre>");
-    
-    // 处理行内代码
-    QRegularExpression inlineCodeRegex(R"(`([^`]+)`)");
-    html.replace(inlineCodeRegex, "<code>\\1</code>");
-    
-    // 处理数学公式 $...$
-    QRegularExpression mathInlineRegex(R"(\$([^\$]+)\$)");
-    html.replace(mathInlineRegex, "<span style='color: #ffc107; font-style: italic;'>\\1</span>");
-    
-    // 处理数学公式 $$...$$
-    QRegularExpression mathBlockRegex(R"(\$\$([\s\S]+?)\$\$)", QRegularExpression::MultilineOption);
-    html.replace(mathBlockRegex, "<div style='text-align: center; color: #ffc107; font-style: italic; margin: 15px 0;'>\\1</div>");
-    
-    // 处理LaTeX命令
-    html.replace(R"(\frac)", "frac");
-    html.replace(R"(\partial)", "∂");
-    html.replace(R"(\cdot)", "·");
-    html.replace(R"(\dots)", "...");
-    html.replace(R"(\le)", "≤");
-    html.replace(R"(\ge)", "≥");
-    html.replace(R"(\times)", "×");
-    html.replace(R"(\div)", "÷");
-    html.replace(R"(\sum)", "Σ");
-    html.replace(R"(\prod)", "Π");
-    html.replace(R"(\int)", "∫");
-    html.replace(R"(\sqrt)", "√");
-    html.replace(R"(\alpha)", "α");
-    html.replace(R"(\beta)", "β");
-    html.replace(R"(\gamma)", "γ");
-    html.replace(R"(\delta)", "δ");
-    html.replace(R"(\pi)", "π");
-    html.replace(R"(\theta)", "θ");
-    html.replace(R"(\lambda)", "λ");
-    html.replace(R"(\mu)", "μ");
-    html.replace(R"(\sigma)", "σ");
-    html.replace(R"(\infty)", "∞");
-    html.replace(R"(\in)", "∈");
-    html.replace(R"(\subset)", "⊂");
-    html.replace(R"(\cup)", "∪");
-    html.replace(R"(\cap)", "∩");
-    html.replace(R"(\emptyset)", "∅");
-    html.replace(R"(\forall)", "∀");
-    html.replace(R"(\exists)", "∃");
-    html.replace(R"(\neg)", "¬");
-    html.replace(R"(\land)", "∧");
-    html.replace(R"(\lor)", "∨");
-    html.replace(R"(\rightarrow)", "→");
-    html.replace(R"(\leftarrow)", "←");
-    html.replace(R"(\Rightarrow)", "⇒");
-    html.replace(R"(\Leftarrow)", "⇐");
-    
-    // 处理粗体
-    QRegularExpression boldRegex(R"(\*\*([^\*]+)\*\*)");
-    html.replace(boldRegex, "<b>\\1</b>");
-    
-    // 处理斜体
-    QRegularExpression italicRegex(R"(\*([^\*]+)\*)");
-    html.replace(italicRegex, "<i>\\1</i>");
-    
-    // 处理换行
-    html.replace("\n\n", "</p><p>");
-    html.replace("\n", "<br>");
-    
-    // 转义HTML特殊字符（但保留我们添加的标签）
-    // html = html.toHtmlEscaped(); // 不能全部转义，会破坏我们的HTML标签
-    
-    return html;
 }

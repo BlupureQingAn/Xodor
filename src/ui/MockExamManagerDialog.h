@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QTextEdit>
-#include <QSpinBox>
 #include <QComboBox>
 #include "../ai/MockExamGenerator.h"
 
@@ -19,12 +18,11 @@ class MockExamManagerDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit MockExamManagerDialog(const QVector<Question> &questions,
-                                  OllamaClient *aiClient, 
+    explicit MockExamManagerDialog(OllamaClient *aiClient, 
                                   QWidget *parent = nullptr);
     
 private slots:
-    void onAnalyzeBank();
+    void onBankSelectionChanged(int index);
     void onGenerateExams();
     void onViewExam();
     void onDeleteExam();
@@ -37,19 +35,19 @@ private slots:
     
 private:
     void setupUI();
+    void loadAvailableBanks();
+    void loadBankQuestions(const QString &bankName);
     void loadExistingExams();
-    void saveExam(const QVector<Question> &questions, int examIndex);
-    QString getExamPath(const QString &category, int examIndex);
+    void saveExam(const QVector<Question> &questions);
+    QString getExamPath();
     
-    QVector<Question> m_questions;
     OllamaClient *m_aiClient;
     MockExamGenerator *m_generator;
     
     // UI 组件
-    QComboBox *m_categoryCombo;
+    QComboBox *m_bankCombo;
+    QLabel *m_bankInfoLabel;
     QLabel *m_patternLabel;
-    QSpinBox *m_examCountSpinBox;
-    QPushButton *m_analyzeBtn;
     QPushButton *m_generateBtn;
     
     QListWidget *m_examList;
@@ -61,7 +59,8 @@ private:
     QTextEdit *m_logText;
     
     ExamPattern m_currentPattern;
-    QString m_currentCategory;
+    QString m_currentBankName;
+    QVector<Question> m_currentQuestions;
 };
 
 #endif // MOCKEXAMMANAGERDIALOG_H

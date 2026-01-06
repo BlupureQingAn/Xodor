@@ -1,8 +1,11 @@
 #include "SmartImportDialog.h"
 #include "../ai/OllamaClient.h"
+#include "../utils/ConfigManager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTimer>
+#include <QDebug>
+#include <cmath>
 
 SmartImportDialog::SmartImportDialog(const QString &sourcePath, const QString &bankName,
                                    OllamaClient *aiClient, QWidget *parent)
@@ -13,6 +16,25 @@ SmartImportDialog::SmartImportDialog(const QString &sourcePath, const QString &b
 {
     // 设置目标路径
     m_targetPath = QString("data/question_banks/%1").arg(bankName);
+    
+    // 重新加载AI配置（确保使用最新配置）
+    ConfigManager &config = ConfigManager::instance();
+    if (aiClient) {
+        if (config.useCloudApi()) {
+            aiClient->setCloudMode(true);
+            aiClient->setBaseUrl(config.cloudApiUrl());
+            aiClient->setModel(config.cloudApiModel());
+            aiClient->setApiKey(config.cloudApiKey());
+            qDebug() << "[SmartImportDialog] 使用云端API:" << config.cloudApiUrl() << "模型:" << config.cloudApiModel();
+        } else {
+            aiClient->setCloudMode(false);
+            aiClient->setBaseUrl(config.ollamaUrl());
+            aiClient->setModel(config.ollamaModel());
+            qDebug() << "[SmartImportDialog] 使用本地Ollama:" << config.ollamaUrl() << "模型:" << config.ollamaModel();
+        }
+    } else {
+        qWarning() << "[SmartImportDialog] AI客户端为空！";
+    }
     
     // 创建导入器
     m_importer = new SmartQuestionImporter(aiClient, this);
@@ -183,31 +205,32 @@ void SmartImportDialog::onProgressUpdated(const ImportProgress &progress)
     
     // 更新统计信息
     QString stats;
-    if (progress.totalChunks > 0) {
-        // AI解析阶段
-        stats = QString("文件块: %1/%2 | 已保存: %3 道题目")
-            .arg(progress.processedChunks)
-            .arg(progress.totalChunks)
-            .arg(progress.totalQuestions);
-    } else if (progress.totalFiles > 0) {
-        // 文件扫描阶段
-        stats = QString("扫描: %1/%2 个文件")
-            .arg(progress.processedFiles)
-            .arg(progress.totalFiles);
-    } else {
-        stats = "准备中...";
+    switch (progress.currentStage) {
+        case ImportProgress::Scanning:
+            stats = QString("扫描: %1/%2 个文件")
+                .arg(progress.processedFiles)
+                .arg(progress.totalFiles);
+            break;
+        case ImportProgress::Parsing:
+            stats = QString("已识别并保存: %1 道题目")
+                .arg(progress.totalQuestions);
+            break;
+        case ImportProgress::Saving:
+            stats = QString("保存中... %1 道题目")
+                .arg(progress.totalQuestions);
+            break;
+        case ImportProgress::Complete:
+            stats = QString("完成！共 %1 道题目")
+                .arg(progress.totalQuestions);
+            break;
+        default:
+            stats = "准备中...";
+            break;
     }
     m_statsLabel->setText(stats);
     
-    // 更新进度条
-    int percentage = 0;
-    if (progress.totalChunks > 0) {
-        // AI解析并保存阶段占80% (20% → 100%)
-        percentage = 20 + (progress.processedChunks * 80) / progress.totalChunks;
-    } else if (progress.totalFiles > 0) {
-        // 文件扫描阶段占20% (0% → 20%)
-        percentage = (progress.processedFiles * 20) / progress.totalFiles;
-    }
+    // 使用新的进度计算方法
+    int percentage = progress.calculatePercentage();
     m_progressBar->setValue(percentage);
     m_progressBar->setFormat(QString("%1%").arg(percentage));
 }
@@ -222,17 +245,66 @@ void SmartImportDialog::onLogMessage(const QString &message)
     m_logText->setTextCursor(cursor);
 }
 
-void SmartImportDialog::onImportCompleted(bool success, const QString &message)
+void SmartImportDialog::onImportCompleted(const ImportResult &result)
 {
-    m_success = success;
+    m_success = result.success;
     
-    if (success) {
+    if (result.success) {
         m_statusLabel->setText("✅ 导入完成！");
         m_progressBar->setValue(100);
-        m_logText->append(QString("\n🎉 %1").arg(message));
+        
+        // 构建详细的完成消息
+        QString completionMsg = QString("\n🎉 导入完成！共导入 %1 道题目\n").arg(result.totalQuestions);
+        completionMsg += QString("📁 保存位置：%1\n").arg(result.basePath);
+        
+        // 按源文件统计
+        if (!result.questionsByFile.isEmpty()) {
+            completionMsg += "\n📄 按源文件分类：\n";
+            for (auto it = result.questionsByFile.constBegin(); it != result.questionsByFile.constEnd(); ++it) {
+                completionMsg += QString("  • %1: %2 道题目\n").arg(it.key()).arg(it.value());
+            }
+        }
+        
+        // 按难度统计
+        if (!result.questionsByDifficulty.isEmpty()) {
+            completionMsg += "\n📊 按难度分类：\n";
+            int total = result.totalQuestions;
+            for (auto it = result.questionsByDifficulty.constBegin(); it != result.questionsByDifficulty.constEnd(); ++it) {
+                QString emoji;
+                if (it.key() == "简单") emoji = "🟢";
+                else if (it.key() == "中等") emoji = "🟡";
+                else if (it.key() == "困难") emoji = "🔴";
+                else emoji = "⚪";
+                
+                double percentage = total > 0 ? (it.value() * 100.0 / total) : 0;
+                completionMsg += QString("  %1 %2: %3 道题目 (%4%)\n")
+                    .arg(emoji).arg(it.key()).arg(it.value()).arg(percentage, 0, 'f', 1);
+            }
+        }
+        
+        completionMsg += "\n💡 提示：现在可以在题库面板中查看和练习这些题目了！";
+        
+        m_logText->append(completionMsg);
     } else {
         m_statusLabel->setText("❌ 导入失败");
-        m_logText->append(QString("\n❌ %1").arg(message));
+        
+        QString errorMsg = QString("\n❌ 导入失败：%1").arg(result.errorMessage);
+        
+        // 如果有部分导入的题目，显示统计
+        if (result.totalQuestions > 0) {
+            errorMsg += QString("\n\n⚠️ 已导入 %1 道题目（部分成功）").arg(result.totalQuestions);
+            errorMsg += QString("\n📁 保存位置：%1").arg(result.basePath);
+        }
+        
+        // 显示警告信息
+        if (!result.warnings.isEmpty()) {
+            errorMsg += "\n\n⚠️ 警告信息：\n";
+            for (const QString &warning : result.warnings) {
+                errorMsg += QString("  • %1\n").arg(warning);
+            }
+        }
+        
+        m_logText->append(errorMsg);
     }
     
     m_cancelBtn->setEnabled(false);

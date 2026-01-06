@@ -271,44 +271,55 @@ QString HistoryWidget::loadQuestionTitleFromFile(const QString &questionId)
         return QString();
     }
     
-    // 递归搜索所有.json文件
-    QStringList jsonFiles;
+    // 递归搜索所有题目文件（MD优先，兼容JSON）
+    QStringList questionFiles;
     
     // 先搜索根目录
-    QStringList rootFiles = bankDir.entryList(QStringList() << "*.json", QDir::Files);
-    for (const QString &file : rootFiles) {
-        jsonFiles.append(bankPath + "/" + file);
+    QStringList rootMdFiles = bankDir.entryList(QStringList() << "*.md", QDir::Files);
+    for (const QString &file : rootMdFiles) {
+        questionFiles.append(bankPath + "/" + file);
+    }
+    QStringList rootJsonFiles = bankDir.entryList(QStringList() << "*.json", QDir::Files);
+    for (const QString &file : rootJsonFiles) {
+        questionFiles.append(bankPath + "/" + file);
     }
     
     // 再搜索子目录
     QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
     for (const QString &subDir : subDirs) {
         QDir subDirectory(bankPath + "/" + subDir);
-        QStringList subFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
-        for (const QString &file : subFiles) {
-            jsonFiles.append(bankPath + "/" + subDir + "/" + file);
+        QStringList subMdFiles = subDirectory.entryList(QStringList() << "*.md", QDir::Files);
+        for (const QString &file : subMdFiles) {
+            questionFiles.append(bankPath + "/" + subDir + "/" + file);
+        }
+        QStringList subJsonFiles = subDirectory.entryList(QStringList() << "*.json", QDir::Files);
+        for (const QString &file : subJsonFiles) {
+            questionFiles.append(bankPath + "/" + subDir + "/" + file);
         }
     }
     
     // 在所有文件中查找匹配的题目ID
-    for (const QString &filePath : jsonFiles) {
-        QFile file(filePath);
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            file.close();
-            
-            if (doc.isObject()) {
-                QJsonObject obj = doc.object();
-                QString fileQuestionId = obj["id"].toString();
+    for (const QString &filePath : questionFiles) {
+        Question q;
+        
+        if (filePath.endsWith(".md", Qt::CaseInsensitive)) {
+            // 加载MD文件
+            q = Question::fromMarkdownFile(filePath);
+        } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+            // 加载JSON文件
+            QFile file(filePath);
+            if (file.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                file.close();
                 
-                if (fileQuestionId == questionId) {
-                    // 找到匹配的题目，返回标题
-                    QString title = obj["title"].toString();
-                    if (!title.isEmpty()) {
-                        return title;
-                    }
+                if (doc.isObject()) {
+                    q = Question(doc.object());
                 }
             }
+        }
+        
+        if (q.id() == questionId && !q.title().isEmpty()) {
+            return q.title();
         }
     }
     

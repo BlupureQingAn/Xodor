@@ -58,7 +58,7 @@ void AIAssistant::getHint(const Question &currentQuestion)
     m_aiClient->analyzeCode("", prompt);
 }
 
-void AIAssistant::explainConcept(const QString &concept, const Question &currentQuestion)
+void AIAssistant::explainConcept(const QString &conceptName, const Question &currentQuestion)
 {
     if (!m_aiClient) {
         emit error("AI 客户端未初始化");
@@ -68,10 +68,10 @@ void AIAssistant::explainConcept(const QString &concept, const Question &current
     m_currentQuestionId = currentQuestion.id();
     
     // 添加用户消息
-    addMessage("user", QString("请讲解一下：%1").arg(concept));
+    addMessage("user", QString("请讲解一下：%1").arg(conceptName));
     
     // 构建提示词
-    QString prompt = buildConceptPrompt(concept, currentQuestion);
+    QString prompt = buildConceptPrompt(conceptName, currentQuestion);
     
     // 发送请求
     m_aiClient->analyzeCode("", prompt);
@@ -233,7 +233,7 @@ QString AIAssistant::buildHintPrompt(const Question &question)
     return prompt;
 }
 
-QString AIAssistant::buildConceptPrompt(const QString &concept, const Question &question)
+QString AIAssistant::buildConceptPrompt(const QString &conceptName, const Question &question)
 {
     QString prompt = QString(R"(
 你是一位编程导师，正在帮助学生理解编程概念。
@@ -250,7 +250,7 @@ QString AIAssistant::buildConceptPrompt(const QString &concept, const Question &
 3. 结合题目场景
 4. 语言通俗易懂
 )").arg(question.title())
-   .arg(concept);
+   .arg(conceptName);
     
     return prompt;
 }

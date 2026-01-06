@@ -98,28 +98,33 @@ void QuestionBankTreeWidget::loadBankTree()
 
 void QuestionBankTreeWidget::loadRootNode()
 {
-    // 创建根节点
-    m_rootItem = new QTreeWidgetItem(this);
-    m_rootItem->setText(0, "📁 基础题库");
-    m_rootItem->setData(0, Qt::UserRole, static_cast<int>(TreeNodeType::Root));
-    m_rootItem->setData(0, Qt::UserRole + 1, "data/基础题库");
-    m_rootItem->setExpanded(true);
-    
-    // 加载所有题库
+    // 扫描所有题库文件夹，但跳过被移除注册的（在忽略列表中的）
     QDir baseDir("data/基础题库");
     if (!baseDir.exists()) {
-        qWarning() << "基础题库目录不存在";
+        qWarning() << "[QuestionBankTreeWidget] 基础题库目录不存在";
         return;
     }
     
     QStringList banks = baseDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     
+    qDebug() << "[QuestionBankTreeWidget] Found" << banks.size() << "bank directories";
+    
+    int loadedCount = 0;
     for (const QString &bankName : banks) {
+        // 检查是否在忽略列表中（用户主动移除的）
+        if (QuestionBankManager::instance().isInIgnoreList(bankName)) {
+            qDebug() << "[QuestionBankTreeWidget]   Skipping ignored bank:" << bankName;
+            continue;
+        }
+        
         QString bankPath = baseDir.filePath(bankName);
-        loadBankNode(m_rootItem, bankPath);
+        qDebug() << "[QuestionBankTreeWidget]   Loading bank:" << bankName;
+        // 直接将题库节点添加到树的顶层（不创建根节点）
+        loadBankNode(nullptr, bankPath);
+        loadedCount++;
     }
     
-    qDebug() << "加载了" << banks.size() << "个题库";
+    qDebug() << "[QuestionBankTreeWidget] ✓ Loaded" << loadedCount << "banks (skipped" << (banks.size() - loadedCount) << "ignored)";
 }
 
 void QuestionBankTreeWidget::loadBankNode(QTreeWidgetItem *parentItem, const QString &bankPath)
@@ -131,10 +136,12 @@ void QuestionBankTreeWidget::loadBankNode(QTreeWidgetItem *parentItem, const QSt
     int questionCount = countQuestionsInBank(bankPath);
     
     // 创建题库节点
-    QTreeWidgetItem *bankItem = new QTreeWidgetItem(parentItem);
+    // 如果 parentItem 为 nullptr，直接添加到树的顶层
+    QTreeWidgetItem *bankItem = parentItem ? new QTreeWidgetItem(parentItem) : new QTreeWidgetItem(this);
     bankItem->setText(0, QString("📚 %1 (%2 道题目)").arg(bankName).arg(questionCount));
     bankItem->setData(0, Qt::UserRole, static_cast<int>(TreeNodeType::Bank));
     bankItem->setData(0, Qt::UserRole + 1, bankPath);
+    bankItem->setExpanded(true);  // 默认展开题库
     
     // 加载题目文件
     loadQuestionFiles(bankItem, bankPath);
@@ -147,20 +154,31 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
         return;
     }
     
-    // 加载 JSON 文件
+    // 加载题目文件（MD优先，兼容JSON）
     QStringList filters;
-    filters << "*.json";
+    filters << "*.md" << "*.json";
     QFileInfoList files = bankDir.entryInfoList(filters, QDir::Files, QDir::Name);
+    
+    // 去重：如果同名的MD和JSON都存在，只加载MD
+    QSet<QString> loadedFiles;
     
     for (const QFileInfo &fileInfo : files) {
         QString fileName = fileInfo.fileName();
         QString filePath = fileInfo.absoluteFilePath();
+        QString baseName = fileInfo.completeBaseName();  // 不含扩展名
         
-        // 移除 .json 后缀
-        QString displayName = fileName;
-        if (displayName.endsWith(".json", Qt::CaseInsensitive)) {
-            displayName.chop(5);
+        // 过滤配置文件（导入规则等）
+        if (isConfigFile(fileName)) {
+            continue;
         }
+        
+        // 如果已经加载过这个文件名，跳过
+        if (loadedFiles.contains(baseName)) {
+            continue;
+        }
+        
+        // 移除文件扩展名作为显示名称
+        QString displayName = baseName;
         
         // 加载题目以获取ID和状态
         Question question = loadQuestionFromFile(filePath);
@@ -178,6 +196,8 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
         questionItem->setData(0, Qt::UserRole, static_cast<int>(TreeNodeType::QuestionFile));
         questionItem->setData(0, Qt::UserRole + 1, filePath);
         questionItem->setData(0, Qt::UserRole + 2, question.id());  // 保存题目ID
+        
+        loadedFiles.insert(baseName);
     }
     
     // 递归加载子目录
@@ -185,6 +205,11 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
     for (const QFileInfo &subDirInfo : subDirs) {
         QString subDirPath = subDirInfo.absoluteFilePath();
         QString subDirName = subDirInfo.fileName();
+        
+        // 跳过特殊目录（不应该显示在题库列表中）
+        if (shouldSkipDirectory(subDirName)) {
+            continue;
+        }
         
         // 创建子目录节点
         QTreeWidgetItem *subDirItem = new QTreeWidgetItem(bankItem);
@@ -206,23 +231,48 @@ int QuestionBankTreeWidget::countQuestionsInBank(const QString &bankPath) const
         return 0;
     }
     
-    // 统计当前目录的 JSON 文件
+    // 统计当前目录的题目文件（MD优先，兼容JSON）
     QStringList filters;
-    filters << "*.json";
+    filters << "*.md" << "*.json";
     QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
     
+    // 去重：如果同名的MD和JSON都存在，只计算一次
+    QSet<QString> countedFiles;
+    
     for (const auto &fileInfo : files) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            
-            if (doc.isArray()) {
-                count += doc.array().size();
-            } else if (doc.isObject()) {
-                count += 1;
+        QString fileName = fileInfo.fileName();
+        QString filePath = fileInfo.absoluteFilePath();
+        QString baseName = fileInfo.completeBaseName();
+        
+        // 过滤配置文件（导入规则等）
+        if (isConfigFile(fileName)) {
+            continue;
+        }
+        
+        // 如果已经统计过这个文件名，跳过
+        if (countedFiles.contains(baseName)) {
+            continue;
+        }
+        
+        if (filePath.endsWith(".md", Qt::CaseInsensitive)) {
+            // MD文件，每个文件一道题
+            count += 1;
+            countedFiles.insert(baseName);
+        } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+            // JSON文件，可能包含多道题
+            QFile file(filePath);
+            if (file.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                
+                if (doc.isArray()) {
+                    count += doc.array().size();
+                } else if (doc.isObject()) {
+                    count += 1;
+                }
+                
+                file.close();
             }
-            
-            file.close();
+            countedFiles.insert(baseName);
         }
     }
     
@@ -237,19 +287,26 @@ int QuestionBankTreeWidget::countQuestionsInBank(const QString &bankPath) const
 
 Question QuestionBankTreeWidget::loadQuestionFromFile(const QString &filePath) const
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "无法打开题目文件:" << filePath;
-        return Question();
-    }
-    
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-    
-    if (doc.isObject()) {
-        return Question(doc.object());
-    } else if (doc.isArray() && doc.array().size() > 0) {
-        return Question(doc.array().first().toObject());
+    // 根据文件扩展名选择加载方式
+    if (filePath.endsWith(".md", Qt::CaseInsensitive)) {
+        // 加载MD文件
+        return Question::fromMarkdownFile(filePath);
+    } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+        // 加载JSON文件
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly)) {
+            qWarning() << "无法打开题目文件:" << filePath;
+            return Question();
+        }
+        
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        file.close();
+        
+        if (doc.isObject()) {
+            return Question(doc.object());
+        } else if (doc.isArray() && doc.array().size() > 0) {
+            return Question(doc.array().first().toObject());
+        }
     }
     
     return Question();
@@ -315,11 +372,9 @@ QString QuestionBankTreeWidget::getNodePath(QTreeWidgetItem *item) const
 
 void QuestionBankTreeWidget::expandBank(const QString &bankPath)
 {
-    if (!m_rootItem) return;
-    
-    // 遍历查找对应的题库节点
-    for (int i = 0; i < m_rootItem->childCount(); ++i) {
-        QTreeWidgetItem *bankItem = m_rootItem->child(i);
+    // 遍历顶层项目查找对应的题库节点
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        QTreeWidgetItem *bankItem = topLevelItem(i);
         QString itemPath = getNodePath(bankItem);
         
         if (itemPath == bankPath) {
@@ -332,8 +387,6 @@ void QuestionBankTreeWidget::expandBank(const QString &bankPath)
 
 void QuestionBankTreeWidget::selectQuestion(const QString &questionPath)
 {
-    if (!m_rootItem) return;
-    
     // 递归查找题目节点
     std::function<bool(QTreeWidgetItem*)> findAndSelect = [&](QTreeWidgetItem *parent) -> bool {
         for (int i = 0; i < parent->childCount(); ++i) {
@@ -353,11 +406,22 @@ void QuestionBankTreeWidget::selectQuestion(const QString &questionPath)
         return false;
     };
     
-    findAndSelect(m_rootItem);
+    // 遍历所有顶层项目
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        if (findAndSelect(topLevelItem(i))) {
+            break;
+        }
+    }
 }
 
 void QuestionBankTreeWidget::refreshTree()
 {
+    // 自动扫描并注册未注册的题库
+    int newBanks = QuestionBankManager::instance().scanAndRegisterUnregisteredBanks();
+    if (newBanks > 0) {
+        qDebug() << "[QuestionBankTreeWidget] Auto-registered" << newBanks << "new question banks";
+    }
+    
     // 保存当前展开状态
     QSet<QString> expandedPaths;
     
@@ -370,8 +434,9 @@ void QuestionBankTreeWidget::refreshTree()
         }
     };
     
-    if (m_rootItem) {
-        saveExpandedState(m_rootItem);
+    // 保存所有顶层项目的展开状态
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        saveExpandedState(topLevelItem(i));
     }
     
     // 重新加载
@@ -388,8 +453,9 @@ void QuestionBankTreeWidget::refreshTree()
         }
     };
     
-    if (m_rootItem) {
-        restoreExpandedState(m_rootItem);
+    // 恢复所有顶层项目的展开状态
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        restoreExpandedState(topLevelItem(i));
     }
 }
 
@@ -447,8 +513,9 @@ void QuestionBankTreeWidget::updateQuestionStatus(const QString &questionId)
         }
     };
     
-    if (m_rootItem) {
-        updateNode(m_rootItem);
+    // 更新所有顶层项目
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        updateNode(topLevelItem(i));
     }
 }
 
@@ -472,8 +539,9 @@ QStringList QuestionBankTreeWidget::getExpandedPaths() const
         }
     };
     
-    if (m_rootItem) {
-        collectExpanded(m_rootItem);
+    // 收集所有顶层项目的展开状态
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        collectExpanded(topLevelItem(i));
     }
     
     return expandedPaths;
@@ -498,8 +566,9 @@ void QuestionBankTreeWidget::restoreExpandedPaths(const QStringList &paths)
         }
     };
     
-    if (m_rootItem) {
-        expandItems(m_rootItem);
+    // 恢复所有顶层项目的展开状态
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        expandItems(topLevelItem(i));
     }
 }
 
@@ -627,17 +696,12 @@ void QuestionBankTreeWidget::onAddQuestion()
         if (dialog->exec() == QDialog::Accepted) {
             Question newQuestion = dialog->getQuestion();
             
-            // 保存题目到文件
+            // 保存题目到文件（统一使用MD格式）
             QString fileName = newQuestion.title();
             fileName.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
-            QString filePath = bankPath + "/" + fileName + ".json";
+            QString filePath = bankPath + "/" + fileName + ".md";
             
-            QFile file(filePath);
-            if (file.open(QIODevice::WriteOnly)) {
-                QJsonDocument doc(newQuestion.toJson());
-                file.write(doc.toJson(QJsonDocument::Indented));
-                file.close();
-                
+            if (newQuestion.saveAsMarkdown(filePath)) {
                 // 刷新树
                 refreshTree();
                 
@@ -655,17 +719,12 @@ void QuestionBankTreeWidget::onAddQuestion()
         if (dialog->exec() == QDialog::Accepted) {
             Question newQuestion = dialog->getQuestion();
             
-            // 保存题目到文件
+            // 保存题目到文件（统一使用MD格式）
             QString fileName = newQuestion.title();
             fileName.replace(QRegularExpression("[\\\\/:*?\"<>|]"), "_");
-            QString filePath = bankPath + "/" + fileName + ".json";
+            QString filePath = bankPath + "/" + fileName + ".md";
             
-            QFile file(filePath);
-            if (file.open(QIODevice::WriteOnly)) {
-                QJsonDocument doc(newQuestion.toJson());
-                file.write(doc.toJson(QJsonDocument::Indented));
-                file.close();
-                
+            if (newQuestion.saveAsMarkdown(filePath)) {
                 // 刷新树
                 refreshTree();
                 
@@ -700,13 +759,17 @@ void QuestionBankTreeWidget::onEditQuestion()
     if (dialog->exec() == QDialog::Accepted) {
         Question updatedQuestion = dialog->getQuestion();
         
-        // 保存更新后的题目
-        QFile file(filePath);
-        if (file.open(QIODevice::WriteOnly)) {
-            QJsonDocument doc(updatedQuestion.toJson());
-            file.write(doc.toJson(QJsonDocument::Indented));
-            file.close();
+        // 保存更新后的题目（统一使用MD格式）
+        QString mdPath = filePath;
+        if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+            // 如果原文件是JSON，转换为MD
+            mdPath.replace(QRegularExpression("\\.json$", QRegularExpression::CaseInsensitiveOption), ".md");
             
+            // 删除旧的JSON文件
+            QFile::remove(filePath);
+        }
+        
+        if (updatedQuestion.saveAsMarkdown(mdPath)) {
             // 刷新树
             refreshTree();
             
@@ -806,4 +869,54 @@ bool QuestionBankTreeWidget::shouldShowQuestion(const Question &question) const
     
     // 检查题目难度是否在筛选列表中
     return m_difficultyFilter.contains(question.difficulty());
+}
+
+bool QuestionBankTreeWidget::isConfigFile(const QString &fileName) const
+{
+    // 过滤导入规则文件和其他配置文件
+    // 使用精确匹配或特定模式，避免误过滤正常题目
+    
+    // 1. 导入规则文件
+    if (fileName.endsWith("_parse_rule.json", Qt::CaseInsensitive)) {
+        return true;
+    }
+    
+    // 2. 出题模式规律文件（精确匹配）
+    if (fileName == "出题模式规律.md" || 
+        fileName == "出题模式规律.json" ||
+        fileName.endsWith("_规律.md") ||      // 以_规律.md结尾
+        fileName.endsWith("_pattern.md") ||   // 以_pattern.md结尾
+        fileName.startsWith(".")) {           // 隐藏文件
+        return true;
+    }
+    
+    // 3. README等说明文件（精确匹配）
+    QString lowerName = fileName.toLower();
+    if (lowerName == "readme.md" || 
+        lowerName == "readme.txt" ||
+        lowerName == "拆分规则.md" ||
+        lowerName == "config.json" || 
+        lowerName == "settings.json") {
+        return true;
+    }
+    
+    return false;
+}
+
+bool QuestionBankTreeWidget::shouldSkipDirectory(const QString &dirName) const
+{
+    // 跳过特殊目录（不应该显示在题库列表中）
+    
+    // 1. 跳过"CCF"、"出题模式"等与题库同名的子目录
+    //    这些通常是题目的实际存储目录，不需要在树中显示
+    if (dirName == "CCF" || dirName == "出题模式") {
+        return true;
+    }
+    
+    // 2. 跳过隐藏目录和系统目录
+    if (dirName.startsWith(".")) {
+        return true;
+    }
+    
+    return false;
 }

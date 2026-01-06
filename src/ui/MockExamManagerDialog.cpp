@@ -10,17 +10,15 @@
 #include <QFile>
 #include <QDir>
 
-MockExamManagerDialog::MockExamManagerDialog(const QVector<Question> &questions,
-                                           OllamaClient *aiClient,
+MockExamManagerDialog::MockExamManagerDialog(OllamaClient *aiClient,
                                            QWidget *parent)
     : QDialog(parent)
-    , m_questions(questions)
     , m_aiClient(aiClient)
 {
     m_generator = new MockExamGenerator(aiClient, this);
     
     setupUI();
-    setWindowTitle("模拟题库管理");
+    setWindowTitle("AI模拟题库生成");
     resize(900, 700);
     
     // 连接信号
@@ -33,7 +31,8 @@ MockExamManagerDialog::MockExamManagerDialog(const QVector<Question> &questions,
     connect(m_generator, &MockExamGenerator::error,
             this, &MockExamManagerDialog::onGenerationError);
     
-    loadExistingExams();
+    // 加载可用的题库
+    loadAvailableBanks();
 }
 
 void MockExamManagerDialog::setupUI()
@@ -50,37 +49,28 @@ void MockExamManagerDialog::setupUI()
     QGroupBox *configGroup = new QGroupBox("生成配置", this);
     QFormLayout *configLayout = new QFormLayout(configGroup);
     
-    // 题库分类选择
-    m_categoryCombo = new QComboBox(this);
-    m_categoryCombo->addItem("CCF", "ccf");
-    m_categoryCombo->addItem("LeetCode", "leetcode");
-    m_categoryCombo->addItem("自定义", "custom");
+    // 题库选择
+    m_bankCombo = new QComboBox(this);
+    connect(m_bankCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MockExamManagerDialog::onBankSelectionChanged);
     
-    // 分析按钮
-    m_analyzeBtn = new QPushButton("分析题库", this);
-    connect(m_analyzeBtn, &QPushButton::clicked, this, &MockExamManagerDialog::onAnalyzeBank);
-    
-    QHBoxLayout *categoryLayout = new QHBoxLayout();
-    categoryLayout->addWidget(m_categoryCombo, 1);
-    categoryLayout->addWidget(m_analyzeBtn);
+    // 题库信息显示
+    m_bankInfoLabel = new QLabel("请选择一个题库", this);
+    m_bankInfoLabel->setStyleSheet("color: #b0b0b0; padding: 10px; background: #1a1a1a; border-radius: 6px;");
+    m_bankInfoLabel->setWordWrap(true);
     
     // 出题规律显示
-    m_patternLabel = new QLabel("请先分析题库", this);
+    m_patternLabel = new QLabel("", this);
     m_patternLabel->setStyleSheet("color: #b0b0b0; padding: 10px; background: #1a1a1a; border-radius: 6px;");
     m_patternLabel->setWordWrap(true);
+    m_patternLabel->setVisible(false);
     
-    // 生成数量
-    m_examCountSpinBox = new QSpinBox(this);
-    m_examCountSpinBox->setRange(1, 10);
-    m_examCountSpinBox->setValue(2);
-    m_examCountSpinBox->setSuffix(" 套");
-    
-    configLayout->addRow("题库分类:", categoryLayout);
+    configLayout->addRow("选择样本题库:", m_bankCombo);
+    configLayout->addRow("题库信息:", m_bankInfoLabel);
     configLayout->addRow("出题规律:", m_patternLabel);
-    configLayout->addRow("生成数量:", m_examCountSpinBox);
 
     // 生成按钮
-    m_generateBtn = new QPushButton("开始生成", this);
+    m_generateBtn = new QPushButton("生成模拟题库", this);
     m_generateBtn->setEnabled(false);
     connect(m_generateBtn, &QPushButton::clicked, this, &MockExamManagerDialog::onGenerateExams);
     
@@ -211,7 +201,6 @@ void MockExamManagerDialog::setupUI()
         }
     )";
     
-    m_analyzeBtn->setStyleSheet(btnStyle);
     m_generateBtn->setStyleSheet(btnStyle);
     m_viewBtn->setStyleSheet(btnStyle);
     m_deleteBtn->setStyleSheet(btnStyle);
@@ -249,21 +238,99 @@ void MockExamManagerDialog::setupUI()
     )");
 }
 
-void MockExamManagerDialog::onAnalyzeBank()
+void MockExamManagerDialog::loadAvailableBanks()
 {
-    m_currentCategory = m_categoryCombo->currentData().toString();
+    m_bankCombo->clear();
+    m_bankCombo->addItem("-- 请选择题库 --", "");
     
-    m_logText->append(QString("🔍 开始分析 [%1] 题库...\n").arg(m_currentCategory));
+    // 从QuestionBankManager获取所有已注册的题库
+    QDir baseDir("data/基础题库");
+    if (!baseDir.exists()) {
+        return;
+    }
     
-    // 使用传入的题目列表
-    if (m_questions.isEmpty()) {
-        QMessageBox::warning(this, "提示", "当前题库为空，请先导入题目。");
+    QStringList banks = baseDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    
+    for (const QString &bankName : banks) {
+        // 过滤掉ai模拟题库文件夹
+        if (bankName == "ai模拟题库") {
+            continue;
+        }
+        
+        // 统计题目数量
+        QString bankPath = baseDir.filePath(bankName);
+        QDir bankDir(bankPath);
+        int questionCount = bankDir.entryList(QStringList() << "*.md", QDir::Files | QDir::NoDotAndDotDot).count();
+        
+        m_bankCombo->addItem(QString("%1 (%2 道题)").arg(bankName).arg(questionCount), bankName);
+    }
+}
+
+void MockExamManagerDialog::loadBankQuestions(const QString &bankName)
+{
+    m_currentQuestions.clear();
+    
+    QString bankPath = QString("data/基础题库/%1").arg(bankName);
+    QDir bankDir(bankPath);
+    
+    if (!bankDir.exists()) {
+        return;
+    }
+    
+    // 加载所有题目文件
+    QFileInfoList files = bankDir.entryInfoList(QStringList() << "*.md", QDir::Files);
+    
+    for (const QFileInfo &fileInfo : files) {
+        Question q = Question::fromMarkdownFile(fileInfo.absoluteFilePath());
+        if (!q.id().isEmpty()) {
+            m_currentQuestions.append(q);
+        }
+    }
+}
+
+void MockExamManagerDialog::onBankSelectionChanged(int index)
+{
+    QString bankName = m_bankCombo->currentData().toString();
+    
+    if (bankName.isEmpty()) {
+        m_bankInfoLabel->setText("请选择一个题库");
+        m_patternLabel->setVisible(false);
+        m_generateBtn->setEnabled(false);
+        m_currentBankName.clear();
+        m_currentQuestions.clear();
+        loadExistingExams();
+        return;
+    }
+    
+    m_currentBankName = bankName;
+    m_logText->append(QString("📚 选择题库：%1\n").arg(bankName));
+    
+    // 加载题目
+    loadBankQuestions(bankName);
+    
+    if (m_currentQuestions.isEmpty()) {
+        m_bankInfoLabel->setText("⚠️ 该题库为空，无法生成模拟题");
+        m_patternLabel->setVisible(false);
+        m_generateBtn->setEnabled(false);
         m_logText->append("❌ 题库为空\n");
         return;
     }
     
+    // 检查是否有导入规则文件
+    bool hasRules = m_generator->hasSourceBankRules(bankName);
+    
     // 分析题库
-    m_currentPattern = m_generator->analyzeQuestionBank(m_questions, m_currentCategory);
+    m_currentPattern = m_generator->analyzeQuestionBank(m_currentQuestions, bankName);
+    
+    // 显示题库信息
+    QString infoText = QString(
+        "✅ 题库已加载\n"
+        "• 题目总数：%1 道\n"
+        "• 导入规则：%2"
+    ).arg(m_currentQuestions.size())
+     .arg(hasRules ? "✅ 已找到" : "⚠️ 未找到");
+    
+    m_bankInfoLabel->setText(infoText);
     
     // 显示分析结果
     QString patternText = QString(
@@ -280,20 +347,27 @@ void MockExamManagerDialog::onAnalyzeBank()
      .arg(m_currentPattern.topicRatio.keys().mid(0, 5).join(", "));
     
     m_patternLabel->setText(patternText);
+    m_patternLabel->setVisible(true);
+    
     m_generateBtn->setEnabled(true);
     
     m_logText->append("✅ 题库分析完成\n");
-    m_logText->append(patternText + "\n");
     
-    // 保存规律
-    QString bankPath = QString("基础题库/%1").arg(m_currentCategory);
-    m_generator->savePattern(bankPath, m_currentPattern);
+    if (!hasRules) {
+        m_logText->append(QString("⚠️ 未找到导入规则文件：data/config/%1_parse_rule.json\n").arg(bankName));
+        m_logText->append("💡 提示：将使用基础分析结果生成模拟题\n");
+    } else {
+        m_logText->append(QString("✅ 找到导入规则文件：data/config/%1_parse_rule.json\n").arg(bankName));
+    }
+    
+    // 加载已有的模拟题
+    loadExistingExams();
 }
 
 void MockExamManagerDialog::onGenerateExams()
 {
-    if (m_currentPattern.categoryName.isEmpty()) {
-        QMessageBox::warning(this, "提示", "请先分析题库。");
+    if (m_currentBankName.isEmpty()) {
+        QMessageBox::warning(this, "提示", "请先选择一个题库。");
         return;
     }
     
@@ -302,16 +376,30 @@ void MockExamManagerDialog::onGenerateExams()
         return;
     }
     
-    int examCount = m_examCountSpinBox->value();
+    // 检查是否已有模拟题
+    QString mockPath = QString("data/基础题库/ai模拟题库/%1-模拟").arg(m_currentBankName);
+    if (QDir(mockPath).exists()) {
+        int ret = QMessageBox::question(this, "确认覆盖",
+            QString("题库 '%1' 已有模拟题库。\n\n"
+                   "生成新的模拟题将覆盖原有内容。\n\n"
+                   "是否继续？").arg(m_currentBankName),
+            QMessageBox::Yes | QMessageBox::No);
+        
+        if (ret == QMessageBox::No) {
+            m_logText->append("❌ 用户取消操作\n");
+            return;
+        }
+    }
     
     m_generateBtn->setEnabled(false);
-    m_analyzeBtn->setEnabled(false);
+    m_bankCombo->setEnabled(false);
     m_progressBar->setVisible(true);
     m_progressBar->setValue(0);
     
-    m_logText->append(QString("\n🚀 开始生成 %1 套模拟题...\n").arg(examCount));
+    m_logText->append(QString("\n🚀 开始为 [%1] 生成模拟题库...\n").arg(m_currentBankName));
     
-    m_generator->generateMockExam(m_currentPattern, examCount);
+    // 生成1套模拟题（包含多道题目）
+    m_generator->generateMockExam(m_currentPattern, 1);
 }
 
 void MockExamManagerDialog::onViewExam()
@@ -380,11 +468,11 @@ void MockExamManagerDialog::onProgressUpdated(int percentage, const QString &mes
 
 void MockExamManagerDialog::onExamGenerated(const QVector<Question> &questions, int examIndex)
 {
-    m_logText->append(QString("✅ 第 %1 套题生成完成，共 %2 道题\n")
-        .arg(examIndex).arg(questions.size()));
+    m_logText->append(QString("✅ 模拟题生成完成，共 %1 道题\n")
+        .arg(questions.size()));
     
     // 保存模拟题
-    saveExam(questions, examIndex);
+    saveExam(questions);
     
     // 刷新列表
     loadExistingExams();
@@ -393,13 +481,17 @@ void MockExamManagerDialog::onExamGenerated(const QVector<Question> &questions, 
 void MockExamManagerDialog::onGenerationComplete(int totalExams)
 {
     m_progressBar->setValue(100);
-    m_logText->append(QString("\n🎉 所有模拟题生成完成！共 %1 套\n").arg(totalExams));
+    m_logText->append(QString("\n🎉 模拟题库生成完成！\n"));
     
     m_generateBtn->setEnabled(true);
-    m_analyzeBtn->setEnabled(true);
+    m_bankCombo->setEnabled(true);
+    
+    // 刷新已有模拟题列表
+    loadExistingExams();
     
     QMessageBox::information(this, "生成完成",
-        QString("成功生成 %1 套模拟题！").arg(totalExams));
+        QString("成功为 '%1' 生成模拟题库！\n\n"
+               "保存位置：data/基础题库/ai模拟题库/%1-模拟/").arg(m_currentBankName));
 }
 
 void MockExamManagerDialog::onGenerationError(const QString &error)
@@ -407,7 +499,7 @@ void MockExamManagerDialog::onGenerationError(const QString &error)
     m_logText->append(QString("\n❌ 生成错误：%1\n").arg(error));
     m_progressBar->setValue(0);
     m_generateBtn->setEnabled(true);
-    m_analyzeBtn->setEnabled(true);
+    m_bankCombo->setEnabled(true);
     
     QMessageBox::critical(this, "生成失败", error);
 }
@@ -416,32 +508,32 @@ void MockExamManagerDialog::loadExistingExams()
 {
     m_examList->clear();
     
-    QString mockPath = QString("人工模拟题库/%1").arg(m_currentCategory);
+    if (m_currentBankName.isEmpty()) {
+        return;
+    }
+    
+    // 从 ai模拟题库 目录加载当前题库的模拟题
+    QString mockPath = QString("data/基础题库/ai模拟题库/%1-模拟").arg(m_currentBankName);
     QDir mockDir(mockPath);
     
     if (!mockDir.exists()) {
         return;
     }
     
-    QStringList examDirs = mockDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    int questionCount = mockDir.entryList(QStringList() << "*.md", QDir::Files).size();
     
-    for (const QString &examDir : examDirs) {
-        QString fullPath = mockDir.filePath(examDir);
-        QDir dir(fullPath);
-        
-        int questionCount = dir.entryList(QStringList() << "*.md", QDir::Files).size();
-        
+    if (questionCount > 0) {
         QListWidgetItem *item = new QListWidgetItem(
-            QString("📝 %1 (%2 道题)").arg(examDir).arg(questionCount)
+            QString("📝 %1-模拟 (%2 道题)").arg(m_currentBankName).arg(questionCount)
         );
-        item->setData(Qt::UserRole, fullPath);
+        item->setData(Qt::UserRole, mockPath);
         m_examList->addItem(item);
     }
 }
 
-void MockExamManagerDialog::saveExam(const QVector<Question> &questions, int examIndex)
+void MockExamManagerDialog::saveExam(const QVector<Question> &questions)
 {
-    QString examPath = getExamPath(m_currentCategory, examIndex);
+    QString examPath = getExamPath();
     QDir dir;
     dir.mkpath(examPath);
     
@@ -476,7 +568,7 @@ void MockExamManagerDialog::saveExam(const QVector<Question> &questions, int exa
     QFile readmeFile(readmePath);
     if (readmeFile.open(QIODevice::WriteOnly)) {
         QString readme = QString(
-            "# 模拟题 %1 - 答题说明\n\n"
+            "# %1-模拟 - 答题说明\n\n"
             "## 考试信息\n\n"
             "- 题目数量：%2 道\n"
             "- 时间限制：%3 分钟\n"
@@ -491,7 +583,7 @@ void MockExamManagerDialog::saveExam(const QVector<Question> &questions, int exa
             "- 测试结果会显示通过/失败状态\n"
             "- 失败的测试会显示详细错误信息\n\n"
             "祝你答题顺利！🎯\n"
-        ).arg(examIndex)
+        ).arg(m_currentBankName)
          .arg(m_currentPattern.questionsPerExam)
          .arg(m_currentPattern.timeLimit)
          .arg(m_currentPattern.supportedLanguages.join(", "));
@@ -501,7 +593,9 @@ void MockExamManagerDialog::saveExam(const QVector<Question> &questions, int exa
     }
 }
 
-QString MockExamManagerDialog::getExamPath(const QString &category, int examIndex)
+QString MockExamManagerDialog::getExamPath()
 {
-    return QString("人工模拟题库/%1/模拟题%2").arg(category).arg(examIndex);
+    // 模拟题保存到：data/基础题库/ai模拟题库/{bankName}-模拟/
+    QString mockBankName = QString("%1-模拟").arg(m_currentBankName);
+    return QString("data/基础题库/ai模拟题库/%1").arg(mockBankName);
 }

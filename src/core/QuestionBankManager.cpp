@@ -1,4 +1,5 @@
 #include "QuestionBankManager.h"
+#include "../utils/ImportRuleManager.h"
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
@@ -188,9 +189,6 @@ bool QuestionBankManager::copyDirectory(const QString &source, const QString &de
 
 QString QuestionBankManager::importQuestionBank(const QString &sourcePath, const QString &name, bool isAIParsed)
 {
-    // 生成唯一ID
-    QString bankId = generateBankId();
-    
     // 确保路径是相对于项目根目录的基础题库路径
     QString normalizedPath = sourcePath;
     
@@ -200,6 +198,35 @@ QString QuestionBankManager::importQuestionBank(const QString &sourcePath, const
         normalizedPath = QString("data/基础题库/%1").arg(name);
         qDebug() << "Normalized bank path from" << sourcePath << "to" << normalizedPath;
     }
+    
+    // 【关键修复】检查题库是否已经存在（防止重复注册）
+    QString cleanedPath = QDir::cleanPath(normalizedPath);
+    for (const QuestionBankInfo &existingBank : m_banks) {
+        QString existingCleanedPath = QDir::cleanPath(existingBank.path);
+        
+        // 通过名称或路径判断是否已存在
+        if (existingBank.name == name || 
+            existingCleanedPath == cleanedPath ||
+            existingCleanedPath.endsWith("/" + name) ||
+            existingCleanedPath.endsWith("\\" + name)) {
+            
+            qDebug() << "[QuestionBankManager] Bank already exists:" << name 
+                     << "ID:" << existingBank.id << "Path:" << existingBank.path;
+            qDebug() << "[QuestionBankManager] Skipping duplicate registration";
+            
+            // 设置为当前题库
+            m_currentBankId = existingBank.id;
+            emit currentBankChanged(existingBank.id);
+            
+            return existingBank.id;  // 返回已存在的题库ID
+        }
+    }
+    
+    // 题库不存在，创建新的
+    qDebug() << "[QuestionBankManager] Registering new bank:" << name;
+    
+    // 生成唯一ID
+    QString bankId = generateBankId();
     
     // 创建题库信息
     QuestionBankInfo info;
@@ -225,7 +252,7 @@ QString QuestionBankManager::importQuestionBank(const QString &sourcePath, const
     emit bankListChanged();
     emit currentBankChanged(bankId);
     
-    qDebug() << "Question bank registered successfully:" << bankId << "at" << normalizedPath;
+    qDebug() << "[QuestionBankManager] Question bank registered successfully:" << bankId << "at" << normalizedPath;
     
     return bankId;
 }
@@ -234,9 +261,11 @@ bool QuestionBankManager::deleteQuestionBank(const QString &bankId)
 {
     // 查找题库
     int index = -1;
+    QString bankName;
     for (int i = 0; i < m_banks.size(); ++i) {
         if (m_banks[i].id == bankId) {
             index = i;
+            bankName = m_banks[i].name;
             break;
         }
     }
@@ -245,6 +274,10 @@ bool QuestionBankManager::deleteQuestionBank(const QString &bankId)
         qWarning() << "Question bank not found:" << bankId;
         return false;
     }
+    
+    // 添加到忽略列表，防止自动重新注册
+    addToIgnoreList(bankName);
+    qDebug() << "[QuestionBankManager] Added to ignore list:" << bankName;
     
     // 只从列表中移除，不删除实际文件
     // （文件在 data/基础题库/ 下，用户可能还需要）
@@ -261,7 +294,7 @@ bool QuestionBankManager::deleteQuestionBank(const QString &bankId)
     
     emit bankListChanged();
     
-    qDebug() << "Question bank unregistered:" << bankId;
+    qDebug() << "[QuestionBankManager] Question bank unregistered:" << bankId;
     
     return true;
 }
@@ -362,9 +395,16 @@ void QuestionBankManager::save()
         banksArray.append(obj);
     }
     
+    // 保存忽略列表
+    QJsonArray ignoredArray;
+    for (const QString &bankName : m_ignoredBanks) {
+        ignoredArray.append(bankName);
+    }
+    
     QJsonObject root;
     root["banks"] = banksArray;
     root["currentBankId"] = m_currentBankId;
+    root["ignoredBanks"] = ignoredArray;
     
     QJsonDocument doc(root);
     
@@ -386,7 +426,11 @@ void QuestionBankManager::load()
     QFile file(filePath);
     
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "No existing question banks config found";
+        qDebug() << "No existing question banks config found at" << filePath;
+        // 配置文件不存在，尝试自动扫描
+        qDebug() << "Attempting to auto-scan question banks...";
+        int scanned = scanAndRegisterUnregisteredBanks();
+        qDebug() << "Auto-scanned and registered" << scanned << "question banks";
         return;
     }
     
@@ -400,6 +444,14 @@ void QuestionBankManager::load()
     
     QJsonObject root = doc.object();
     m_currentBankId = root["currentBankId"].toString();
+    
+    // 加载忽略列表
+    m_ignoredBanks.clear();
+    QJsonArray ignoredArray = root["ignoredBanks"].toArray();
+    for (const QJsonValue &val : ignoredArray) {
+        m_ignoredBanks.insert(val.toString());
+    }
+    qDebug() << "[QuestionBankManager] Loaded" << m_ignoredBanks.size() << "ignored banks:" << m_ignoredBanks;
     
     QJsonArray banksArray = root["banks"].toArray();
     m_banks.clear();
@@ -421,10 +473,17 @@ void QuestionBankManager::load()
         m_banks.append(info);
     }
     
-    qDebug() << "Loaded" << m_banks.size() << "question banks";
+    qDebug() << "Loaded" << m_banks.size() << "question banks from config";
     
     // 加载后自动验证和修复路径
     validateAndFixBankPaths();
+    
+    // 加载后也尝试扫描新的题库
+    qDebug() << "Scanning for new question banks...";
+    int newBanks = scanAndRegisterUnregisteredBanks();
+    if (newBanks > 0) {
+        qDebug() << "Found and registered" << newBanks << "new question banks";
+    }
 }
 
 bool QuestionBankManager::validateAndFixBankPaths()
@@ -489,4 +548,251 @@ bool QuestionBankManager::validateAndFixBankPaths()
     }
     
     return hasChanges;
+}
+
+
+int QuestionBankManager::scanAndRegisterUnregisteredBanks()
+{
+    QString baseBankRoot = getProcessedBanksRoot();
+    qDebug() << "[QuestionBankManager] Scanning base bank root:" << baseBankRoot;
+    
+    QDir baseDir(baseBankRoot);
+    
+    if (!baseDir.exists()) {
+        qWarning() << "[QuestionBankManager] Base question bank directory does not exist:" << baseBankRoot;
+        qDebug() << "[QuestionBankManager] Attempting to create directory...";
+        if (baseDir.mkpath(".")) {
+            qDebug() << "[QuestionBankManager] Directory created successfully";
+        } else {
+            qWarning() << "[QuestionBankManager] Failed to create directory";
+        }
+        return 0;
+    }
+    
+    // 获取所有子目录（每个子目录代表一个题库）
+    QStringList bankDirs = baseDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    qDebug() << "[QuestionBankManager] Found" << bankDirs.size() << "directories:" << bankDirs;
+    qDebug() << "[QuestionBankManager] Currently registered banks:" << m_banks.size();
+    
+    int registeredCount = 0;
+    
+    for (const QString &bankName : bankDirs) {
+        qDebug() << "[QuestionBankManager] Checking directory:" << bankName;
+        
+        // 检查是否在忽略列表中
+        if (isInIgnoreList(bankName)) {
+            qDebug() << "[QuestionBankManager]   In ignore list (user removed), skipping";
+            continue;
+        }
+        
+        // 检查是否已经注册（更严格的检查）
+        bool alreadyRegistered = false;
+        QString expectedPath = QString("%1/%2").arg(baseBankRoot).arg(bankName);
+        for (const QuestionBankInfo &info : m_banks) {
+            // 使用规范化路径比较，避免重复注册
+            QString normalizedInfoPath = QDir::cleanPath(info.path);
+            QString normalizedExpectedPath = QDir::cleanPath(expectedPath);
+            
+            if (info.name == bankName || 
+                normalizedInfoPath == normalizedExpectedPath ||
+                normalizedInfoPath.endsWith("/" + bankName) ||
+                normalizedInfoPath.endsWith("\\" + bankName)) {
+                alreadyRegistered = true;
+                qDebug() << "[QuestionBankManager]   Already registered as:" << info.name << "at" << info.path;
+                break;
+            }
+        }
+        
+        if (alreadyRegistered) {
+            continue;
+        }
+        
+        qDebug() << "[QuestionBankManager]   Not registered, checking for questions...";
+        
+        // 检查目录中是否有题目文件
+        QString bankPath = QString("%1/%2").arg(baseBankRoot).arg(bankName);
+        QDir bankDir(bankPath);
+        
+        // 递归统计所有.md文件（排除配置文件）
+        QStringList filters;
+        filters << "*.md";
+        QFileInfoList mdFiles = bankDir.entryInfoList(filters, QDir::Files);
+        
+        // 也检查子目录（简单/中等/困难）
+        QStringList subDirs = bankDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString &subDir : subDirs) {
+            QDir subDirObj(bankPath + "/" + subDir);
+            QFileInfoList subFiles = subDirObj.entryInfoList(filters, QDir::Files);
+            
+            // 过滤掉配置文件（虽然.md不太可能是配置文件，但保持一致性）
+            for (const QFileInfo &fileInfo : subFiles) {
+                if (!isConfigFile(fileInfo.fileName())) {
+                    mdFiles.append(fileInfo);
+                }
+            }
+        }
+        
+        qDebug() << "[QuestionBankManager]   Found" << mdFiles.size() << "question files";
+        
+        if (mdFiles.isEmpty()) {
+            qDebug() << "[QuestionBankManager]   Skipping empty directory:" << bankName;
+            continue;
+        }
+        
+        // 注册这个题库
+        qDebug() << "[QuestionBankManager]   Registering question bank:" << bankName << "with" << mdFiles.size() << "questions";
+        
+        QuestionBankInfo info;
+        info.id = generateBankId();
+        info.name = bankName;
+        info.path = bankPath;
+        info.originalPath = QString("data/原始题库/%1").arg(bankName);
+        info.questionCount = mdFiles.size();
+        info.importTime = QDateTime::currentDateTime();
+        info.lastAccessTime = info.importTime;
+        info.isAIParsed = true;  // 假设基础题库中的都是AI解析过的
+        info.type = QuestionBankType::Processed;
+        
+        m_banks.append(info);
+        registeredCount++;
+        
+        qDebug() << "[QuestionBankManager]   Successfully registered with ID:" << info.id;
+    }
+    
+    if (registeredCount > 0) {
+        qDebug() << "[QuestionBankManager] Saving configuration...";
+        save();
+        emit bankListChanged();
+        qDebug() << "[QuestionBankManager] ✓ Auto-registered" << registeredCount << "new question banks";
+    } else {
+        qDebug() << "[QuestionBankManager] No new question banks to register";
+    }
+    
+    return registeredCount;
+}
+
+
+bool QuestionBankManager::deleteQuestionBankCompletely(const QString &bankId)
+{
+    qDebug() << "[QuestionBankManager] deleteQuestionBankCompletely:" << bankId;
+    
+    // 获取题库信息
+    QuestionBankInfo info = getBankInfo(bankId);
+    if (info.id.isEmpty()) {
+        qWarning() << "[QuestionBankManager] Bank not found:" << bankId;
+        return false;
+    }
+    
+    QString bankName = info.name;
+    qDebug() << "[QuestionBankManager] Deleting bank:" << bankName;
+    qDebug() << "[QuestionBankManager] Path:" << info.path;
+    qDebug() << "[QuestionBankManager] Original path:" << info.originalPath;
+    
+    // 先从配置中移除（会添加到忽略列表）
+    if (!deleteQuestionBank(bankId)) {
+        qWarning() << "[QuestionBankManager] Failed to remove from config";
+        return false;
+    }
+    
+    bool success = true;
+    
+    // 删除基础题库文件夹
+    QDir processedDir(info.path);
+    if (processedDir.exists()) {
+        qDebug() << "[QuestionBankManager] Deleting processed bank directory:" << info.path;
+        if (processedDir.removeRecursively()) {
+            qDebug() << "[QuestionBankManager] ✓ Processed bank directory deleted";
+        } else {
+            qWarning() << "[QuestionBankManager] ✗ Failed to delete processed bank directory";
+            success = false;
+        }
+    } else {
+        qDebug() << "[QuestionBankManager] Processed bank directory does not exist";
+    }
+    
+    // 删除原始题库文件夹（如果存在）
+    QDir originalDir(info.originalPath);
+    if (originalDir.exists()) {
+        qDebug() << "[QuestionBankManager] Deleting original bank directory:" << info.originalPath;
+        if (originalDir.removeRecursively()) {
+            qDebug() << "[QuestionBankManager] ✓ Original bank directory deleted";
+        } else {
+            qWarning() << "[QuestionBankManager] ✗ Failed to delete original bank directory";
+            success = false;
+        }
+    } else {
+        qDebug() << "[QuestionBankManager] Original bank directory does not exist";
+    }
+    
+    // 删除导入规则文件（如果存在）
+    if (ImportRuleManager::hasImportRule(bankName)) {
+        qDebug() << "[QuestionBankManager] Deleting import rule file:" << ImportRuleManager::getRulePath(bankName);
+        if (ImportRuleManager::deleteImportRule(bankName)) {
+            qDebug() << "[QuestionBankManager] ✓ Import rule file deleted";
+        } else {
+            qWarning() << "[QuestionBankManager] ✗ Failed to delete import rule file";
+            success = false;
+        }
+    } else {
+        qDebug() << "[QuestionBankManager] No import rule file found for this bank";
+    }
+    
+    // 完全删除后，从忽略列表中移除（因为文件已经不存在了）
+    removeFromIgnoreList(bankName);
+    qDebug() << "[QuestionBankManager] Removed from ignore list:" << bankName;
+    
+    if (success) {
+        qDebug() << "[QuestionBankManager] ✓ Bank completely deleted:" << bankName;
+    } else {
+        qWarning() << "[QuestionBankManager] ⚠ Bank partially deleted (some files may remain)";
+    }
+    
+    return success;
+}
+
+
+// ==================== 忽略列表管理 ====================
+
+void QuestionBankManager::addToIgnoreList(const QString &bankName)
+{
+    m_ignoredBanks.insert(bankName);
+    save();  // 立即保存
+}
+
+void QuestionBankManager::removeFromIgnoreList(const QString &bankName)
+{
+    m_ignoredBanks.remove(bankName);
+    save();  // 立即保存
+}
+
+bool QuestionBankManager::isInIgnoreList(const QString &bankName) const
+{
+    return m_ignoredBanks.contains(bankName);
+}
+
+void QuestionBankManager::clearIgnoreList()
+{
+    m_ignoredBanks.clear();
+    save();  // 立即保存
+}
+
+// ==================== 配置文件过滤 ====================
+
+bool QuestionBankManager::isConfigFile(const QString &fileName) const
+{
+    // 过滤导入规则文件和其他配置文件
+    // 1. 导入规则文件：*_parse_rule.json
+    // 2. 其他可能的配置文件：*.json（在题库目录中的JSON文件通常是配置）
+    
+    if (fileName.endsWith("_parse_rule.json")) {
+        return true;
+    }
+    
+    // 可选：过滤所有JSON文件（如果题库目录中不应该有JSON文件）
+    // 注意：有些题库可能使用questions.json存储题目，需要根据实际情况调整
+    // if (fileName.endsWith(".json")) {
+    //     return true;
+    // }
+    
+    return false;
 }

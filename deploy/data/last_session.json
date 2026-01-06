@@ -1,0 +1,19 @@
+{
+    "aiAssistantVisible": false,
+    "currentCode": "",
+    "currentLanguage": "",
+    "currentQuestionIndex": 0,
+    "cursorPosition": 0,
+    "examName": "",
+    "examSessionId": "",
+    "examStartTime": "",
+    "examTimeSpent": 0,
+    "hasActiveExamSession": false,
+    "isPracticeMode": false,
+    "lastSaved": "2026-01-05T21:39:34",
+    "practiceCategory": "",
+    "practiceQuestionIndex": 0,
+    "questionBankPath": "data/questions",
+    "windowGeometry": "AdnQywADAAAAAAI9AAABVgAAB7QAAASUAAACPQAAAXUAAAe0AAAElAAAAAAAAAAACgAAAAI9AAABdQAAB7QAAASU",
+    "windowState": "AAAA/wAAAAD9AAAAAgAAAAAAAAEKAAACt/wCAAAAAfv/////AQAAAFUAAAK3AAABUwD///8AAAABAAABEAAAArf8AgAAAAH7/////wEAAABVAAACtwAAAN4A////AAADVgAAArcAAAAEAAAABAAAAAgAAAAI/AAAAAEAAAACAAAAAf////8BAAAAAP////8AAAAAAAAAAA=="
+}

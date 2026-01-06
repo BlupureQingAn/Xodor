@@ -1,5 +1,6 @@
 #include "MockExamGenerator.h"
 #include "OllamaClient.h"
+#include "../utils/ImportRuleManager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -113,6 +114,30 @@ ExamPattern MockExamGenerator::loadPattern(const QString &bankPath)
     return ExamPattern::fromJson(json);
 }
 
+QJsonObject MockExamGenerator::loadSourceBankRules(const QString &bankName)
+{
+    // 从config目录读取导入规则
+    if (!ImportRuleManager::hasImportRule(bankName)) {
+        qWarning() << "[MockExamGenerator] 源题库" << bankName << "没有导入规则文件";
+        return QJsonObject();
+    }
+    
+    QJsonObject rules = ImportRuleManager::loadImportRule(bankName);
+    
+    if (rules.isEmpty()) {
+        qWarning() << "[MockExamGenerator] 无法读取源题库" << bankName << "的导入规则";
+        return QJsonObject();
+    }
+    
+    qDebug() << "[MockExamGenerator] 成功加载源题库" << bankName << "的导入规则";
+    return rules;
+}
+
+bool MockExamGenerator::hasSourceBankRules(const QString &bankName)
+{
+    return ImportRuleManager::hasImportRule(bankName);
+}
+
 void MockExamGenerator::generateMockExam(const ExamPattern &pattern, int examCount)
 {
     m_currentPattern = pattern;
@@ -131,6 +156,9 @@ void MockExamGenerator::generateMockExam(const ExamPattern &pattern, int examCou
 
 QString MockExamGenerator::buildPrompt(const ExamPattern &pattern, int examIndex)
 {
+    // 尝试加载源题库的导入规则
+    QJsonObject sourceRules = loadSourceBankRules(pattern.categoryName);
+    
     QString prompt = R"(
 你是一个专业的编程竞赛题目生成助手。请基于以下出题规则，生成一套完整的模拟题。
 
@@ -147,7 +175,20 @@ QString MockExamGenerator::buildPrompt(const ExamPattern &pattern, int examIndex
 
 【知识点分布】
 %8
+)";
 
+    // 如果有源题库规则，添加格式约束
+    if (!sourceRules.isEmpty()) {
+        prompt += R"(
+【源题库格式约束】
+根据源题库的导入规则，生成的题目应遵循以下格式：
+%11
+
+请确保生成的题目格式与源题库保持一致。
+)";
+    }
+
+    prompt += R"(
 【生成要求】
 1. 题目风格：
    - 符合 %1 竞赛风格
@@ -218,14 +259,25 @@ QString MockExamGenerator::buildPrompt(const ExamPattern &pattern, int examIndex
 
     // 构建难度分布说明
     QString diffStr;
-    for (auto it = pattern.difficultyRatio.begin(); it != pattern.difficultyRatio.end(); ++it) {
-        QString diffName;
-        switch (it.key()) {
-            case Difficulty::Easy: diffName = "简单"; break;
-            case Difficulty::Medium: diffName = "中等"; break;
-            case Difficulty::Hard: diffName = "困难"; break;
+    if (!sourceRules.isEmpty() && sourceRules.contains("statistics")) {
+        // 使用源题库的统计信息
+        QJsonObject stats = sourceRules["statistics"].toObject();
+        QJsonObject diffDist = stats["difficultyDistribution"].toObject();
+        
+        for (auto it = diffDist.begin(); it != diffDist.end(); ++it) {
+            diffStr += QString("- %1: %2 道题目\n").arg(it.key()).arg(it.value().toInt());
         }
-        diffStr += QString("- %1: %2%\n").arg(diffName).arg(it.value() * 100, 0, 'f', 0);
+    } else {
+        // 使用pattern中的难度分布
+        for (auto it = pattern.difficultyRatio.begin(); it != pattern.difficultyRatio.end(); ++it) {
+            QString diffName;
+            switch (it.key()) {
+                case Difficulty::Easy: diffName = "简单"; break;
+                case Difficulty::Medium: diffName = "中等"; break;
+                case Difficulty::Hard: diffName = "困难"; break;
+            }
+            diffStr += QString("- %1: %2%\n").arg(diffName).arg(it.value() * 100, 0, 'f', 0);
+        }
     }
     
     // 构建知识点分布说明
@@ -237,6 +289,18 @@ QString MockExamGenerator::buildPrompt(const ExamPattern &pattern, int examIndex
     // 题号格式
     QString titlePattern = pattern.questionTitlePattern.join("、");
     
+    // 构建格式约束说明
+    QString formatConstraints;
+    if (!sourceRules.isEmpty()) {
+        formatConstraints = "题目格式应与源题库保持一致，包括标题格式、描述结构、测试用例格式等。";
+        
+        if (sourceRules.contains("statistics")) {
+            QJsonObject stats = sourceRules["statistics"].toObject();
+            int avgTestCases = stats["avgTestCases"].toInt(5);
+            formatConstraints += QString("\n平均测试用例数量：%1 个").arg(avgTestCases);
+        }
+    }
+    
     prompt = prompt
         .arg(pattern.categoryName)
         .arg(pattern.questionsPerExam)
@@ -247,7 +311,8 @@ QString MockExamGenerator::buildPrompt(const ExamPattern &pattern, int examIndex
         .arg(diffStr)
         .arg(topicStr)
         .arg(titlePattern)
-        .arg(examIndex);
+        .arg(examIndex)
+        .arg(formatConstraints);
     
     return prompt;
 }

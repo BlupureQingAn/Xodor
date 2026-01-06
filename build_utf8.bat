@@ -39,7 +39,6 @@ if not exist build (
         echo.
         echo CMake 配置失败！
         cd ..
-        pause
         exit /b 1
     )
     cd ..
@@ -56,7 +55,6 @@ if errorlevel 1 (
     echo 构建失败！
     echo ========================================
     cd ..
-    pause
     exit /b 1
 )
 
@@ -68,5 +66,3 @@ echo 构建成功！
 echo ========================================
 echo.
 echo 可执行文件: build\CodePracticeSystem.exe
-echo.
-pause

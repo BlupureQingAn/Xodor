@@ -33,7 +33,7 @@ public:
     void getHint(const Question &currentQuestion);
     
     // 知识点讲解
-    void explainConcept(const QString &concept, const Question &currentQuestion);
+    void explainConcept(const QString &conceptName, const Question &currentQuestion);
     
     // 错误诊断
     void diagnoseError(const QString &code, const QString &errorMessage, 
@@ -60,7 +60,7 @@ private slots:
 private:
     QString buildQuestionPrompt(const QString &userInput, const Question &question);
     QString buildHintPrompt(const Question &question);
-    QString buildConceptPrompt(const QString &concept, const Question &question);
+    QString buildConceptPrompt(const QString &conceptName, const Question &question);
     QString buildDiagnosePrompt(const QString &code, const QString &errorMessage, 
                                const Question &question);
     

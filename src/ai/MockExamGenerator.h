@@ -47,6 +47,12 @@ public:
     // 加载出题规则
     ExamPattern loadPattern(const QString &bankPath);
     
+    // 从config目录加载源题库的导入规则
+    QJsonObject loadSourceBankRules(const QString &bankName);
+    
+    // 检查源题库是否有导入规则
+    bool hasSourceBankRules(const QString &bankName);
+    
     // 生成模拟题（异步）
     void generateMockExam(const ExamPattern &pattern, int examCount = 1);
     

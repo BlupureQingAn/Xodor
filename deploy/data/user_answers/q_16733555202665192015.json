@@ -1,0 +1,5 @@
+{
+    "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    // TODO: 读取输入\n    // 提示：根据题目要求读取输入数据\n    \n    // TODO: 处理逻辑\n    // 提示：在这里实现题目要求的算法\n    \n    // TODO: 输出结果\n    // 提示：按照题目要求的格式输出结果\n    \n    return 0;\n}\n",
+    "lastModified": "2025-12-03T19:00:25",
+    "questionId": "q_16733555202665192015"
+}

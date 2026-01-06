@@ -1,72 +1,121 @@
-# Build directories
-build/
-build_release/
-build_debug/
-.qtcreator/
-
-# Qt Creator files
-*.pro.user
-*.pro.user.*
-
-# CMake files
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-*.cmake
-
-# Compiled files
+# C++ 编译产物
+*.o
+*.obj
 *.exe
 *.dll
 *.so
 *.dylib
 *.a
 *.lib
-*.o
-*.obj
 
-# Qt MOC files
+# Qt 相关
+*.pro.user
+*.pro.user.*
+*.qmake.stash
+*.autosave
 moc_*.cpp
 moc_*.h
-ui_*.h
 qrc_*.cpp
+ui_*.h
 
-# IDE files
+# CMake 构建目录
+build/
+build_*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+!cmake/*.cmake
+
+# IDE 配置
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
+*.code-workspace
+.qtcreator/
+*.user
 
-# Package files
-*.zip
-*.tar.gz
-*.7z
-
-# Deploy directory
-deploy/
-
-# User data
-data/user_answers/
-data/question_banks/*.json
-data/config.json
-
-# Logs
+# 编译和临时文件
 *.log
-
-# Temporary files
 *.tmp
 *.temp
 *.bak
-
-# Windows specific
+*.swp
+*~
+.DS_Store
 Thumbs.db
-desktop.ini
 
-# QScintilla source
-QScintilla_src-2.14.1/
-QScintilla-2.14.1.tar.gz
+# 部署目录（保留结构但不提交二进制文件）
+deploy/*.exe
+deploy/*.dll
+deploy/platforms/
+deploy/styles/
+deploy/imageformats/
+deploy/tls/
 
-# Release packages
-CodePracticeSystem-v*/
-CodePracticeSystem_v*/
+# 用户数据（不提交用户的个人数据）
+data/user_answers/
+data/config/last_session.json
+data/config/user_progress.json
+
+# 日志文件
+*.log
+build_*.log
+compile_*.log
+
+# 临时构建文件
+.cache/
+compile_commands.json
+
+# Qt Creator 临时文件
+.qtc_clangd/
+
+# Windows 特定
+*.stackdump
+ehthumbs.db
+Desktop.ini
+
+# 打包文件
+*.zip
+*.tar.gz
+*.rar
+
+# 文档临时文件（保留主要文档）
+本次会话*.md
+AI*.md
+题*.md
+编译*.md
+修复*.md
+!README.md
+!LICENSE
+!CHANGELOG.md
+!CONTRIBUTING.md
+
+# 测试和调试文件
+test_*.cpp
+test_*.bat
+debug_*.txt
+
+# 脚本临时文件
+fix_*.bat
+deploy_debug*.bat
+rebuild_*.bat
+clean_*.bat
+configure_*.bat
+verify_*.bat
+create_icon*.bat
+create_icon*.py
+create_icon*.ps1
+convert_*.ps1
+install_*.ps1
+
+# QScintilla 源码（如果已编译）
+QScintilla_src-*/
+QScintilla-*.tar.gz
+
+# 备份文件
+*.old
+*_backup
+*_old.*

@@ -1,4 +1,5 @@
 #include "OriginalQuestionDialog.h"
+#include "../utils/MarkdownRenderer.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -157,9 +158,9 @@ void OriginalQuestionDialog::setupUI()
 
 void OriginalQuestionDialog::displayQuestion()
 {
-    // 显示题目描述
+    // 显示题目描述 - 使用统一的Markdown渲染器
     QString descHtml = "<div style='line-height: 1.8;'>";
-    descHtml += m_question.description().replace("\n", "<br>");
+    descHtml += MarkdownRenderer::toHtml(m_question.description(), true);
     
     // 添加标签
     if (!m_question.tags().isEmpty()) {
@@ -168,7 +169,7 @@ void OriginalQuestionDialog::displayQuestion()
             descHtml += QString("<span style='background-color: #242424; "
                               "padding: 4px 12px; border-radius: 6px; "
                               "margin-right: 8px; display: inline-block;'>%1</span>")
-                .arg(tag);
+                .arg(tag.toHtmlEscaped());
         }
         descHtml += "</p>";
     }

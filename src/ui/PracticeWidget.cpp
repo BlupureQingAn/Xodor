@@ -729,20 +729,32 @@ void PracticeWidget::updateStatistics()
 
 void PracticeWidget::updateBankSelector()
 {
+    qDebug() << "[PracticeWidget] updateBankSelector() started";
+    
     m_bankSelector->clear();
     
     // 从 QuestionBankManager 获取所有题库
     QVector<QuestionBankInfo> banks = QuestionBankManager::instance().getAllBanks();
     QString currentBankId = QuestionBankManager::instance().getCurrentBankId();
     
+    qDebug() << "[PracticeWidget] Found" << banks.size() << "banks, current:" << currentBankId;
+    
     if (banks.isEmpty()) {
         m_bankSelector->addItem("暂无题库");
         m_bankSelector->setEnabled(false);
+        qDebug() << "[PracticeWidget] No banks available";
         return;
     }
     
     m_bankSelector->setEnabled(true);
     int currentIndex = 0;
+    
+    // 如果没有当前题库，自动选择第一个
+    if (currentBankId.isEmpty() && !banks.isEmpty()) {
+        currentBankId = banks[0].id;
+        QuestionBankManager::instance().switchToBank(currentBankId);
+        qDebug() << "[PracticeWidget] Auto-selected first bank:" << banks[0].name;
+    }
     
     for (int i = 0; i < banks.size(); ++i) {
         const QuestionBankInfo &info = banks[i];
@@ -779,6 +791,7 @@ void PracticeWidget::updateBankSelector()
     }
     
     m_bankSelector->setCurrentIndex(currentIndex);
+    qDebug() << "[PracticeWidget] Bank selector updated, selected index:" << currentIndex;
 }
 
 QVector<Question> PracticeWidget::loadQuestionsFromBank(const QString &bankPath) const
@@ -800,25 +813,68 @@ void PracticeWidget::loadQuestionsRecursive(const QString &dirPath, QVector<Ques
 {
     QDir dir(dirPath);
     QStringList filters;
-    filters << "*.json";
+    filters << "*.md" << "*.json";  // 优先MD，兼容JSON
     
-    // 加载当前目录的 JSON 文件
+    // 加载当前目录的题目文件
     QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
+    
+    // 去重：如果同名的MD和JSON都存在，只加载MD
+    QSet<QString> loadedFiles;
+    
     for (const auto &fileInfo : files) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            
-            if (doc.isArray()) {
-                QJsonArray arr = doc.array();
-                for (const auto &val : arr) {
-                    questions.append(Question(val.toObject()));
-                }
-            } else if (doc.isObject()) {
-                questions.append(Question(doc.object()));
+        QString filePath = fileInfo.absoluteFilePath();
+        QString fileName = fileInfo.fileName();
+        QString baseName = fileInfo.completeBaseName();
+        
+        // 过滤配置文件和规律文件（使用精确匹配）
+        if (fileName.endsWith("_parse_rule.json", Qt::CaseInsensitive) ||
+            fileName == "出题模式规律.md" ||
+            fileName == "出题模式规律.json" ||
+            fileName.endsWith("_规律.md") ||
+            fileName.endsWith("_pattern.md") ||
+            fileName.startsWith(".")) {
+            continue;
+        }
+        
+        QString lowerName = fileName.toLower();
+        if (lowerName == "readme.md" || 
+            lowerName == "readme.txt" ||
+            lowerName == "拆分规则.md" ||
+            lowerName == "config.json" || 
+            lowerName == "settings.json") {
+            continue;
+        }
+        
+        // 如果已经加载过这个文件名，跳过
+        if (loadedFiles.contains(baseName)) {
+            continue;
+        }
+        
+        if (filePath.endsWith(".md", Qt::CaseInsensitive)) {
+            // 加载MD文件
+            Question q = Question::fromMarkdownFile(filePath);
+            if (!q.id().isEmpty()) {
+                questions.append(q);
             }
-            
-            file.close();
+            loadedFiles.insert(baseName);
+        } else if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+            // 加载JSON文件
+            QFile file(filePath);
+            if (file.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                
+                if (doc.isArray()) {
+                    QJsonArray arr = doc.array();
+                    for (const auto &val : arr) {
+                        questions.append(Question(val.toObject()));
+                    }
+                } else if (doc.isObject()) {
+                    questions.append(Question(doc.object()));
+                }
+                
+                file.close();
+            }
+            loadedFiles.insert(baseName);
         }
     }
     

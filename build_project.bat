@@ -12,7 +12,6 @@ cmake --build .
 if errorlevel 1 (
     echo.
     echo 构建失败！
-    pause
     exit /b 1
 )
 
@@ -22,4 +21,3 @@ echo 构建成功！
 echo ========================================
 echo.
 echo 可执行文件位置: build\CodePracticeSystem.exe
-pause

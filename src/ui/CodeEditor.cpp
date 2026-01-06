@@ -37,11 +37,11 @@ void CodeEditor::setupEditor()
 {
     m_editor = new QsciScintilla(this);
     
-    // === 字体设置 - 使用现代圆润字体 ===
+    // === 字体设置 - 使用等宽字体 ===
     QFont font;
     #ifdef Q_OS_WIN
-        // Windows优先使用Cascadia Code或Consolas
-        QStringList fontFamilies = {"Cascadia Code", "Consolas", "Microsoft YaHei Mono", "Courier New"};
+        // Windows优先使用Consolas（清晰易读，1和l容易区分）
+        QStringList fontFamilies = {"Consolas", "Cascadia Code", "Courier New"};
     #elif defined(Q_OS_MAC)
         QStringList fontFamilies = {"SF Mono", "Menlo", "Monaco"};
     #else

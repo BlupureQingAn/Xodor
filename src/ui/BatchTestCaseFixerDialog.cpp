@@ -125,26 +125,56 @@ void BatchTestCaseFixerDialog::scanAllQuestions()
         return;
     }
     
+    // 扫描MD和JSON文件
+    QStringList mdFiles = dataDir.entryList(QStringList() << "*.md", QDir::Files);
     QStringList jsonFiles = dataDir.entryList(QStringList() << "*.json", QDir::Files);
-    int totalCount = jsonFiles.size();
+    
+    // 去重：如果同名的MD和JSON都存在，只扫描MD
+    QSet<QString> scannedFiles;
+    QStringList allFiles;
+    
+    for (const QString &md : mdFiles) {
+        allFiles.append(md);
+        scannedFiles.insert(md.left(md.length() - 3));  // 移除.md
+    }
+    for (const QString &json : jsonFiles) {
+        QString baseName = json.left(json.length() - 5);  // 移除.json
+        if (!scannedFiles.contains(baseName)) {
+            allFiles.append(json);
+            scannedFiles.insert(baseName);
+        }
+    }
+    
+    int totalCount = allFiles.size();
     int scannedCount = 0;
     
-    for (const QString &fileName : jsonFiles) {
+    for (const QString &fileName : allFiles) {
         QString filePath = dataDir.filePath(fileName);
         
-        QFile file(filePath);
-        if (!file.open(QIODevice::ReadOnly)) {
-            continue;
+        Question question;
+        if (fileName.endsWith(".md", Qt::CaseInsensitive)) {
+            // 加载MD文件
+            question = Question::fromMarkdownFile(filePath);
+        } else if (fileName.endsWith(".json", Qt::CaseInsensitive)) {
+            // 加载JSON文件
+            QFile file(filePath);
+            if (!file.open(QIODevice::ReadOnly)) {
+                continue;
+            }
+            
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            file.close();
+            
+            if (!doc.isObject()) {
+                continue;
+            }
+            
+            question = Question(doc.object());
         }
         
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-        file.close();
-        
-        if (!doc.isObject()) {
+        if (question.id().isEmpty()) {
             continue;
         }
-        
-        Question question(doc.object());
         
         // 检测是否有问题
         QVector<int> problematicIndices = detectProblematicTestCases(question);
@@ -447,14 +477,15 @@ void BatchTestCaseFixerDialog::onStopBatchFix()
 
 bool BatchTestCaseFixerDialog::saveFixedQuestion(const Question &question, const QString &filePath)
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly)) {
-        return false;
+    // 统一保存为MD格式
+    QString mdPath = filePath;
+    if (filePath.endsWith(".json", Qt::CaseInsensitive)) {
+        // 如果原文件是JSON，转换为MD
+        mdPath.replace(QRegularExpression("\\.json$", QRegularExpression::CaseInsensitiveOption), ".md");
+        
+        // 删除旧的JSON文件
+        QFile::remove(filePath);
     }
     
-    QJsonDocument doc(question.toJson());
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-    
-    return true;
+    return question.saveAsMarkdown(mdPath);
 }

@@ -53,7 +53,6 @@ private slots:
     void onShowOperationHistory();
     
     // 题目操作
-    void onRunTests();
     void onAIJudgeRequested();  // AI判题
     void onAIJudgeCompleted(bool passed, const QString &comment, const QVector<int> &failedTestCases);
     void onAIJudgeError(const QString &error);

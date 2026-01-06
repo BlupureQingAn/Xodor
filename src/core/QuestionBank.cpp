@@ -37,12 +37,18 @@ void QuestionBank::loadFromDirectoryRecursive(const QString &dirPath)
     QFileInfoList mdFiles = dir.entryInfoList(mdFilters, QDir::Files);
     
     for (const auto &fileInfo : mdFiles) {
-        QString fileName = fileInfo.fileName().toLower();
-        // 跳过README等非题目文件
-        if (fileName.contains("readme") || 
-            fileName.contains("拆分规则") ||
-            fileName.contains("出题模式") ||
-            fileName.contains("规律")) {
+        QString fileName = fileInfo.fileName();
+        QString lowerName = fileName.toLower();
+        
+        // 跳过配置文件和规律文件（使用精确匹配）
+        if (fileName.endsWith("_parse_rule.json", Qt::CaseInsensitive) ||
+            fileName == "出题模式规律.md" ||
+            fileName.endsWith("_规律.md") ||
+            fileName.endsWith("_pattern.md") ||
+            fileName.startsWith(".") ||
+            lowerName == "readme.md" ||
+            lowerName == "readme.txt" ||
+            lowerName == "拆分规则.md") {
             continue;
         }
         

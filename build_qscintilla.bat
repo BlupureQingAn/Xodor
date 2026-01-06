@@ -1,13 +1,13 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo 编译 QScintilla for Qt 6.10.0 MinGW
+echo 编译 QScintilla for Qt 6.9.2 MinGW
 echo ========================================
 
 REM 设置 Qt 环境
-set QTDIR=F:\Qt\qt\6.10.0\mingw_64
+set QTDIR=F:\Qt\6.9.2\mingw_64
 set PATH=%QTDIR%\bin;%PATH%
-set PATH=F:\Qt\qt\Tools\mingw1310_64\bin;%PATH%
+set PATH=F:\Qt\Tools\mingw1310_64\bin;%PATH%
 
 echo.
 echo 检查 qmake...

@@ -226,11 +226,27 @@ void TestCaseFixerDialog::loadAllQuestions()
     QMap<QString, QString> titleToPathMap;
     QMap<QString, QString> idToPathMap;
     
-    // 使用递归迭代器扫描所有子目录
-    QDirIterator it(bankPath, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
+    // 使用递归迭代器扫描所有子目录（MD优先，兼容JSON）
+    QDirIterator itMd(bankPath, QStringList() << "*.md", QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator itJson(bankPath, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
     
-    while (it.hasNext()) {
-        QString filePath = it.next();
+    // 先扫描MD文件
+    while (itMd.hasNext()) {
+        QString filePath = itMd.next();
+        
+        // 读取MD文件获取标题和ID
+        Question q = Question::fromMarkdownFile(filePath);
+        if (!q.id().isEmpty()) {
+            if (!q.title().isEmpty()) {
+                titleToPathMap[q.title()] = filePath;
+            }
+            idToPathMap[q.id()] = filePath;
+        }
+    }
+    
+    // 再扫描JSON文件（如果MD中没有，才添加）
+    while (itJson.hasNext()) {
+        QString filePath = itJson.next();
         
         // 读取文件获取标题和ID
         QFile file(filePath);
@@ -243,10 +259,11 @@ void TestCaseFixerDialog::loadAllQuestions()
                 QString title = obj["title"].toString();
                 QString id = obj["id"].toString();
                 
-                if (!title.isEmpty()) {
+                // 只有在MD中没有这个题目时才添加JSON
+                if (!title.isEmpty() && !titleToPathMap.contains(title)) {
                     titleToPathMap[title] = filePath;
                 }
-                if (!id.isEmpty()) {
+                if (!id.isEmpty() && !idToPathMap.contains(id)) {
                     idToPathMap[id] = filePath;
                 }
             }

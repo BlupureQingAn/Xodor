@@ -1,0 +1,7 @@
+{
+    "cloudApiKey": "sk-1a8bae2865f1443c99b924ffd14c4252",
+    "compilerPath": "g++",
+    "ollamaModel": "qwen",
+    "ollamaUrl": "http://localhost:11434",
+    "useCloudMode": true
+}

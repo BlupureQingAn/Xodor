@@ -1,0 +1,59 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#aa0000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#880000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#660000;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="gradient2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#660000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#880000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#aa0000;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 阴影滤镜 -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- C 字母 - 使用圆弧路径 -->
+  <g filter="url(#shadow)">
+    <path d="M 200 80 
+             A 80 80 0 1 0 200 176"
+          stroke="url(#gradient1)" 
+          stroke-width="36" 
+          stroke-linecap="round"
+          fill="none"/>
+  </g>
+  
+  <!-- X 字母 - 叠加在 C 上 -->
+  <g filter="url(#shadow)">
+    <!-- 左上到右下的斜线 -->
+    <path d="M 80 80 L 176 176" 
+          stroke="url(#gradient2)" 
+          stroke-width="28" 
+          stroke-linecap="round"
+          fill="none"/>
+    
+    <!-- 右上到左下的斜线 -->
+    <path d="M 176 80 L 80 176" 
+          stroke="url(#gradient2)" 
+          stroke-width="28" 
+          stroke-linecap="round"
+          fill="none"/>
+  </g>
+  
+  <!-- 中心高光点 -->
+  <circle cx="128" cy="128" r="8" fill="#ffffff" opacity="0.6"/>
+</svg>

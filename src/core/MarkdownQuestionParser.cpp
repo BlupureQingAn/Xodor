@@ -1,5 +1,6 @@
 #include "MarkdownQuestionParser.h"
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QRegularExpression>
 #include <QJsonArray>
@@ -19,7 +20,16 @@ Question MarkdownQuestionParser::parseFromFile(const QString &filePath)
     QString content = in.readAll();
     file.close();
     
-    return parseFromContent(content);
+    Question q = parseFromContent(content);
+    
+    // 如果解析后没有ID，使用文件名生成一个
+    if (q.id().isEmpty()) {
+        QFileInfo fileInfo(filePath);
+        QString fileName = fileInfo.completeBaseName(); // 不含扩展名的文件名
+        q.setId(fileName);
+    }
+    
+    return q;
 }
 
 Question MarkdownQuestionParser::parseFromContent(const QString &content)
@@ -29,8 +39,25 @@ Question MarkdownQuestionParser::parseFromContent(const QString &content)
     // 提取Front Matter
     QJsonObject metadata = extractFrontMatter(content);
     
+    // 如果没有Front Matter，使用默认值继续解析（兼容旧格式）
     if (metadata.isEmpty()) {
-        qWarning() << "MD文件缺少Front Matter元数据";
+        // 不输出警告，静默处理
+        // 使用文件内容的第一行作为标题
+        QString firstLine = content.split('\n').first().trimmed();
+        if (firstLine.startsWith('#')) {
+            firstLine = firstLine.mid(1).trimmed();
+        }
+        
+        // 设置默认值
+        q.setTitle(firstLine.isEmpty() ? "未命名题目" : firstLine);
+        q.setType(QuestionType::Code);
+        q.setDifficulty(Difficulty::Medium);
+        q.setDescription(content);
+        
+        // 解析测试用例
+        QVector<TestCase> testCases = parseTestCases(content);
+        q.setTestCases(testCases);
+        
         return q;
     }
     

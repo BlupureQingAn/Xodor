@@ -38,7 +38,8 @@ public:
     
     // 题库操作
     QString importQuestionBank(const QString &sourcePath, const QString &name, bool isAIParsed = false);
-    bool deleteQuestionBank(const QString &bankId);
+    bool deleteQuestionBank(const QString &bankId);  // 仅从配置中移除
+    bool deleteQuestionBankCompletely(const QString &bankId);  // 完全删除（包括文件）
     bool renameQuestionBank(const QString &bankId, const QString &newName);
     bool updateQuestionCount(const QString &bankId, int count);
     
@@ -66,6 +67,15 @@ public:
     // 路径验证和修复
     bool validateAndFixBankPaths();
     
+    // 自动扫描并注册未注册的题库
+    int scanAndRegisterUnregisteredBanks();
+    
+    // 忽略列表管理（用于记录用户主动移除的题库）
+    void addToIgnoreList(const QString &bankName);
+    void removeFromIgnoreList(const QString &bankName);
+    bool isInIgnoreList(const QString &bankName) const;
+    void clearIgnoreList();
+    
 signals:
     void bankListChanged();
     void currentBankChanged(const QString &bankId);
@@ -79,9 +89,11 @@ private:
     QString generateBankId() const;
     QString getConfigFilePath() const;
     bool copyDirectory(const QString &source, const QString &destination);
+    bool isConfigFile(const QString &fileName) const;
     
     QVector<QuestionBankInfo> m_banks;
     QString m_currentBankId;
+    QSet<QString> m_ignoredBanks;  // 用户主动移除的题库名称列表
 };
 
 #endif // QUESTIONBANKMANAGER_H

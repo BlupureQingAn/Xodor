@@ -6,6 +6,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 添加编译器特定的标志来解决Qt 6.9.2兼容性问题
+if(MINGW)
+    # MinGW特定设置 - 解决Qt 6.9.2编译问题
+    add_compile_options(-Wno-deprecated-declarations)
+    add_compile_options(-Wno-unused-parameter)
+    # 解决Qt 6.9.2的编译器检测问题
+    add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060000)
+endif()
+
 # ============================================
 # UTF-8编码配置 - 支持中文字符编译
 # ============================================
@@ -19,6 +28,7 @@ if(MSVC)
     # MSVC 编译器
     add_compile_options(/utf-8)  # 源文件和执行字符集都使用UTF-8
     add_compile_options(/Zc:__cplusplus)  # 正确报告C++版本
+    add_compile_options(/permissive-)  # 启用严格的C++标准符合性
     add_compile_definitions(_UNICODE UNICODE)
 elseif(MINGW OR CMAKE_COMPILER_IS_GNUCXX)
     # MinGW/GCC 编译器
@@ -31,6 +41,10 @@ elseif(MINGW OR CMAKE_COMPILER_IS_GNUCXX)
     
     # 链接器选项 - 支持UTF-8
     add_link_options(-municode)
+    
+    # 解决Qt 6.9.2的特定问题
+    add_compile_definitions(QT_NO_DEPRECATED_WARNINGS)
+    add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060000)
 endif()
 
 # Qt 自动化工具
@@ -40,15 +54,21 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC_MOC_OPTIONS "-DMINGW_HAS_SECURE_API=1")
 set(CMAKE_AUTOMOC_COMPILER_PREDEFINES OFF)
 
-# 设置 Qt 路径
-set(CMAKE_PREFIX_PATH "F:/Qt/qt/6.10.0/mingw_64")
+# 设置 Qt 路径 - 强制使用Qt 6.9.2
+set(CMAKE_PREFIX_PATH "F:/Qt/6.9.2/mingw_64" CACHE PATH "Qt installation path" FORCE)
+set(Qt6_DIR "F:/Qt/6.9.2/mingw_64/lib/cmake/Qt6" CACHE PATH "Qt6 CMake directory" FORCE)
 
 # 查找 Qt6
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network PrintSupport)
 
 # QScintilla 配置
-set(QSCINTILLA_INCLUDE_DIR "F:/Qt/qt/6.10.0/mingw_64/include")
-set(QSCINTILLA_LIBRARY "F:/Qt/qt/6.10.0/mingw_64/lib/libqscintilla2_qt6.a")
+set(QSCINTILLA_INCLUDE_DIR "F:/Qt/6.9.2/mingw_64/include")
+set(QSCINTILLA_LIBRARY "F:/Qt/6.9.2/mingw_64/lib/libqscintilla2_qt6.a")
+
+# Windows 资源文件（图标）
+if(WIN32)
+    set(APP_ICON_RC "${CMAKE_SOURCE_DIR}/resources/app_icon.rc")
+endif()
 
 # 源文件
 set(SOURCES
@@ -121,6 +141,8 @@ set(SOURCES
     src/utils/AutoSaveManager.cpp
     src/utils/SyntaxChecker.cpp
     src/utils/FileUtils.cpp
+    src/utils/MarkdownRenderer.cpp
+    src/utils/ImportRuleManager.cpp
 )
 
 # 头文件
@@ -189,7 +211,11 @@ set(HEADERS
 )
 
 # 创建可执行文件
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+if(WIN32)
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${APP_ICON_RC})
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+endif()
 
 # 包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE 
@@ -229,9 +255,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Syncing data files (preserving user data)..."
 )
 
+# 设置运行时环境变量 - 修复Qt插件路径冲突
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VS_DEBUGGER_ENVIRONMENT "QT_PLUGIN_PATH=${CMAKE_PREFIX_PATH}/plugins;QT_QPA_PLATFORM_PLUGIN_PATH=${CMAKE_PREFIX_PATH}/plugins/platforms"
+)
+
 # 输出信息
 message(STATUS "Qt6 found: ${Qt6_DIR}")
 message(STATUS "QScintilla library: ${QSCINTILLA_LIBRARY}")
 message(STATUS "QScintilla include: ${QSCINTILLA_INCLUDE_DIR}")
 message(STATUS "Data files will be copied from: ${CMAKE_SOURCE_DIR}/data")
 message(STATUS "Data files will be copied to: build/data")
+message(STATUS "Qt plugins path: ${CMAKE_PREFIX_PATH}/plugins")
