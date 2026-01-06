@@ -1,0 +1,60 @@
+========================================
+Xodor Release 发布清单
+========================================
+
+✅ 准备工作已完成：
+  - 压缩包: Xodor-v1.0.0-Windows-x64.zip (46.13 MB)
+  - 位置: F:\Xodor\Xodor-v1.0.0-Windows-x64.zip
+
+========================================
+发布步骤（5分钟）
+========================================
+
+第1步：访问 GitHub
+  → 打开: https://github.com/BlupureQingAn/Xodor/releases
+  → 点击: "Create a new release" (绿色按钮)
+
+第2步：填写信息
+  Tag: v1.0.0
+  标题: Xodor v1.0.0 - 智能刷题系统首次发布
+  描述: 复制 GitHub_Release创建步骤.md 中的描述内容
+
+第3步：上传文件
+  → 拖拽或选择: Xodor-v1.0.0-Windows-x64.zip
+  → 等待上传完成
+
+第4步：发布
+  → 勾选: "Set as the latest release"
+  → 点击: "Publish release"
+
+========================================
+发布后检查
+========================================
+
+□ Release 页面显示正常
+□ 压缩包可以下载
+□ 标记为 Latest 版本
+□ 下载并测试程序运行
+
+========================================
+提交邮件信息
+========================================
+
+收件人: zgsm@sangfor.com.cn
+主题: 【码上AI】技术挑战赛-[团队名称]-[学校]
+
+必须包含：
+  - GitHub 仓库: https://github.com/BlupureQingAn/Xodor
+  - Release 页面: https://github.com/BlupureQingAn/Xodor/releases/tag/v1.0.0
+  - 下载链接: https://github.com/BlupureQingAn/Xodor/releases/download/v1.0.0/Xodor-v1.0.0-Windows-x64.zip
+
+========================================
+重要提示
+========================================
+
+1. 确保仓库设置为 Public（公开）
+2. 在截止日期前完成提交
+3. 测试下载链接是否有效
+4. 保留压缩包本地备份
+
+========================================
