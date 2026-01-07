@@ -45,6 +45,9 @@ public:
     // 设置难度筛选
     void setDifficultyFilter(const QSet<Difficulty> &difficulties);
     
+    // 设置搜索文本
+    void setSearchText(const QString &text);
+    
 signals:
     // 题目被选中
     void questionSelected(const QString &filePath, const Question &question);
@@ -85,6 +88,7 @@ private:
     
     // 筛选状态
     QSet<Difficulty> m_difficultyFilter;
+    QString m_searchText;
 };
 
 #endif // QUESTIONBANKTREEWIDGET_H

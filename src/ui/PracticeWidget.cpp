@@ -392,6 +392,8 @@ void PracticeWidget::setupUI()
     mainLayout->addWidget(scrollArea);
     
     // 连接信号
+    connect(m_bankSelector, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &PracticeWidget::onBankSelectorChanged);
     connect(m_searchEdit, &QLineEdit::textChanged, this, &PracticeWidget::onSearchTextChanged);
     connect(m_difficultyFilter, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &PracticeWidget::onFilterChanged);
@@ -731,6 +733,9 @@ void PracticeWidget::updateBankSelector()
 {
     qDebug() << "[PracticeWidget] updateBankSelector() started";
     
+    // 阻止信号，避免触发 onBankSelectorChanged
+    m_bankSelector->blockSignals(true);
+    
     m_bankSelector->clear();
     
     // 从 QuestionBankManager 获取所有题库
@@ -742,6 +747,7 @@ void PracticeWidget::updateBankSelector()
     if (banks.isEmpty()) {
         m_bankSelector->addItem("暂无题库");
         m_bankSelector->setEnabled(false);
+        m_bankSelector->blockSignals(false);
         qDebug() << "[PracticeWidget] No banks available";
         return;
     }
@@ -791,6 +797,10 @@ void PracticeWidget::updateBankSelector()
     }
     
     m_bankSelector->setCurrentIndex(currentIndex);
+    
+    // 恢复信号
+    m_bankSelector->blockSignals(false);
+    
     qDebug() << "[PracticeWidget] Bank selector updated, selected index:" << currentIndex;
 }
 
@@ -957,6 +967,45 @@ void PracticeWidget::onQuestionStatusUpdated(const QString &questionId)
             break;
         }
     }
+}
+
+void PracticeWidget::onBankSelectorChanged(int index)
+{
+    if (index < 0) {
+        qDebug() << "[PracticeWidget] Invalid bank selector index:" << index;
+        return;
+    }
+    
+    // 获取选中的题库ID
+    QString selectedBankId = m_bankSelector->itemData(index).toString();
+    if (selectedBankId.isEmpty()) {
+        qDebug() << "[PracticeWidget] No bank ID for index:" << index;
+        return;
+    }
+    
+    qDebug() << "[PracticeWidget] Bank selector changed to:" << selectedBankId;
+    
+    // 获取当前题库ID
+    QString currentBankId = QuestionBankManager::instance().getCurrentBankId();
+    
+    // 如果选择的是同一个题库，不需要切换
+    if (selectedBankId == currentBankId) {
+        qDebug() << "[PracticeWidget] Same bank selected, skipping";
+        return;
+    }
+    
+    // 切换到选中的题库
+    if (!QuestionBankManager::instance().switchToBank(selectedBankId)) {
+        qWarning() << "[PracticeWidget] Failed to switch to bank:" << selectedBankId;
+        QMessageBox::warning(this, "错误", "切换题库失败");
+        return;
+    }
+    
+    qDebug() << "[PracticeWidget] Successfully switched to bank:" << selectedBankId;
+    
+    // 刷新题目列表和统计
+    loadQuestions();
+    updateStatistics();
 }
 
 void PracticeWidget::onFilterChanged()

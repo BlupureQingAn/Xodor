@@ -183,8 +183,10 @@ void QuestionBankPanel::updateQuestionStatus(const QString &questionId)
 
 void QuestionBankPanel::onSearchTextChanged(const QString &text)
 {
-    // TODO: 实现搜索过滤功能
-    Q_UNUSED(text);
+    // 将搜索文本传递给树形控件
+    if (m_treeWidget) {
+        m_treeWidget->setSearchText(text);
+    }
 }
 
 void QuestionBankPanel::onQuestionSelected(const QString &filePath, const Question &question)

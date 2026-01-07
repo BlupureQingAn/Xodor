@@ -183,7 +183,7 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
         // 加载题目以获取ID和状态
         Question question = loadQuestionFromFile(filePath);
         
-        // 应用难度筛选
+        // 应用难度筛选和搜索筛选
         if (!shouldShowQuestion(question)) {
             continue;  // 跳过不符合筛选条件的题目
         }
@@ -219,6 +219,11 @@ void QuestionBankTreeWidget::loadQuestionFiles(QTreeWidgetItem *bankItem, const 
         
         // 递归加载子目录的题目
         loadQuestionFiles(subDirItem, subDirPath);
+        
+        // 如果子目录没有任何子节点（所有题目都被过滤掉了），删除这个目录节点
+        if (subDirItem->childCount() == 0) {
+            delete subDirItem;
+        }
     }
 }
 
@@ -860,15 +865,52 @@ void QuestionBankTreeWidget::setDifficultyFilter(const QSet<Difficulty> &difficu
     refreshTree();
 }
 
+void QuestionBankTreeWidget::setSearchText(const QString &text)
+{
+    m_searchText = text.trimmed();
+    qDebug() << "[QuestionBankTreeWidget] Search text set to:" << m_searchText;
+    
+    // 重新加载树以应用搜索
+    refreshTree();
+}
+
 bool QuestionBankTreeWidget::shouldShowQuestion(const Question &question) const
 {
-    // 如果没有设置筛选（空集合），显示所有题目
-    if (m_difficultyFilter.isEmpty()) {
-        return true;
+    // 1. 检查难度筛选
+    if (!m_difficultyFilter.isEmpty()) {
+        if (!m_difficultyFilter.contains(question.difficulty())) {
+            return false;
+        }
     }
     
-    // 检查题目难度是否在筛选列表中
-    return m_difficultyFilter.contains(question.difficulty());
+    // 2. 检查搜索文本
+    if (!m_searchText.isEmpty()) {
+        // 搜索题目标题、ID、标签
+        QString searchLower = m_searchText.toLower();
+        
+        // 在标题中搜索
+        if (question.title().toLower().contains(searchLower)) {
+            return true;
+        }
+        
+        // 在ID中搜索
+        if (question.id().toLower().contains(searchLower)) {
+            return true;
+        }
+        
+        // 在标签中搜索
+        for (const QString &tag : question.tags()) {
+            if (tag.toLower().contains(searchLower)) {
+                return true;
+            }
+        }
+        
+        // 如果都不匹配，不显示
+        return false;
+    }
+    
+    // 没有任何筛选条件，显示所有题目
+    return true;
 }
 
 bool QuestionBankTreeWidget::isConfigFile(const QString &fileName) const

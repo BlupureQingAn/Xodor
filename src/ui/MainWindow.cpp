@@ -529,10 +529,13 @@ void MainWindow::setupConnections()
             m_codeEditor->autoSaver()->forceSave();
         }
         
-        // 2. 切换到刷题模式
+        // 2. 存储当前题目
+        m_currentQuestion = question;
+        
+        // 3. 切换到刷题模式
         m_stackedWidget->setCurrentIndex(0);
         
-        // 3. 设置题目到面板
+        // 4. 设置题目到面板
         if (m_questionPanel) {
             qDebug() << "[MainWindow] Setting question to panel";
             m_questionPanel->setQuestion(question);
@@ -540,16 +543,16 @@ void MainWindow::setupConnections()
             qWarning() << "[MainWindow] Question panel is null!";
         }
         
-        // 4. 设置新题目ID到代码编辑器（这会触发AutoSaver加载保存的代码）
+        // 5. 设置新题目ID到代码编辑器（这会触发AutoSaver加载保存的代码）
         if (m_codeEditor) {
             qDebug() << "[MainWindow] Setting question ID to editor:" << question.id();
             m_codeEditor->setQuestionId(question.id());
         }
         
-        // 5. 加载保存的代码（如果AutoSaver没有加载，则手动加载）
+        // 6. 加载保存的代码（如果AutoSaver没有加载，则手动加载）
         loadSavedCode(question.id());
         
-        // 6. 尝试在 m_questionBank 中找到题目索引（用于导航）
+        // 7. 尝试在 m_questionBank 中找到题目索引（用于导航）
         bool found = false;
         for (int i = 0; i < m_questionBank->count(); ++i) {
             if (m_questionBank->allQuestions()[i].id() == question.id()) {
@@ -565,7 +568,7 @@ void MainWindow::setupConnections()
             // 即使不在 m_questionBank 中，题目也已经加载到面板了
         }
         
-        // 7. 保存会话状态（记住当前题目和面板状态）
+        // 8. 保存会话状态（记住当前题目和面板状态）
         QString currentBankId = QuestionBankManager::instance().getCurrentBankId();
         if (!currentBankId.isEmpty()) {
             QuestionBankInfo bankInfo = QuestionBankManager::instance().getBankInfo(currentBankId);
@@ -577,7 +580,7 @@ void MainWindow::setupConnections()
             }
         }
         
-        // 8. 保存题库面板状态（包括难度筛选）
+        // 9. 保存题库面板状态（包括难度筛选）
         if (m_questionBankPanel) {
             QStringList expandedPaths = m_questionBankPanel->getExpandedPaths();
             QString selectedPath = m_questionBankPanel->getSelectedQuestionPath();
@@ -590,6 +593,14 @@ void MainWindow::setupConnections()
                 filterList.append(static_cast<int>(d));
             }
             SessionManager::instance().saveDifficultyFilters(filterList);
+        }
+        
+        // 10. 更新AI助手的题目上下文
+        if (m_aiAssistantPanel) {
+            qDebug() << "[MainWindow] Updating AI assistant context for question:" << question.id();
+            m_aiAssistantPanel->setQuestionContext(question);
+        } else {
+            qWarning() << "[MainWindow] m_aiAssistantPanel is null!";
         }
         
         statusBar()->showMessage(QString("已选择题目: %1").arg(question.title()), 3000);
@@ -1519,13 +1530,13 @@ void MainWindow::onShowOperationHistory()
 
 void MainWindow::onAIJudgeRequested()
 {
-    if (m_currentQuestionIndex < 0 || m_currentQuestionIndex >= m_questionBank->count()) {
+    // 检查是否有当前题目
+    if (m_currentQuestion.id().isEmpty()) {
         QMessageBox::warning(this, "警告", "没有加载题目");
         return;
     }
     
-    Question currentQuestion = m_questionBank->allQuestions()[m_currentQuestionIndex];
-    QString questionId = currentQuestion.id();
+    QString questionId = m_currentQuestion.id();
     
     // 获取编辑器中的代码
     // 注意：编辑器中的代码已经从 data/user_answers/{questionId}.cpp 加载
@@ -1538,6 +1549,7 @@ void MainWindow::onAIJudgeRequested()
     }
     
     qDebug() << "[MainWindow] AI judge requested for question:" << questionId 
+             << "Title:" << m_currentQuestion.title()
              << "Code length:" << code.length();
     
     // 强制保存当前代码（确保最新代码已保存）
@@ -1558,8 +1570,8 @@ void MainWindow::onAIJudgeRequested()
     
     m_aiJudgeProgressDialog->show();
     
-    // 开始AI判题
-    m_aiJudge->judgeCode(currentQuestion, code);
+    // 开始AI判题（使用存储的当前题目）
+    m_aiJudge->judgeCode(m_currentQuestion, code);
 }
 
 void MainWindow::onAIJudgeCompleted(bool passed, const QString &comment, const QVector<int> &failedTestCases)
@@ -1569,23 +1581,23 @@ void MainWindow::onAIJudgeCompleted(bool passed, const QString &comment, const Q
         m_aiJudgeProgressDialog->hide();
     }
     
-    // 获取当前题目
-    if (m_currentQuestionIndex < 0 || m_currentQuestionIndex >= m_questionBank->count()) {
-        qWarning() << "[MainWindow] Invalid question index in onAIJudgeCompleted";
+    // 检查是否有当前题目
+    if (m_currentQuestion.id().isEmpty()) {
+        qWarning() << "[MainWindow] No current question in onAIJudgeCompleted";
         return;
     }
     
-    Question currentQuestion = m_questionBank->allQuestions()[m_currentQuestionIndex];
-    QString questionId = currentQuestion.id();
+    QString questionId = m_currentQuestion.id();
     
     qDebug() << "[MainWindow] AI judge completed for question:" << questionId 
+             << "Title:" << m_currentQuestion.title()
              << "Passed:" << passed;
     
     // 更新进度管理器
     ProgressManager &progressMgr = ProgressManager::instance();
     
     // 确保题目标题已保存（用于历史记录显示）
-    progressMgr.setQuestionTitle(questionId, currentQuestion.title());
+    progressMgr.setQuestionTitle(questionId, m_currentQuestion.title());
     
     // 记录AI判定结果
     progressMgr.recordAIJudge(questionId, passed, comment);
@@ -1758,26 +1770,29 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
         m_codeEditor->autoSaver()->forceSave();
     }
     
-    // 2. 加载题目到面板
+    // 2. 存储当前题目
+    m_currentQuestion = question;
+    
+    // 3. 加载题目到面板
     m_questionPanel->setQuestion(question);
     
-    // 3. 保存题目标题到进度管理器（用于历史记录显示）
+    // 4. 保存题目标题到进度管理器（用于历史记录显示）
     ProgressManager::instance().setQuestionTitle(question.id(), question.title());
     
-    // 4. 设置新题目ID到代码编辑器
+    // 5. 设置新题目ID到代码编辑器
     if (m_codeEditor) {
         qDebug() << "[MainWindow] Setting question ID to editor:" << question.id();
         m_codeEditor->setQuestionId(question.id());
     }
     
-    // 4. 加载保存的代码或使用模板
+    // 6. 加载保存的代码或使用模板
     QString savedCode = loadSavedCodeForQuestion(question.id());
     if (savedCode.isEmpty()) {
         savedCode = generateDefaultCode(question);
     }
     m_codeEditor->setCode(savedCode);
     
-    // 5. 尝试在 m_questionBank 中找到题目索引（用于导航）
+    // 7. 尝试在 m_questionBank 中找到题目索引（用于导航）
     bool found = false;
     for (int i = 0; i < m_questionBank->count(); ++i) {
         if (m_questionBank->allQuestions()[i].id() == question.id()) {
@@ -1792,7 +1807,7 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
         qDebug() << "[MainWindow] Question not in current m_questionBank";
     }
     
-    // 6. 保存会话状态（记住当前题目和面板状态）
+    // 8. 保存会话状态（记住当前题目和面板状态）
     QString currentBankId = QuestionBankManager::instance().getCurrentBankId();
     if (!currentBankId.isEmpty()) {
         QuestionBankInfo bankInfo = QuestionBankManager::instance().getBankInfo(currentBankId);
@@ -1804,7 +1819,7 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
         }
     }
     
-    // 7. 保存题库面板状态
+    // 9. 保存题库面板状态
     if (m_questionBankPanel) {
         QStringList expandedPaths = m_questionBankPanel->getExpandedPaths();
         QString selectedPath = m_questionBankPanel->getSelectedQuestionPath();
@@ -1812,7 +1827,7 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
         qDebug() << "[MainWindow] Panel state saved - Expanded:" << expandedPaths.size() << "Selected:" << selectedPath;
     }
     
-    // 8. 更新AI助手的题目上下文
+    // 10. 更新AI助手的题目上下文
     if (m_aiAssistantPanel) {
         qDebug() << "[MainWindow] Updating AI assistant context for question:" << question.id();
         m_aiAssistantPanel->setQuestionContext(question);
@@ -1827,7 +1842,61 @@ void MainWindow::onQuestionFileSelected(const QString &filePath, const Question 
 void MainWindow::onBankSelectedFromPanel(const QString &bankPath)
 {
     qDebug() << "[MainWindow] Bank selected from panel:" << bankPath;
-    // 可以在这里添加题库选中的处理逻辑
+    
+    // 保存当前代码
+    if (m_codeEditor) {
+        m_codeEditor->forceSave();
+    }
+    
+    // 通过QuestionBankManager切换题库
+    QuestionBankManager &bankMgr = QuestionBankManager::instance();
+    
+    // 查找对应的题库ID
+    QString targetBankId;
+    for (const QuestionBankInfo &info : bankMgr.getAllBanks()) {
+        if (info.path == bankPath) {
+            targetBankId = info.id;
+            break;
+        }
+    }
+    
+    if (targetBankId.isEmpty()) {
+        qWarning() << "[MainWindow] Bank not found in manager for path:" << bankPath;
+        QMessageBox::warning(this, "错误", "未找到对应的题库");
+        return;
+    }
+    
+    // 切换到目标题库
+    if (!bankMgr.switchToBank(targetBankId)) {
+        qWarning() << "[MainWindow] Failed to switch to bank:" << targetBankId;
+        QMessageBox::warning(this, "错误", "切换题库失败");
+        return;
+    }
+    
+    qDebug() << "[MainWindow] Switched to bank:" << targetBankId;
+    
+    // 重新导入题库到m_questionBank（用于导航按钮）
+    importQuestionsFromPath(bankPath);
+    
+    // 刷新PracticeWidget（包含统计面板和题目表格）
+    if (m_practiceWidget) {
+        qDebug() << "[MainWindow] Refreshing practice widget for new bank";
+        m_practiceWidget->refreshQuestionList();
+    }
+    
+    // 如果有题目，加载第一道题
+    if (m_questionBank && m_questionBank->count() > 0) {
+        m_currentQuestionIndex = 0;
+        loadCurrentQuestion();
+    } else {
+        // 清空显示和当前题目
+        m_currentQuestion = Question();
+        m_questionPanel->setQuestion(Question());
+        m_codeEditor->setCode("");
+        if (m_aiAssistantPanel) {
+            m_aiAssistantPanel->setQuestionContext(Question());
+        }
+    }
 }
 
 QString MainWindow::loadSavedCodeForQuestion(const QString &questionId)
@@ -1865,6 +1934,9 @@ void MainWindow::loadCurrentQuestion()
     Question question = m_questionBank->allQuestions()[m_currentQuestionIndex];
     
     qDebug() << "[MainWindow] Loading question:" << question.id() << question.title();
+    
+    // 存储当前题目
+    m_currentQuestion = question;
     
     // 显示题目
     m_questionPanel->setQuestion(question);

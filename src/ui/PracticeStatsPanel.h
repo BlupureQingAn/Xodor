@@ -25,6 +25,9 @@ public:
                                       int mediumCompleted, int mediumTotal,
                                       int hardCompleted, int hardTotal);
     
+    // 刷新所有统计数据（从ProgressManager重新加载）
+    void refreshStats();
+    
 private:
     void setupUI();
     void createHeatMap();

@@ -28,6 +28,7 @@ signals:
     void switchBankRequested();  // 请求切换题库
     
 private slots:
+    void onBankSelectorChanged(int index);
     void onFilterChanged();
     void onSearchTextChanged(const QString &text);
     void onQuestionDoubleClicked(int row, int column);

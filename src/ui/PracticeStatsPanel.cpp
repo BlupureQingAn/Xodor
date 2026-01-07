@@ -507,3 +507,27 @@ void PracticeStatsPanel::updateDifficultyDistribution(int easyCompleted, int eas
         progressBars[2]->setFormat(QString("%1/%2 (%3%)").arg(hardCompleted).arg(hardTotal).arg(hardPercent));
     }
 }
+
+
+void PracticeStatsPanel::refreshStats()
+{
+    qDebug() << "[PracticeStatsPanel] Refreshing all stats";
+    
+    // 从ProgressManager获取最新数据
+    ProgressManager &progressMgr = ProgressManager::instance();
+    
+    // 更新基本统计
+    int totalCompleted = progressMgr.getTotalCompleted();
+    int currentStreak = progressMgr.getCurrentStreak();
+    int longestStreak = progressMgr.getLongestStreak();
+    int todayCompleted = progressMgr.getTodayCompleted();
+    
+    updateStats(totalCompleted, currentStreak, longestStreak, todayCompleted);
+    
+    // 更新热力图
+    QMap<QDate, int> activityData = progressMgr.getActivityByDate(84); // 12周
+    updateHeatMap(activityData);
+    
+    qDebug() << "[PracticeStatsPanel] Stats refreshed - Total:" << totalCompleted 
+             << "Streak:" << currentStreak << "Today:" << todayCompleted;
+}

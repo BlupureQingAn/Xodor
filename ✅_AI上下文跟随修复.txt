@@ -1,0 +1,46 @@
+✅ AI判题和对话上下文跟随修复完成
+=====================================
+
+修复时间：2026-01-07
+
+问题描述：
+---------
+切换题目后，AI判题和AI对话仍然基于之前的题目，没有跟随当前切换的题目。
+
+问题根源：
+---------
+MainWindow只存储了题目索引(m_currentQuestionIndex)，但没有存储实际的题目对象。
+当从不同来源选择题目或切换题库后，索引可能不准确，导致AI操作获取了错误的题目。
+
+修复方案：
+---------
+1. 在MainWindow.h中添加了 m_currentQuestion 成员变量
+2. 在所有题目选择的地方都更新 m_currentQuestion：
+   - questionSelected 信号（从练习面板选择题目）
+   - onQuestionFileSelected（从树状列表选择题目）
+   - loadCurrentQuestion（加载题目）
+   - onBankSelectedFromPanel（切换题库时清空）
+
+3. 修改AI判题相关方法使用 m_currentQuestion：
+   - onAIJudgeRequested() - 使用当前题目而不是通过索引获取
+   - onAIJudgeCompleted() - 使用当前题目而不是通过索引获取
+
+修改的文件：
+-----------
+- src/ui/MainWindow.h
+- src/ui/MainWindow.cpp
+
+测试建议：
+---------
+1. 从题库树选择题目A，进行AI对话，确认对话内容是关于题目A的
+2. 切换到题目B，再次进行AI对话，确认对话内容切换到题目B
+3. 使用AI判题功能，确认判题是针对当前显示的题目
+4. 切换题库后选择题目，确认AI功能正常工作
+5. 从练习面板选择题目，确认AI功能正常工作
+
+预期效果：
+---------
+✅ AI对话始终基于当前显示的题目
+✅ AI判题始终针对当前显示的题目
+✅ 切换题目后AI上下文立即更新
+✅ 切换题库后AI功能正常工作

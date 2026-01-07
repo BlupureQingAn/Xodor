@@ -1,0 +1,134 @@
+✅ 题库切换完整修复
+====================
+
+修复时间：2026-01-07
+
+问题描述：
+---------
+1. 题库面板的"当前题库"下拉框切换题库后，界面中的题目表格没有变化
+2. 统计数据没有更新
+3. AI对话和判题没有跟随当前题目
+4. 重新点击题目列表后，当前题库又回到了更换前
+
+问题根源：
+---------
+1. **MainWindow::onBankSelectedFromPanel()** 只调用了 importQuestionsFromPath()
+   - importQuestionsFromPath() 只更新了 m_questionBank，但没有更新 QuestionBankManager 的当前题库
+   - PracticeWidget::loadQuestions() 从 QuestionBankManager 获取当前题库，导致数据不一致
+
+2. **PracticeWidget::onBankSelectorChanged()** 没有切换题库
+   - 只调用了 loadQuestions() 和 updateStatistics()
+   - 没有调用 QuestionBankManager::switchToBank() 切换当前题库
+   - 导致题目表格仍然显示旧题库的数据
+
+3. **MainWindow 只存储题目索引**
+   - 没有存储实际的题目对象
+   - AI操作通过索引获取题目，可能获取到错误的题目
+
+修复方案：
+---------
+
+### 1. 题库面板切换修复（MainWindow.cpp）
+在 onBankSelectedFromPanel() 中：
+- 通过 QuestionBankManager 查找题库ID
+- 调用 QuestionBankManager::switchToBank() 切换题库
+- 然后再调用 importQuestionsFromPath() 和 refreshQuestionList()
+- 确保 QuestionBankManager 和 m_questionBank 保持同步
+
+### 2. 题库选择器切换修复（PracticeWidget.cpp）
+在 onBankSelectorChanged() 中：
+- 获取选中的题库ID
+- 调用 QuestionBankManager::switchToBank() 切换题库
+- 然后再调用 loadQuestions() 和 updateStatistics()
+- 添加同题库检测，避免重复切换
+
+在 updateBankSelector() 中：
+- 使用 blockSignals() 避免触发 onBankSelectorChanged
+- 防止循环调用
+
+### 3. AI上下文跟随修复（MainWindow.h/cpp）
+- 添加 m_currentQuestion 成员变量存储当前题目
+- 在所有题目选择的地方更新 m_currentQuestion
+- AI判题和对话使用 m_currentQuestion 而不是通过索引获取
+
+修改的文件：
+-----------
+- src/ui/MainWindow.h - 添加 m_currentQuestion 成员变量
+- src/ui/MainWindow.cpp - 修复题库面板切换和AI上下文跟随逻辑
+- src/ui/PracticeWidget.cpp - 修复题库选择器切换逻辑
+
+关键代码变更：
+-------------
+
+### PracticeWidget::onBankSelectorChanged() 修复前：
+```cpp
+void PracticeWidget::onBankSelectorChanged(int index)
+{
+    Q_UNUSED(index);
+    qDebug() << "[PracticeWidget] Bank selector changed, refreshing questions";
+    
+    // 刷新题目列表和统计
+    loadQuestions();  // ❌ 仍然从旧题库加载
+    updateStatistics();
+}
+```
+
+### PracticeWidget::onBankSelectorChanged() 修复后：
+```cpp
+void PracticeWidget::onBankSelectorChanged(int index)
+{
+    // 获取选中的题库ID
+    QString selectedBankId = m_bankSelector->itemData(index).toString();
+    
+    // 获取当前题库ID
+    QString currentBankId = QuestionBankManager::instance().getCurrentBankId();
+    
+    // 如果选择的是同一个题库，不需要切换
+    if (selectedBankId == currentBankId) {
+        return;
+    }
+    
+    // 切换到选中的题库
+    QuestionBankManager::instance().switchToBank(selectedBankId);  // ✅ 切换题库
+    
+    // 刷新题目列表和统计
+    loadQuestions();  // ✅ 从新题库加载
+    updateStatistics();
+}
+```
+
+### PracticeWidget::updateBankSelector() 修复：
+```cpp
+void PracticeWidget::updateBankSelector()
+{
+    // 阻止信号，避免触发 onBankSelectorChanged
+    m_bankSelector->blockSignals(true);  // ✅ 防止循环
+    
+    // ... 更新选择器内容 ...
+    
+    // 恢复信号
+    m_bankSelector->blockSignals(false);
+}
+```
+
+测试建议：
+---------
+1. 导入多个题库（如CCF题库、LeetCode题库）
+2. 在题库面板的"当前题库"下拉框中切换题库
+3. 确认题目表格立即更新显示新题库的题目
+4. 确认统计数据更新为新题库的数据
+5. 再次切换回原题库，确认数据正确
+6. 选择一道题目，进行AI对话，确认对话内容正确
+7. 切换到另一道题目，确认AI对话切换到新题目
+8. 使用AI判题功能，确认判题针对当前题目
+9. 切换题库后再选择题目，确认题库不会自动切换回去
+
+预期效果：
+---------
+✅ 切换题库后题目表格立即更新
+✅ 统计数据正确显示新题库的数据
+✅ 题库选择器切换后不会自动切换回去
+✅ AI对话始终基于当前显示的题目
+✅ AI判题始终针对当前显示的题目
+✅ 所有功能在切换题库后正常工作
+✅ 题库面板和题库选择器保持同步

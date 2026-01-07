@@ -120,6 +120,7 @@ private:
     
     // 状态
     int m_currentQuestionIndex;
+    Question m_currentQuestion;  // 当前显示的题目
     QString m_lastImportPath;
     QString m_currentBankPath;  // 当前题库路径
     AIConnectionStatus m_lastAIStatus;  // 最后一次AI连接状态
